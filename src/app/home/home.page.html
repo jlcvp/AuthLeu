@@ -14,9 +14,35 @@
   </ion-header>
 
   <div id="container">
-    <strong>Ready to create an app?</strong>
-    <ion-button (click)="logout()" expand="block" fill="clear" shape="round">
-      logout
-    </ion-button>
+    <div id="code-container" class="ion-justify-content-center ion-align-items-center">
+      <ng-container *ngIf="selectedAccount;else selectAccountContainer">
+        <img src="{{selectedAccount.getLogo()}}" alt="code" class="service-logo">
+        <p>{{selectedAccount.serviceName}}</p>
+        <p>{{selectedAccount.accountName}}</p>
+        <p>{{selectedAccountCode}}</p>
+        <p>{{selectedAccount.getNextRollingTimeLeft()}}</p>
+      </ng-container>
+      <ng-template #selectAccountContainer>
+        <p>Selecione uma conta para iniciar...</p>
+      </ng-template>
+    </div>
+
+    <div id="accounts-container">
+      <ion-grid>
+        <ion-row>
+          <ion-col *ngFor="let account of accounts$ | async" size="3">
+            <ion-card (click)="selectAccount(account)">
+              <ion-card-header>
+                <ion-card-title>{{account.serviceName}}</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
+                <p>{{account.serviceName}}</p>
+                <p>{{account.accountName}}</p>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
   </div>
 </ion-content>

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Account2FA } from '../models/account2FA.model';
 import { collection, collectionData, Firestore } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 export class Account2faService {
   private firestore: Firestore = inject(Firestore)
   private accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
-  
+
   constructor() { }
 
   public loadAccounts(userId: string) {
@@ -19,6 +19,6 @@ export class Account2faService {
   }
   
   public getAccounts(): Observable<Account2FA[]> {
-    return this.accounts$
+    return this.accounts$.pipe(map(accounts => accounts.map(account => Account2FA.fromDictionary(account))))
   }
 }
