@@ -28,6 +28,6 @@ export class Account2FA {
     }
 
     getNextRollingTimeLeft(): number {
-        return (Math.floor(Date.now() / 1000) % (this.interval || 30)) - (this.interval || 30);
+        return (this.interval || 30) - (Math.floor(Date.now() / 1000) % (this.interval || 30));
     }
 }
