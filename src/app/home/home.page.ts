@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { AuthenticationService } from '../services/authentication.service';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
@@ -7,6 +9,10 @@ import { Component } from '@angular/core';
 })
 export class HomePage {
 
-  constructor() {}
+  constructor(private authService: AuthenticationService, private navCtrl: NavController) {}
 
+  async logout() {
+    await this.authService.logout()
+    this.navCtrl.navigateRoot('/login', { skipLocationChange:  true })
+  }
 }
