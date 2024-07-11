@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Account2FA } from '../models/account2FA.model';
-import { collection, collectionData, Firestore } from '@angular/fire/firestore';
+import { collection, collectionData, doc, Firestore, setDoc } from '@angular/fire/firestore';
 import { map, Observable } from 'rxjs';
 
 @Injectable({
@@ -9,8 +9,8 @@ import { map, Observable } from 'rxjs';
 export class Account2faService {
   private firestore: Firestore = inject(Firestore)
   private accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
-
-  constructor() { }
+  
+  constructor() {}
 
   public loadAccounts(userId: string) {
     const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
@@ -20,5 +20,18 @@ export class Account2faService {
   
   public getAccounts(): Observable<Account2FA[]> {
     return this.accounts$.pipe(map(accounts => accounts.map(account => Account2FA.fromDictionary(account))))
+  }
+
+  public async addAccount(userId: string, account: Account2FA) {
+    const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
+    const id = this.createId()
+    const document = doc(accountCollection, id)
+    
+    account.id = id
+    await setDoc(document, account.typeErased())
+  }
+
+  private createId(): string {
+    return doc(collection(this.firestore, '_')).id
   }
 }
