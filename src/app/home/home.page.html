@@ -1,18 +1,27 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      AuthLeu
-    </ion-title>
+    <ion-searchbar [debounce]="800" (ionInput)="handleSearch($event)"></ion-searchbar>
+    <ion-buttons slot="end">
+      <ion-button (click)="showPopover($event)">
+        <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
+      </ion-button>
+      <ion-popover #popover [isOpen]="isPopoverOpen" triggerAction="click">
+        <ng-template>
+          <ion-content>
+            <ion-list class="ion-no-padding">
+              <ion-item button detail="false" (click)="addAccountAction()">
+                <ion-icon slot="start" name="add-outline"></ion-icon>
+                <ion-label>Adicionar Conta</ion-label> 
+              </ion-item>
+            </ion-list>
+          </ion-content>
+        </ng-template>
+      </ion-popover>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">AuthLeu</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
   <div id="container">
     <div id="code-container" class="ion-justify-content-center ion-align-items-center">
       <ng-container *ngIf="selectedAccount;else selectAccountContainer">
@@ -57,23 +66,66 @@
     <div id="accounts-container">
       <ion-grid>
         <ion-row>
-          <ion-col *ngFor="let account of accounts$ | async" size="3">
-            <ion-card (click)="selectAccount(account)">
+          <ion-col *ngFor="let account of accounts$ | async | accountFilter: searchTxt" class="square-ratio" size-xs="6" size-sm="4" size-md="4" size-lg="3" size-xl="2">
+            <ion-card (click)="selectAccount(account)" class="fill-parent">
               <ion-card-header>
                 <ion-card-title>{{account.serviceName}}</ion-card-title>
               </ion-card-header>
               <ion-card-content>
-                <p>{{account.accountName}}</p>
+                <p class="small-text">{{account.accountName}}</p>
               </ion-card-content>
             </ion-card>
           </ion-col>
         </ion-row>
       </ion-grid>
     </div>
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button (click)="addAccount()">
-        <ion-icon name="add"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
   </div>
-</ion-content>
+
+  <ion-modal [isOpen]="isAddAccountModalOpen" (willDismiss)="onWillDismissModal($event)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="cancelAddAccount()">Cancel</ion-button>
+          </ion-buttons>
+          <ion-title>Adicionar conta</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ngx-scanner-qrcode *ngIf="isScanActive;else nonScan" #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)"></ngx-scanner-qrcode>
+        <ng-template #nonScan>
+          <ion-button expand="block" (click)="scanCode()" *ngIf="!manualInput;else manualForm">
+            <ion-icon slot="start" name="qr-code-outline"></ion-icon>
+            Escanear QR Code
+          </ion-button>
+          <ng-template #manualForm>
+            <form [formGroup]="validations_form" (ngSubmit)="createAccount(validations_form.value)">
+              <ion-item>
+                <ion-label position="floating">Nome do serviço</ion-label>
+                <ion-input formControlName="serviceName"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="floating">Nome da conta</ion-label>
+                <ion-input formControlName="accountName"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="floating">Chave-segredo</ion-label>
+                <ion-input formControlName="secret"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="floating">Tamanho do token</ion-label>
+                <ion-input formControlName="tokenLength"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="floating">Intervalo de token (s)</ion-label>
+                <ion-input formControlName="interval"></ion-input>
+              </ion-item>
+              <ion-button [disabled]="!validations_form.valid" type="submit">Salvar conta</ion-button>
+            </form>
+          </ng-template>
+        </ng-template>
+      </ion-content>
+      </ng-template>
+      </ion-modal>
+      
+      </ion-content>
