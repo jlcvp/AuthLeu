@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-searchbar [debounce]="800" (ionInput)="handleSearch($event)"></ion-searchbar>
+    <ion-searchbar [debounce]="250" (ionInput)="handleSearch($event)"></ion-searchbar>
     <ion-buttons slot="end">
       <ion-button (click)="showPopover($event)">
         <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
@@ -67,22 +67,7 @@
       </ng-template>
     </div>
 
-    <div id="accounts-container">
-      <ion-grid>
-        <ion-row>
-          <ion-col *ngFor="let account of accounts$ | async | accountFilter: searchTxt" class="square-ratio" size-xs="6" size-sm="4" size-md="4" size-lg="3" size-xl="2">
-            <ion-card (click)="selectAccount(account)" class="fill-parent">
-              <ion-card-header>
-                <ion-card-title>{{account.serviceName}}</ion-card-title>
-              </ion-card-header>
-              <ion-card-content>
-                <p class="small-text">{{account.accountName}}</p>
-              </ion-card-content>
-            </ion-card>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </div>
+    <app-account-list [accounts]="accounts$ | async | accountFilter: searchTxt" [type]="accountListType" (accountSelected)="selectAccount($event)"></app-account-list>
   </div>
 
   <ion-modal [isOpen]="isAddAccountModalOpen" (willDismiss)="onWillDismissModal($event)">

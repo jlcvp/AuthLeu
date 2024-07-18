@@ -8,7 +8,7 @@
         <ion-card-content color="primary" class="ion-padding card-content-bg">
           <form class="form" [formGroup]="validations_form" (ngSubmit)="loginUser(validations_form.value)">
             <ion-item class="form-rounded-top">
-              <ion-label class="ion-padding-start" position="stacked" color="primary">E-mail</ion-label>
+              <ion-label class="ion-padding-start" position="stacked">E-mail</ion-label>
               <ion-input type="text" formControlName="email"></ion-input>
             </ion-item>
             <div class="validation-errors">
@@ -21,8 +21,8 @@
             </div>
 
             <ion-item class="form-rounded-bottom">
-              <ion-label class="ion-padding-start" position="stacked" color="primary">Senha</ion-label>
-              <ion-input type="password" formControlName="password" class="form-controll" required></ion-input>
+              <ion-label class="ion-padding-start" position="stacked">Senha</ion-label>
+              <ion-input type="password" formControlName="password" required></ion-input>
             </ion-item>
             <div class="validation-errors">
                 <ng-container *ngFor="let validation of validation_messages.password">

@@ -7,6 +7,7 @@ import { HomePage } from './home.page';
 import { HomePageRoutingModule } from './home-routing.module';
 import { AccountFilterPipe } from '../pipes/account-filter.pipe';
 import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
+import { AccountListComponent } from '../components/account-list/account-list.component';
 
 
 @NgModule({
@@ -17,8 +18,9 @@ import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
     IonicModule,
     HomePageRoutingModule,
     AccountFilterPipe,
-    NgxScannerQrcodeModule
+    NgxScannerQrcodeModule,
+    
   ],
-  declarations: [HomePage]
+  declarations: [HomePage, AccountListComponent]
 })
 export class HomePageModule {}
