@@ -1,0 +1,9 @@
+#code-container {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.service-logo {
+    object-fit: scale-down;
+}

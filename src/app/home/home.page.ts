@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
 import { IonModal, LoadingController, NavController, ToastController, ToastOptions } from '@ionic/angular';
-import { firstValueFrom, lastValueFrom, Observable } from 'rxjs';
+import { debounceTime, firstValueFrom, fromEvent, lastValueFrom, Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/account2fa.service';
 import { OtpService } from '../services/otp.service';
@@ -19,15 +19,20 @@ export class HomePage implements OnInit {
   @ViewChild('popover') popover: any;
   @ViewChild(IonModal) modal!: IonModal;
   @ViewChild('qrscanner') qrscanner!: NgxScannerQrcodeComponent;
+  
+  @HostListener('window:resize', ['$event'])
+  onWindowResize() {
+    this.isLandscape = window.innerWidth > window.innerHeight
+  }
+
   qrScannerOpts: ScannerQRCodeConfig = {
     isBeep: false,
     vibrate: 100
   }
+
+  isLandscape: boolean = false
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
-  selectedAccount: Account2FA | null = null
-  refreshTimeout: any
-  timerRefreshInterval: any
-  timer: number = 0
+  selectedAccount?: Account2FA
   searchTxt: string = ''
   manualInput: boolean = false
   isPopoverOpen: boolean = false
@@ -69,7 +74,7 @@ export class HomePage implements OnInit {
   }
 
   get accountListType() {
-    return GlobalUtils.isMobile() ? 'grid' : 'list'
+    return this.isLandscape ? 'list' : 'grid'
   }
   
   async ngOnInit() {
@@ -95,51 +100,6 @@ export class HomePage implements OnInit {
 
   selectAccount(account: any) {
     this.selectedAccount = account
-    console.log("generating new code")
-    this.updateTimer()
-    if(this.refreshTimeout) {
-      clearTimeout(this.refreshTimeout)
-    }
-    
-    this.refreshTimeout = setTimeout(() => {
-      clearTimeout(this.refreshTimeout)
-      this.selectAccount(account)
-    }, account.getNextRollingTimeLeft() * 1000)
-  }
-
-  updateTimer() {
-    if(this.timerRefreshInterval) {
-      clearInterval(this.timerRefreshInterval)
-    }
-    if(this.selectedAccount) {
-      this.timer = this.selectedAccount.getNextRollingTimeLeft()
-      this.timerRefreshInterval = setInterval(() => {
-        this.timer = this.selectedAccount?.getNextRollingTimeLeft() || -10
-      }, 1000)
-    }
-  }
-
-  async copyCode(evt: any) {
-    if(!this.selectedAccount) {
-      return
-    }
-    const code = this.selectedAccountCode
-    await navigator.clipboard.writeText(code)
-    const toast = await this.toastController.create({
-      message: `Código copiado`,
-      positionAnchor: evt.target,
-      cssClass: 'width-auto',
-      duration: 2000
-    })
-    console.log({evt})
-    await toast.present()
-  }
-
-  get selectedAccountCode() {
-    if(!this.selectedAccount) {
-      return ''
-    }
-    return this.otpService.generateTOTP(this.selectedAccount.secret, this.selectedAccount.interval || 30)
   }
 
   handleSearch(evt: any) {
@@ -194,7 +154,7 @@ export class HomePage implements OnInit {
         throw new Error('User not found')
       }
       
-      const newAccId = await this.accountsService.addAccount(userId, account)
+      await this.accountsService.addAccount(userId, account)
       await loading.dismiss()
       // select new account
       this.selectAccount(account)
