@@ -9,6 +9,7 @@ import { AccountFilterPipe } from '../pipes/account-filter.pipe';
 import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 import { AccountListComponent } from '../components/account-list/account-list.component';
 import { AccountDetailComponent } from '../components/account-detail/account-detail.component';
+import { CountdownTimerComponent } from '../components/countdown-timer/countdown-timer.component';
 
 
 @NgModule({
@@ -20,8 +21,7 @@ import { AccountDetailComponent } from '../components/account-detail/account-det
     HomePageRoutingModule,
     AccountFilterPipe,
     NgxScannerQrcodeModule,
-    
   ],
-  declarations: [HomePage, AccountListComponent, AccountDetailComponent]
+  declarations: [HomePage, AccountListComponent, AccountDetailComponent, CountdownTimerComponent]
 })
 export class HomePageModule {}

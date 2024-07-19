@@ -22,7 +22,7 @@
       </ion-row>
       <ion-row>
         <ion-col size="12">
-         <h2>{{timer}}s</h2>
+         <app-countdown-timer #countdownTimer [seconds]="tokenCountdown" (timerEnd)="timerEnd()"></app-countdown-timer>
         </ion-col>
       </ion-row>
   </ng-container>

@@ -71,7 +71,7 @@ export class Account2FA implements IAccount2FA {
     }
 
     getNextRollingTimeLeft(): number {
-        return (this.interval || 30) - (Math.floor(Date.now() / 1000) % (this.interval || 30));
+        return this.interval - (Math.ceil(Date.now() / 1000) % this.interval);
     }
 
     typeErased(): Object {
