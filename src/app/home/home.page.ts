@@ -76,8 +76,16 @@ export class HomePage implements OnInit {
   get accountListType() {
     return this.isLandscape ? 'list' : 'grid'
   }
+
+  get layoutOrientationClass() {
+    return {
+      'landscape': this.isLandscape,
+      'portrait': !this.isLandscape
+    }
+  }
   
   async ngOnInit() {
+    this.onWindowResize()
     const loading = await this.loadingController.create({
       message: "Carregando contas...",
       backdropDismiss: false
@@ -93,8 +101,16 @@ export class HomePage implements OnInit {
 
   async logout() {
     this.hidePopover()
+    const loading = await this.loadingController.create({
+      message: "Logout...",
+      spinner: "circular",
+      backdropDismiss: false
+    })
+    await loading.present()
+    await this.accountsService.clearCache()
     await this.authService.logout()
     //reload window
+    await loading.dismiss()
     window.location.reload()
   }
 

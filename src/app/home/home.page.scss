@@ -1,19 +1,45 @@
 #container {
   display: flex;
-  flex-direction: column;
   height: 100%;
+  width: 100%;
+}
+
+#container.landscape {
+  flex-direction: row;
+}
+
+#container.portrait {
+  flex-direction: column;
 }
 
 #code-container {
-  height: 40%;
   color: var(--ion-card-color, var(--ion-item-color, var(--ion-color-step-550, var(--ion-text-color-step-450, #737373))));
-  background-color: var(--ion-card-background, #c550ff);
+  background-color: var(--ion-card-background, var(--ion-color-light, var(--ion-color-step-50, #f4f4f4)));
+}
+
+#code-container.landscape {
+  width: 40%;
+  height: 100%;
+}
+
+#code-container.portrait {
+  width: 100%;
+  height: 40%;
 }
 
 #accounts-container {
-  height: 60%;
   overflow-y: auto;
   border: 1px blue solid;
+}
+
+#accounts-container.landscape {
+  width: 60%;
+  height: 100%;
+}
+
+#accounts-container.portrait {
+  width: 100%;
+  height: 60%;
 }
 
 .square-ratio {

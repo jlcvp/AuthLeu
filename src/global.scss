@@ -39,3 +39,9 @@
 ion-toast.width-auto {
     --max-width: 140px;
 }
+
+.center-vertical {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
