@@ -13,7 +13,7 @@ export class AccountDetailComponent {
   private timerRefreshInterval: any
   private _account?: Account2FA
   timer: number = 0 
-  token = '000000'
+  private _token = '000 000'
 
   @Input() set account(value: Account2FA | undefined) {
     this._account = value
@@ -26,11 +26,39 @@ export class AccountDetailComponent {
 
   constructor(private otpService: OtpService, private toastController: ToastController) { }
 
+  set token(value: string) {
+    if(value.length <= 4) { // if token length is 4 or less, use it as is
+      this._token = value
+    } else if(value.length % 7 == 0) { // if token has a length divisible by 7, separate in groups of (2,3,2) characters
+      this._token = value.replace(/(.{2})(.{3})(.{2})/g, '$1 $2 $3 ').trim()
+    } else if(value.length % 5 == 0) { // if token has a length divisible by 5, separate in groups of (2,3) characters
+      this._token = value.replace(/(.{2})(.{3})/g, '$1 $2 ').trim()
+    } else if(value.length % 3 == 0) { // if token has a length divisible by 3, add a space every 3 characters
+      this._token = value.replace(/(.{3})/g, '$1 ').trim()
+    } else if(value.length % 2 == 0) { // if token has a length divisible by 2, add a space every 2 characters
+      this._token = value.replace(/(.{2})/g, '$1 ').trim()
+    } else { // if token has an odd length, add space every 3 characters, starting from the end
+      const reversedChars = value.split('').reverse()
+      let token = ''
+      reversedChars.forEach((char, index) => {
+        if(index % 3 == 0) {
+          token += ' '
+        }
+        token += char
+      })
+      this._token = token.trim().split('').reverse().join('')
+    }
+  }
+
+  get token(): string {
+    return this._token
+  }
+
   async copyCode(evt: any) {
     if(!this.account) {
       return
     }
-    const code = this.token
+    const code = this.token.replace(/\s/g, '')
     await navigator.clipboard.writeText(code)
     const toast = await this.toastController.create({
       message: `Código copiado`,

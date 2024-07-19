@@ -2,17 +2,21 @@
     object-fit: scale-down;
 }
 
+.thumb {
+    width: 100%;
+    max-height: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .fill-parent {
     width: 100%;
     height: 100%;
+    aspect-ratio: 1;
 }
 
 .small-text {
-    font-size: 0.87em;
-}
-
-.square-ratio {
-    width: 100%;
-    height: 100%;
-    aspect-ratio: 1;
+    font-size: 0.8em;
+    padding: 16px 8px 0 8px;
 }

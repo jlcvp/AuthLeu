@@ -1,21 +1,14 @@
 <div id="code-container-component" class="ion-justify-content-center ion-align-items-center">
   <ng-container *ngIf="account;else selectAccountContainer">
     
-      <ion-row *ngIf="account.logo; else serviceNameInfo">
+      <ion-row>
         <ion-col size="12">
           <img src="{{account.getLogo()}}" alt="code" class="service-logo">
         </ion-col>
       </ion-row>
-      <ng-template #serviceNameInfo>
-        <ion-row>
-          <ion-col size="12">
-            <h2>{{account.serviceName}}</h2>
-          </ion-col>
-        </ion-row>
-      </ng-template>
       <ion-row>
         <ion-col size="12">
-          <p>{{account.accountName}}</p>
+          {{account.label}}
         </ion-col>
       </ion-row>
       <ion-row class="center-vertical">
@@ -29,7 +22,7 @@
       </ion-row>
       <ion-row>
         <ion-col size="12">
-          <p>Token expires in: {{timer}}s</p>
+          Expira em: <h2><strong>{{timer}}</strong>s</h2>
         </ion-col>
       </ion-row>
   </ng-container>

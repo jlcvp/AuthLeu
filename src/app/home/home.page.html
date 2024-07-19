@@ -25,7 +25,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content scroll-y="false">
   <div id="container" [ngClass]="layoutOrientationClass">
     <app-account-detail [ngClass]="layoutOrientationClass" id="code-container" [account]="selectedAccount"></app-account-detail>
     <app-account-list [ngClass]="layoutOrientationClass" id="accounts-container" [accounts]="accounts$ | async | accountFilter: searchTxt" [type]="accountListType" (accountSelected)="selectAccount($event)"></app-account-list>
@@ -59,10 +59,7 @@
           <ng-template #manualForm>
             <form [formGroup]="validations_form" (ngSubmit)="createAccount(validations_form.value)">
               <ion-item>
-                <ion-input label="Nome do serviço" labelPlacement="stacked" formControlName="serviceName" placeholder="ex.: Google"></ion-input>
-              </ion-item>
-              <ion-item>
-                <ion-input label="Nome da conta" labelPlacement="stacked" formControlName="accountName" placeholder="ex.: teste@gmail.com"></ion-input>
+                <ion-input label="Label" labelPlacement="stacked" formControlName="label" placeholder="ex.: Google:teste@gmail.com"></ion-input>
               </ion-item>
               <ion-item>
                 <ion-input label="Chave-segredo" labelPlacement="stacked" formControlName="secret" placeholder="ex.: QAPERTPEO123"></ion-input>

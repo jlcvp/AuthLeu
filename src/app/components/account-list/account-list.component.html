@@ -1,17 +1,14 @@
 <div class="account-list-container">
   <ion-grid *ngIf="isGridType; else listView">
     <ion-row>
-      <ion-col *ngFor="let account of accounts" class="square-ratio" size-xs="6" size-sm="4" size-md="4" size-lg="3" size-xl="2">
-        <ion-card (click)="selectAccount(account)" class="fill-parent">
-          <ion-card-header>
-            <ion-card-title>
-              <ion-thumbnail>
-                <img class="thumb-img" [src]="account.getLogo()">
-              </ion-thumbnail>
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <p class="small-text">{{account.accountName}}</p>
+      <ion-col *ngFor="let account of accounts" size-xs="4" size-sm="3" size-md="2" size-lg="2" size-xl="2">
+        <ion-card (click)="selectAccount(account)" class="ion-no-padding ion-no-margin square fill-parent ion-activatable ripple-parent">
+          <ion-ripple-effect></ion-ripple-effect>
+          <ion-card-content class="ion-no-padding">
+            <ion-thumbnail class="thumb ion-no-padding ion-padding-top">
+              <img class="thumb-img" [src]="account.getLogo()">
+            </ion-thumbnail>
+            <p class="small-text ion-text-center ion-padding-top">{{account.label}}</p>
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -24,8 +21,7 @@
           <img class="thumb-img" [src]="account.getLogo()">
         </ion-thumbnail>
         <ion-label>
-          <h2>{{account.serviceName}}</h2>
-          <p>{{account.accountName}}</p>
+          <h2>{{account.label}}</h2>
         </ion-label>
       </ion-item>
     </ion-list>

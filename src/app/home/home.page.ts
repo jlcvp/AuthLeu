@@ -42,25 +42,19 @@ export class HomePage implements OnInit {
 
   constructor(
     private authService: AuthenticationService, 
-    private navCtrl: NavController,
     private accountsService: Account2faService,
-    private otpService: OtpService,
-    private logoService: LogoService,
     private loadingController: LoadingController,
     private toastController: ToastController,
     formBuilder: FormBuilder
   ) {
     this.validations_form = formBuilder.group({
-      accountName: new FormControl('', Validators.compose([
+      label: new FormControl('', Validators.compose([
         Validators.required,
       ])),
       secret: new FormControl('', Validators.compose([
         Validators.required,
         Validators.minLength(8),
         Validators.pattern('^(?:[A-Z2-7]{8})*(?:[A-Z2-7]{2}={6}|[A-Z2-7]{4}={4}|[A-Z2-7]{5}={3}|[A-Z2-7]{7}=)?$')
-      ])),
-      serviceName: new FormControl('', Validators.compose([
-        Validators.required,
       ])),
       tokenLength: new FormControl(6, Validators.compose([
         Validators.required,
@@ -209,12 +203,10 @@ export class HomePage implements OnInit {
     const account = Account2FA.fromOTPAuthURL(evt)
     console.log({account})
 
-    this.validations_form.controls['accountName'].setValue(account.accountName)
+    this.validations_form.controls['label'].setValue(account.label)
     this.validations_form.controls['secret'].setValue(account.secret)
-    this.validations_form.controls['serviceName'].setValue(account.serviceName)
     this.validations_form.controls['tokenLength'].setValue(account.tokenLength)
     this.validations_form.controls['interval'].setValue(account.interval)
-
 
     this.manualInput = true
   }
