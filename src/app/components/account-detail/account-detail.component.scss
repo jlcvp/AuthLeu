@@ -11,3 +11,11 @@
 .service-logo {
     object-fit: scale-down;
 }
+
+.large-text {
+    font-size: x-large;
+}
+
+.code-color {
+    color: var(--ion-text-color, var(--ion-color-primary), #555);
+}
