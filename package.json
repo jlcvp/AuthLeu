@@ -1,7 +1,7 @@
 {
   "name": "authleu",
-  "version": "0.0.1",
-  "author": "Ionic Framework",
+  "version": "1.0.0",
+  "author": "Leonardo 'Leu' Pereira <jlcvp@users.noreply.github.com>",
   "homepage": "https://ionicframework.com/",
   "scripts": {
     "ng": "ng",

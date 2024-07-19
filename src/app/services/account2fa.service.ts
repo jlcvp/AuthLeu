@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Account2FA } from '../models/account2FA.model';
-import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, setDoc } from '@angular/fire/firestore';
+import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, setDoc, terminate } from '@angular/fire/firestore';
 import { map, Observable } from 'rxjs';
 
 @Injectable({
@@ -34,6 +34,7 @@ export class Account2faService {
   }
 
   public async clearCache() {
+    await terminate(this.firestore)
     await clearIndexedDbPersistence(this.firestore)
   }
 

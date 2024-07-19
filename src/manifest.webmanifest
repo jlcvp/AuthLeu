@@ -1,6 +1,6 @@
 {
-  "name": "LeuAuth",
-  "short_name": "LeuAuth",
+  "name": "AuthLeu",
+  "short_name": "AuthLeu",
   "theme_color": "#424362",
   "background_color": "#252329",
   "display": "standalone",
