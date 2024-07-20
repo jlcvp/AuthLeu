@@ -15,8 +15,7 @@ export class AccountDetailComponent {
 
   private _account?: Account2FA
   private _token = '000 000'
-  private _tokenCountdown = 30
-  private debounceTimeout: any
+  private _tokenCountdown = 0
   @Input() set account(value: Account2FA | undefined) {
     this._account = value
     this.updateTokenCountdown()
@@ -51,6 +50,7 @@ export class AccountDetailComponent {
       })
       this._token = token.trim().split('').reverse().join('')
     }
+    console.log("new Token = ", this._token)
   }
 
   get token(): string {
@@ -85,10 +85,11 @@ export class AccountDetailComponent {
   }
 
   timerEnd() {
+    console.log("timer end")
     setTimeout(() => {
-      this.updateCode()
       this.updateTokenCountdown()
-    }, 1000);
+      this.updateCode()
+    }, 500);
   }
 
   updateCode() {
@@ -99,11 +100,6 @@ export class AccountDetailComponent {
   }
 
   private updateTokenCountdown() {
-    if(!this.debounceTimeout) {
-      this.debounceTimeout = setTimeout(() => {
-        this.tokenCountdown = this.account?.getNextRollingTimeLeft() || this.account?.interval || 30
-        this.debounceTimeout = undefined
-      }, 150)
-    }
+    this.tokenCountdown = this.account?.getNextRollingTimeLeft() || this.account?.interval || 30      
   }
 }
