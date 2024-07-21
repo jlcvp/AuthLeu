@@ -8,6 +8,7 @@ export interface IAccount2FA {
     issuer?: string;
     active?: boolean;
     logo?: string;
+    added?: any;
 }
 export class Account2FA implements IAccount2FA {
     id: string;
@@ -19,7 +20,7 @@ export class Account2FA implements IAccount2FA {
     issuer?: string;
     active?: boolean;
     logo?: string;
-
+    added?: any;
     constructor(id: string, label: string, secret: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string) {
         this.id = id;
         this.label = label;

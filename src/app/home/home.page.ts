@@ -7,6 +7,7 @@ import { Account2faService } from '../services/account2fa.service';
 import { LogoService } from '../services/logo.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
+import { LocalStorageService } from '../services/local-storage.service';
 
 @Component({
   selector: 'app-home',
@@ -48,6 +49,7 @@ export class HomePage implements OnInit {
     private loadingController: LoadingController,
     private toastController: ToastController,
     private logoService: LogoService,
+    private storageService: LocalStorageService,
     formBuilder: FormBuilder
   ) {
     this.validations_form = formBuilder.group({
@@ -92,6 +94,14 @@ export class HomePage implements OnInit {
     if(userId) {
       this.accountsService.loadAccounts(userId)
       this.accounts$ = this.accountsService.getAccounts()
+      const lastSelectedAccountId: string | undefined = await this.storageService.get('lastSelectedAccountId')
+      if(lastSelectedAccountId) {
+        const accounts = await firstValueFrom(this.accounts$)
+        const lastSelectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
+        if(lastSelectedAccount) {
+          this.selectAccount(lastSelectedAccount)
+        }
+      }
     }
     await loading.dismiss()
   }
@@ -113,6 +123,9 @@ export class HomePage implements OnInit {
 
   selectAccount(account: any) {
     this.selectedAccount = account
+    if(account && account.id) {
+      this.storageService.set('lastSelectedAccountId', account.id)
+    }
   }
 
   handleSearch(evt: any) {
@@ -183,8 +196,9 @@ export class HomePage implements OnInit {
   async createAccount(formValues: any) {
     
     console.log({formValues})
+    const logo = this.draftLogoURL
     await this.closeAddAccountModal()
-    const newAccountDict = Object.assign({}, formValues, {logo: this.draftLogoURL})
+    const newAccountDict = Object.assign(formValues, {logo})
     const account = Account2FA.fromDictionary(newAccountDict)
     console.log({account2fa: account})
     const loading = await this.loadingController.create({
