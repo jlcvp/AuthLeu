@@ -9,7 +9,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "firebase:deploy:firestore:indexes": "firebase deploy --only firestore:indexes",
+    "firebase:deploy:hosting": "ng build --prod && firebase deploy --only hosting",
+    "firebase:deploy:all": "ng build --prod && firebase deploy"
   },
   "private": true,
   "dependencies": {
