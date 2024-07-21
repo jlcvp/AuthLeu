@@ -44,7 +44,7 @@ export class Account2FA implements IAccount2FA {
 
         const pathComponents = urlObj.pathname.split('/').filter(e=>!!e).map(decodeURIComponent);
         const type = pathComponents[0];
-        
+        console.log({url})
         if (type !== 'totp') {
             throw new Error('Only TOTP is supported');
         }
