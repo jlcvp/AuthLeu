@@ -70,6 +70,32 @@
               <ion-item>
                 <ion-input label="Intervalo de token (s)" labelPlacement="stacked" formControlName="interval" placeholder="ex.: 30"></ion-input>
               </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Logo</ion-label>
+                <ion-searchbar class="ion-padding-top" [debounce]="250" [value]="draftLogoSearchTxt" (ionInput)="handleSearchLogo($event)"></ion-searchbar>
+                  <ion-grid class="full-row">
+                    <ion-row class="full-row">
+                      <ion-col size-xs="6" size-sm="4" size="4">
+                        <ion-card class="logo-card" (click)="selectLogo('')" [ngClass]="{ 'selected-logo': !draftLogoURL }">
+                          <ion-img class="ion-padding logo-img" [src]="'../../assets/icon/favicon.png'"></ion-img>
+                          <p>No Logo</p>
+                        </ion-card>
+                      </ion-col>
+                      <!-- <ion-col size-xs="6" size-sm="4">
+                        <ion-card class="logo-card" (click)="selectLogo('')" [ngClass]="{ 'selected-logo': !draftLogoURL }">
+                          <img class="ion-padding ion-margin logo-img" src="../../assets/icon/favicon.png">
+                          <p>No-Logo</p>
+                        </ion-card>
+                      </ion-col> -->
+                      <ion-col size-xs="6" size-sm="4" *ngFor="let logoResult of searchLogoResults">
+                        <ion-card class="logo-card" (click)="selectLogo(logoResult)" [ngClass]="{ 'selected-logo': logoResult === draftLogoURL }">
+                          <ion-img class="ion-padding ion-margin logo-img" [src]="logoResult"></ion-img>
+                        </ion-card>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                  <p *ngIf="searchLogoResults.length > 0">Logos provided by <a href="https://brandfetch.com">Brandfetch</a></p>
+              </ion-item>
               <ion-button [disabled]="!validations_form.valid" type="submit">Salvar conta</ion-button>
             </form>
           </ng-template>

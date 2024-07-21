@@ -1,14 +1,12 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
-import { IonModal, LoadingController, NavController, ToastController, ToastOptions } from '@ionic/angular';
-import { debounceTime, firstValueFrom, fromEvent, lastValueFrom, Observable } from 'rxjs';
+import { IonModal, LoadingController, ToastController } from '@ionic/angular';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/account2fa.service';
-import { OtpService } from '../services/otp.service';
 import { LogoService } from '../services/logo.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
-import { GlobalUtils } from '../utils/global-utils';
 
 @Component({
   selector: 'app-home',
@@ -34,6 +32,10 @@ export class HomePage implements OnInit {
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount?: Account2FA
   searchTxt: string = ''
+  draftLogoSearchTxt: string = ''
+  searchLogoResults: any[] = []
+  draftLogoURL: string = ''
+
   manualInput: boolean = false
   isPopoverOpen: boolean = false
   isAddAccountModalOpen: boolean = false
@@ -45,6 +47,7 @@ export class HomePage implements OnInit {
     private accountsService: Account2faService,
     private loadingController: LoadingController,
     private toastController: ToastController,
+    private logoService: LogoService,
     formBuilder: FormBuilder
   ) {
     this.validations_form = formBuilder.group({
@@ -118,6 +121,26 @@ export class HomePage implements OnInit {
     this.searchTxt = searchTerm
   }
 
+  async handleSearchLogo(evt: any) {
+    const searchTerm = evt?.detail?.value
+    console.log({evt, searchTerm})
+    if(!searchTerm) {
+      this.draftLogoURL = ''
+      this.searchLogoResults = []
+      return
+    }
+    const brandInfo = await this.logoService.searchServiceInfo(searchTerm)
+    if(brandInfo && brandInfo.length > 0) {
+      this.draftLogoURL = brandInfo[0].logo
+      this.searchLogoResults = brandInfo.map(brand => brand.logo)
+    }
+    console.log({brandInfo, draftLogoURL: this.draftLogoURL, searchTerm: this.draftLogoSearchTxt, results: this.searchLogoResults})
+  }
+
+  selectLogo(logoURL: string) {
+    this.draftLogoURL = logoURL
+  }
+
   async addAccountAction() {
     this.hidePopover()
     this.isAddAccountModalOpen = true
@@ -149,8 +172,8 @@ export class HomePage implements OnInit {
     
     console.log({formValues})
     await this.closeAddAccountModal()
-    // TODO: get logo
-    const account = Account2FA.fromDictionary(formValues)
+    const newAccountDict = Object.assign({}, formValues, {logo: this.draftLogoURL})
+    const account = Account2FA.fromDictionary(newAccountDict)
     console.log({account2fa: account})
     const loading = await this.loadingController.create({
       message: "Adicionando conta...",
@@ -207,7 +230,10 @@ export class HomePage implements OnInit {
     this.validations_form.controls['secret'].setValue(account.secret)
     this.validations_form.controls['tokenLength'].setValue(account.tokenLength)
     this.validations_form.controls['interval'].setValue(account.interval)
-
+    // service name inferred from issuer or label
+    const serviceName = account.issuer || account.label.split(':')[0]
+    const event = {detail: {value: serviceName}}
+    this.handleSearchLogo(event)
     this.manualInput = true
   }
 

@@ -43,7 +43,16 @@ export class LogoService {
     })
     if(!response.ok) { throw new Error("Failed to fetch service info") }
 
-    const brands: BrandFetchSearchResultArray = await response.json()
+    const brands: BrandFetchSearchResultArray = (await response.json()).map((brand: any) => {
+      return {
+        brandId: brand.brandId,
+        claimed: brand.claimed,
+        domain: brand.domain,
+        icon: brand.icon,
+        name: brand.name,
+        logo: `https://cdn.brandfetch.io/${brand.domain}/w/250/h/120/logo`
+      }
+    })
     console.log("BRANDS:::::", {brands})
     return brands
   }

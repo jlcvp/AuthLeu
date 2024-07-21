@@ -4,6 +4,7 @@ export interface BrandFetchSearchResult {
     domain: string;
     icon: string;
     name: string;
+    logo: string;
 }
 
 export type BrandFetchSearchResultArray = BrandFetchSearchResult[]
