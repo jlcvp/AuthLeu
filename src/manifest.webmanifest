@@ -1,7 +1,7 @@
 {
   "name": "AuthLeu",
   "short_name": "AuthLeu",
-  "theme_color": "#424362",
+  "theme_color": "#682f8d",
   "background_color": "#252329",
   "display": "standalone",
   "scope": "./",
