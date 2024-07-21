@@ -59,7 +59,7 @@ export class HomePage implements OnInit {
       secret: new FormControl('', Validators.compose([
         Validators.required,
         Validators.minLength(8),
-        Validators.pattern('^(?:[A-Z2-7]{8})*(?:[A-Z2-7]{2}={6}|[A-Z2-7]{4}={4}|[A-Z2-7]{5}={3}|[A-Z2-7]{7}=)?$')
+        Validators.pattern('^[A-Z2-7]+=*$')
       ])),
       tokenLength: new FormControl(6, Validators.compose([
         Validators.required,
