@@ -4,11 +4,11 @@
       <ion-col *ngFor="let account of accounts" size-xs="4" size-sm="3" size-md="2">
         <ion-card (click)="selectAccount(account)" class="ion-no-padding ion-no-margin square fill-parent ion-activatable ripple-parent">
           <ion-ripple-effect></ion-ripple-effect>
-          <ion-card-content class="ion-no-padding">
+          <ion-card-content>
             <ion-thumbnail class="thumb ion-no-padding ion-padding-top">
               <img class="thumb-img" [src]="account.getLogo()">
             </ion-thumbnail>
-            <p class="small-text ion-text-center ion-padding-top">{{account.label}}</p>
+            <p class="small-text ion-text-center ion-no-padding ion-padding-top">{{account.label}}</p>
           </ion-card-content>
         </ion-card>
       </ion-col>
