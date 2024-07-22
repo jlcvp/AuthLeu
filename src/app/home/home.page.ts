@@ -303,14 +303,10 @@ export class HomePage implements OnInit {
     if(!backCamera) {
       backCamera = devices.find(device => device.label.toLowerCase().match(/.*back.*camera.*/))
     }
-    // defaults to the first one if no back camera is found
-    if(!backCamera) {
-      backCamera = devices[0]
-    }
 
     if(backCamera && backCamera.deviceId) {
       console.log("using device", {backCamera})
-      this.qrscanner.playDevice(backCamera.deviceId)
+      await this.qrscanner.playDevice(backCamera.deviceId)
     }
     await loading.dismiss()
   }
