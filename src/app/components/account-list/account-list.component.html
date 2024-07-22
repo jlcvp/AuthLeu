@@ -1,10 +1,10 @@
 <div class="account-list-container">
   <ion-grid *ngIf="isGridType; else listView">
     <ion-row>
-      <ion-col *ngFor="let account of accounts" size-xs="4" size-sm="3" size-md="2">
+      <ion-col *ngFor="let account of accounts; trackBy:itemTrackBy" size-xs="4" size-sm="3" size-md="2">
         <ion-card (click)="selectAccount(account)" class="ion-no-padding ion-no-margin square fill-parent ion-activatable ripple-parent">
           <ion-ripple-effect></ion-ripple-effect>
-          <ion-card-content>
+          <ion-card-content class="ion-no-padding ion-padding-start ion-padding-end">
             <ion-thumbnail class="thumb ion-no-padding ion-padding-top">
               <img class="thumb-img" [src]="account.getLogo()">
             </ion-thumbnail>
@@ -16,7 +16,7 @@
   </ion-grid>
   <ng-template #listView>
     <ion-list>
-      <ion-item button *ngFor="let account of accounts" (click)="selectAccount(account)">
+      <ion-item button *ngFor="let account of accounts; trackBy:itemTrackBy" (click)="selectAccount(account)">
         <ion-thumbnail slot="start">
           <img class="thumb-img" [src]="account.getLogo()">
         </ion-thumbnail>

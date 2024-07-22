@@ -74,13 +74,15 @@ export class AccountDetailComponent {
     }
     const code = this.token.replace(/\s/g, '')
     await navigator.clipboard.writeText(code)
+    console.log("code copied")
     const toast = await this.toastController.create({
       message: `Código copiado`,
       positionAnchor: evt.target,
+      //position: 'middle'
+      mode: 'md',
       cssClass: 'width-auto',
       duration: 2000
     })
-    console.log({evt})
     await toast.present()
   }
 

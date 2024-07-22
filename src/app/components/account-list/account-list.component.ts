@@ -20,4 +20,8 @@ export class AccountListComponent {
   get isGridType() {
     return this.type === "grid";
   }
+
+  itemTrackBy(index: number, account: Account2FA) {
+    return account.id;
+  }
 }

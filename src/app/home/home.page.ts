@@ -24,6 +24,20 @@ export class HomePage implements OnInit {
     this.isLandscape = window.innerWidth > window.innerHeight
   }
 
+  @HostListener('window:focus', ['$event'])
+  onFocus(event: FocusEvent): void {
+    // resume timer
+    console.log("Window focused")
+    this.isWindowFocused = true
+  }
+
+  @HostListener('window:blur', ['$event'])
+  onBlur(event: FocusEvent): void {
+    // stop timer, camera, etc
+    console.log("Window blurred")
+    this.isWindowFocused = false
+  }
+
   qrScannerOpts: ScannerQRCodeConfig = {
     isBeep: false,
     vibrate: 100,
@@ -48,9 +62,11 @@ export class HomePage implements OnInit {
   isPopoverOpen: boolean = false
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
+  isWindowFocused: boolean = true
   validations_form: FormGroup;
   currentDarkModePref: string = '';
-  
+  supportsWebCredentialManagement: boolean = false
+
   constructor(
     private authService: AuthenticationService, 
     private accountsService: Account2faService,
@@ -110,6 +126,7 @@ export class HomePage implements OnInit {
       backdropDismiss: false
     })
     await loading.present()
+    await this.setupWebAuth()
     const userId = await this.authService.getCurrentUserId()
     if(userId) {
       this.accountsService.loadAccounts(userId)
@@ -311,11 +328,18 @@ export class HomePage implements OnInit {
     await loading.dismiss()
   }
 
-  onQRCodeScanned(evt: ScannerQRCodeResult[], qrscanner: NgxScannerQrcodeComponent) {
-    qrscanner.stop()
-    this.isScanActive = false
-    
+  async onQRCodeScanned(evt: ScannerQRCodeResult[], qrscanner: NgxScannerQrcodeComponent) {
+    try { 
+      await qrscanner.stop()
+      await this.qrscanner.stop() 
+    } catch (error) {
+      console.error("Error stopping scanner", error)
+    }
     this.processQRCode(evt && evt[0]?.value || '')
+    // give time for the scanner to stop
+    setTimeout(() => {
+      this.isScanActive = false
+    }, 200);
   }
 
   async cycleCamera() {
@@ -336,21 +360,38 @@ export class HomePage implements OnInit {
 
   private processQRCode(evt: string) {
     // otpauth://totp/Google:My%20Account?secret=JBSWY3D&issuer=Google&algorithm=SHA1&digits=6&period=30
-    const account = Account2FA.fromOTPAuthURL(evt)
-    console.log({account})
-
-    this.validations_form.controls['label'].setValue(account.label)
-    this.validations_form.controls['secret'].setValue(account.secret)
-    this.validations_form.controls['tokenLength'].setValue(account.tokenLength)
-    this.validations_form.controls['interval'].setValue(account.interval)
-    // service name inferred from issuer or label
-    const serviceName = account.issuer || account.label.split(':')[0]
-    const event = {detail: {value: serviceName}}
-    this.handleSearchLogo(event)
+    try {
+      const account = Account2FA.fromOTPAuthURL(evt)
+      console.log({account})
+  
+      this.validations_form.controls['label'].setValue(account.label)
+      this.validations_form.controls['secret'].setValue(account.secret)
+      this.validations_form.controls['tokenLength'].setValue(account.tokenLength)
+      this.validations_form.controls['interval'].setValue(account.interval)
+      // service name inferred from issuer or label
+      const serviceName = account.issuer || account.label.split(':')[0]
+      const event = {detail: {value: serviceName}}
+      this.handleSearchLogo(event)
+    } catch (error) {
+      console.error("Error processing QR code", error)
+      this.toastController.create({
+        message: "Código QR inválido",
+        duration: 2000,
+        color: 'danger'
+      }).then(toast => toast.present())
+    }
     this.manualInput = true
   }
 
   private hidePopover() {
     this.isPopoverOpen = false;
+  }
+
+  private async setupWebAuth() {
+    const webAuthState = await this.storageService.get<boolean>('webAuthEnabled')
+    if(webAuthState) {
+      this.supportsWebCredentialManagement = true
+      return
+    }
   }
 }
