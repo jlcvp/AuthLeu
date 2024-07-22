@@ -29,6 +29,8 @@ export class HomePage implements OnInit {
     vibrate: 100
   }
 
+  private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
   isLandscape: boolean = false
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount?: Account2FA
@@ -42,7 +44,8 @@ export class HomePage implements OnInit {
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   validations_form: FormGroup;
-
+  currentDarkModePref: string = '';
+  
   constructor(
     private authService: AuthenticationService, 
     private accountsService: Account2faService,
@@ -82,9 +85,21 @@ export class HomePage implements OnInit {
       'portrait': !this.isLandscape
     }
   }
+
+  get darkModeLabel() {
+    switch (this.currentDarkModePref) {
+      case 'light':
+        return 'Claro'
+      case 'dark':
+        return 'Escuro'
+      default:
+        return 'Sistema'
+    }
+  }
   
   async ngOnInit() {
     this.onWindowResize()
+    this.setupPalette()
     const loading = await this.loadingController.create({
       message: "Carregando contas...",
       backdropDismiss: false
@@ -225,6 +240,45 @@ export class HomePage implements OnInit {
       })
       await toast.present()
     }
+  }
+
+  async darkPaletteChange(selectedPalette: string) {
+    await this.storageService.set('darkPalette', selectedPalette)
+    this.currentDarkModePref = selectedPalette
+    this.handleDarkPaletteChange()
+  }
+
+  private async setupPalette() {
+    this.systemPrefersDark.addEventListener('change', (mediaQuery) => {
+      if(this.currentDarkModePref !== 'system') {
+        return
+      }
+      this.useDarkPalette(mediaQuery.matches)
+    });
+    const darkPalettePref = await this.storageService.get<string|undefined>('darkPalette')
+    console.log({darkPalettePref})
+    this.currentDarkModePref = darkPalettePref || 'system'
+    this.handleDarkPaletteChange()
+  }
+
+  private handleDarkPaletteChange() {
+    switch (this.currentDarkModePref) {
+      case 'light':
+        this.useDarkPalette(false);
+        break;
+      case 'dark':
+        this.useDarkPalette(true);
+        break;
+      default:
+        const isCurrentlyDark = this.systemPrefersDark.matches;
+        this.useDarkPalette(isCurrentlyDark)
+        break;
+    }
+  }
+  
+  // Add or remove the "ion-palette-dark" class on the html element
+  private useDarkPalette(isDark: boolean) {
+    document.documentElement.classList.toggle('ion-palette-dark', isDark);
   }
 
   async scanCode() {
