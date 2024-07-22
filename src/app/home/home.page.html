@@ -11,7 +11,7 @@
             <ion-list class="ion-no-padding">
               <ion-item button detail="false" (click)="addAccountAction()">
                 <ion-icon slot="start" name="add-outline"></ion-icon>
-                <ion-label>Adicionar Conta</ion-label> 
+                <ion-label>Adicionar Conta</ion-label>
               </ion-item>
               <ion-item button id="dark-mode-trigger">
                 <ion-icon slot="start" name="invert-mode-outline"></ion-icon>
@@ -24,15 +24,15 @@
                     <ion-list>
                       <ion-item button detail="false" (click)="darkPaletteChange('light')">
                         <ion-icon slot="start" name="sunny-outline"></ion-icon>
-                        <ion-label>Claro</ion-label> 
+                        <ion-label>Claro</ion-label>
                       </ion-item>
                       <ion-item button detail="false" (click)="darkPaletteChange('dark')">
                         <ion-icon slot="start" name="moon-outline"></ion-icon>
-                        <ion-label>Escuro</ion-label> 
+                        <ion-label>Escuro</ion-label>
                       </ion-item>
                       <ion-item button detail="false" (click)="darkPaletteChange('system')">
                         <ion-icon slot="start" name="contrast-outline"></ion-icon>
-                        <ion-label>Sistema</ion-label> 
+                        <ion-label>Sistema</ion-label>
                       </ion-item>
                     </ion-list>
                   </ion-content>
@@ -40,9 +40,9 @@
               </ion-popover>
               <ion-item button detail="false" (click)="logout()">
                 <ion-icon slot="start" name="log-out-outline"></ion-icon>
-                <ion-label>Logout</ion-label> 
+                <ion-label>Logout</ion-label>
               </ion-item>
-              
+
             </ion-list>
           </ion-content>
         </ng-template>
@@ -53,23 +53,29 @@
 
 <ion-content scroll-y="false">
   <div id="container" [ngClass]="layoutOrientationClass">
-    <app-account-detail [ngClass]="layoutOrientationClass" id="code-container" [account]="selectedAccount"></app-account-detail>
-    <app-account-list [ngClass]="layoutOrientationClass" id="accounts-container" [accounts]="accounts$ | async | accountFilter: searchTxt" [type]="accountListType" (accountSelected)="selectAccount($event)"></app-account-list>
+    <app-account-detail [ngClass]="layoutOrientationClass" id="code-container"
+      [account]="selectedAccount"></app-account-detail>
+    <app-account-list [ngClass]="layoutOrientationClass" id="accounts-container"
+      [accounts]="accounts$ | async | accountFilter: searchTxt" [type]="accountListType"
+      (accountSelected)="selectAccount($event)"></app-account-list>
   </div>
 
-  <ion-modal [isOpen]="isAddAccountModalOpen" (willDismiss)="onWillDismissModal($event)" (didDismiss)="onDidDismissModal($event)">
+  <ion-modal [isOpen]="isAddAccountModalOpen" (willDismiss)="onWillDismissModal($event)"
+    (didDismiss)="onDidDismissModal($event)">
     <ng-template>
       <ion-header>
         <ion-toolbar>
           <ion-title>Adicionar conta</ion-title>
           <ion-buttons slot="end">
-            <ion-button (click)="closeAddAccountModal()"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+            <ion-button (click)="closeAddAccountModal()"><ion-icon slot="icon-only"
+                name="close-outline"></ion-icon></ion-button>
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding">
-        <ng-container *ngIf="isScanActive;else nonScan">
-          <ngx-scanner-qrcode #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)" [config]="qrScannerOpts"></ngx-scanner-qrcode>
+        <ng-container *ngIf="isScanActive;else manualForm">
+          <ngx-scanner-qrcode #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)"
+            [config]="qrScannerOpts"></ngx-scanner-qrcode>
           <ion-grid>
             <ion-row>
               <ion-col size="auto">
@@ -84,61 +90,65 @@
                 </ion-button>
               </ion-col>
             </ion-row>
+            <ion-row>
+              <ion-col size="12">
+                <ion-button size="large" expand="block" fill="outline" (click)="isScanActive=false;manualInput=true">
+                  <ion-icon slot="start" name="create-outline"></ion-icon>
+                  Input Manual
+                </ion-button>
+              </ion-col>
+            </ion-row>
           </ion-grid>
         </ng-container>
-        <ng-template #nonScan>
-          <ng-container *ngIf="!manualInput;else manualForm">
-            <ion-button size="large" expand="block" (click)="scanCode()">
-              <ion-icon slot="start" name="qr-code-outline"></ion-icon>
-              Escanear QR Code
-            </ion-button>
-            <div class="ion-padding-top"></div>
-            <ion-button size="large" expand="block" fill="outline" (click)="manualInput=true">
-              <ion-icon slot="start" name="create-outline"></ion-icon>
-              Input Manual
-            </ion-button>
-          </ng-container>
-          
-          <ng-template #manualForm>
-            <form [formGroup]="validations_form" (ngSubmit)="createAccount(validations_form.value)">
-              <ion-item>
-                <ion-input label="Label" labelPlacement="stacked" formControlName="label" placeholder="ex.: Google:teste@gmail.com"></ion-input>
-              </ion-item>
-              <ion-item>
-                <ion-input label="Chave-segredo" labelPlacement="stacked" formControlName="secret" placeholder="ex.: QAPERTPEO123"></ion-input>
-              </ion-item>
-              <ion-item>
-                <ion-input label="Tamanho do token" labelPlacement="stacked" formControlName="tokenLength" placeholder="ex.: 6"></ion-input>
-              </ion-item>
-              <ion-item>
-                <ion-input label="Intervalo de token (s)" labelPlacement="stacked" formControlName="interval" placeholder="ex.: 30"></ion-input>
-              </ion-item>
-              <ion-item>
-                <ion-label position="stacked">Logo</ion-label>
-                <ion-searchbar class="ion-padding-top" [debounce]="250" [value]="draftLogoSearchTxt" (ionInput)="handleSearchLogo($event)"></ion-searchbar>
-                  <ion-grid class="full-row">
-                    <ion-row class="full-row">
-                      <ion-col size-xs="6" size-sm="4" size="4">
-                        <ion-card class="logo-card" (click)="selectLogo('')" [ngClass]="{ 'selected-logo': !draftLogoURL }">
-                          <ion-img class="ion-padding logo-img" [src]="'../../assets/icon/favicon.png'"></ion-img>
-                          <p>No Logo</p>
-                        </ion-card>
-                      </ion-col>
-                      <ion-col size-xs="6" size-sm="4" *ngFor="let logoResult of searchLogoResults">
-                        <ion-card class="logo-card" (click)="selectLogo(logoResult)" [ngClass]="{ 'selected-logo': logoResult === draftLogoURL }">
-                          <ion-img class="ion-padding ion-margin logo-img" [src]="logoResult"></ion-img>
-                        </ion-card>
-                      </ion-col>
-                    </ion-row>
-                  </ion-grid>
-                  <p *ngIf="searchLogoResults.length > 0">Logos provided by <a href="https://brandfetch.com">Brandfetch</a></p>
-              </ion-item>
-              <ion-button expand="block" [disabled]="!validations_form.valid" type="submit">Salvar conta</ion-button>
-            </form>
-          </ng-template>
+        <ng-template #manualForm>
+          <ion-button size="large" expand="block" (click)="scanCode()">
+            <ion-icon slot="start" name="qr-code-outline"></ion-icon>
+            Escanear QR Code
+          </ion-button>
+          <form [formGroup]="validations_form" (ngSubmit)="createAccount(validations_form.value)">
+            <ion-item>
+              <ion-input label="Label" labelPlacement="stacked" formControlName="label"
+                placeholder="ex.: Google:teste@gmail.com"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input label="Chave-segredo" labelPlacement="stacked" formControlName="secret"
+                placeholder="ex.: QAPERTPEO123"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input label="Tamanho do token" labelPlacement="stacked" formControlName="tokenLength"
+                placeholder="ex.: 6"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input label="Intervalo de token (s)" labelPlacement="stacked" formControlName="interval"
+                placeholder="ex.: 30"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Logo</ion-label>
+              <ion-searchbar class="ion-padding-top" [debounce]="250" [value]="draftLogoSearchTxt"
+                (ionInput)="handleSearchLogo($event)"></ion-searchbar>
+              <ion-grid class="full-row">
+                <ion-row class="full-row">
+                  <ion-col size-xs="6" size-sm="4" size="4">
+                    <ion-card class="logo-card" (click)="selectLogo('')" [ngClass]="{ 'selected-logo': !draftLogoURL }">
+                      <ion-img class="ion-padding logo-img" [src]="'../../assets/icon/favicon.png'"></ion-img>
+                      <p>No Logo</p>
+                    </ion-card>
+                  </ion-col>
+                  <ion-col size-xs="6" size-sm="4" *ngFor="let logoResult of searchLogoResults">
+                    <ion-card class="logo-card" (click)="selectLogo(logoResult)"
+                      [ngClass]="{ 'selected-logo': logoResult === draftLogoURL }">
+                      <ion-img class="ion-padding ion-margin logo-img" [src]="logoResult"></ion-img>
+                    </ion-card>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+              <p *ngIf="searchLogoResults.length > 0">Logos provided by <a href="https://brandfetch.com">Brandfetch</a>
+              </p>
+            </ion-item>
+            <ion-button expand="block" [disabled]="!validations_form.valid" type="submit">Salvar conta</ion-button>
+          </form>
         </ng-template>
       </ion-content>
-      </ng-template>
-      </ion-modal>
-      
-      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
