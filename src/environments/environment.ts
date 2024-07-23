@@ -13,6 +13,9 @@ export const environment = {
     apiKey: "AIzaSyB0JZ7doymz8wuuEnqcyFKrZAouSjZ55bY",
     authDomain: "authleu.firebaseapp.com",
     messagingSenderId: "946698001868"
+  },
+  webAuthConfig: {
+    rpId: "localhost",
   }
 };
 
