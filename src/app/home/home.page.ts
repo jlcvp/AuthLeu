@@ -160,11 +160,20 @@ export class HomePage implements OnInit {
     this.manualInput = false
     this.isAddAccountModalOpen = false
     this.isScanActive = false
+    if(this.qrscanner) {
+      this.qrscanner.stop()
+    }
     // clear form
     this.validations_form.reset()
     this.draftLogoURL = ''
     this.draftLogoSearchTxt = ''
     this.searchLogoResults = []
+  }
+
+  onWillDismissModal(e: Event) {
+    if(this.qrscanner) {
+      this.qrscanner.stop()
+    }
   }
 
   async closeAddAccountModal() {
