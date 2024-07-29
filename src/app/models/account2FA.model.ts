@@ -38,12 +38,21 @@ export class Account2FA implements IAccount2FA {
     }
 
     static fromOTPAuthURL(url: string): Account2FA {
-        const urlObj = new URL(url);
-        const params = new URLSearchParams(urlObj.search);
         //otpauth://totp/ACME%20Co:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30
-
-        const pathComponents = urlObj.pathname.split('/').filter(e=>!!e).map(decodeURIComponent);
+        const urlObj = new URL(url);
+        
+        if(!urlObj.protocol.startsWith('otpauth:')) {
+            throw new Error('Invalid OTPAuth URL');
+        }
+        
+        const params = new URLSearchParams(urlObj.search)
+        const pathComponents = url.replace('otpauth://', '')
+            .split('/')
+            .filter(e=>!!e)
+            .map(decodeURIComponent)
+            .map(e=>e.replace(/\?.*/, ''))
         const type = pathComponents[0];
+        
         console.log({url})
         if (type !== 'totp') {
             throw new Error('Only TOTP is supported');
