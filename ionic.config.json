@@ -1,0 +1,7 @@
+{
+  "name": "AuthLeu",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
