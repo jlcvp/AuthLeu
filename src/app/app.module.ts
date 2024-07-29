@@ -6,9 +6,9 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { enableIndexedDbPersistence, getFirestore, initializeFirestore, persistentLocalCache, provideFirestore } from '@angular/fire/firestore';
 import { environment } from 'src/environments/environment';
 import { NgxScannerQrcodeModule, LOAD_WASM } from 'ngx-scanner-qrcode';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -34,7 +34,12 @@ LOAD_WASM().subscribe() // Preload NGXScanner WASM module
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideAuth(() => getAuth()), 
-    provideFirestore(() => getFirestore())
+    provideFirestore(() =>  {
+      const firestore = initializeFirestore(getApp(), { 
+        localCache: persistentLocalCache() 
+      })
+      return firestore
+    })
   ],
   bootstrap: [AppComponent],
 })

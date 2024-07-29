@@ -8,6 +8,7 @@ import { OtpService } from '../services/otp.service';
 import { LogoService } from '../services/logo.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
+import { GlobalUtils } from '../utils/global-utils';
 
 @Component({
   selector: 'app-home',
@@ -65,6 +66,10 @@ export class HomePage implements OnInit {
         Validators.pattern('^[1-9]+[0-9]*$')
       ])),
     });
+  }
+
+  get accountListType() {
+    return GlobalUtils.isMobile() ? 'grid' : 'list'
   }
   
   async ngOnInit() {
@@ -146,21 +151,6 @@ export class HomePage implements OnInit {
   async addAccountAction() {
     this.hidePopover()
     this.isAddAccountModalOpen = true
-
-    // let userId = await this.authService.getCurrentUserId()
-    // if(!userId) {
-    //   return
-    // }
-
-    // userId = userId as string
-    // const account = new Account2FA('', 'Google', 'My Account', 'JBSWY3D', 6, 30, true, 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png')
-    // const loading = await this.loadingController.create({
-    //   message: "Adicionando conta...",
-    //   backdropDismiss: false
-    // })
-    // await loading.present()
-    // await this.accountsService.addAccount(userId, account)
-    // await loading.dismiss()
   }
 
   showPopover(e: Event) {

@@ -1,0 +1,33 @@
+<div class="account-list-container">
+  <ion-grid *ngIf="isGridType; else listView">
+    <ion-row>
+      <ion-col *ngFor="let account of accounts" class="square-ratio" size-xs="6" size-sm="4" size-md="4" size-lg="3" size-xl="2">
+        <ion-card (click)="selectAccount(account)" class="fill-parent">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-thumbnail>
+                <img class="thumb-img" [src]="account.getLogo()">
+              </ion-thumbnail>
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p class="small-text">{{account.accountName}}</p>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ng-template #listView>
+    <ion-list>
+      <ion-item *ngFor="let account of accounts" (click)="selectAccount(account)">
+        <ion-thumbnail slot="start">
+          <img class="thumb-img" [src]="account.getLogo()">
+        </ion-thumbnail>
+        <ion-label>
+          <h2>{{account.serviceName}}</h2>
+          <p>{{account.accountName}}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-template>
+</div>
