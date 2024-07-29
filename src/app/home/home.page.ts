@@ -26,7 +26,12 @@ export class HomePage implements OnInit {
 
   qrScannerOpts: ScannerQRCodeConfig = {
     isBeep: false,
-    vibrate: 100
+    vibrate: 100,
+    constraints: {
+      video: {
+        facingMode: 'environment'
+      }
+    }
   }
 
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -172,6 +177,7 @@ export class HomePage implements OnInit {
   async addAccountAction() {
     this.hidePopover()
     this.isAddAccountModalOpen = true
+    this.scanCode()
   }
 
   showPopover(e: Event) {
