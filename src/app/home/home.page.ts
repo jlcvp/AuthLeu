@@ -82,8 +82,10 @@ export class HomePage implements OnInit {
   }
 
   async logout() {
+    this.hidePopover()
     await this.authService.logout()
-    this.navCtrl.navigateRoot('/login', { skipLocationChange:  true })
+    //reload window
+    window.location.reload()
   }
 
   selectAccount(account: any) {
