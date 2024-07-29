@@ -48,7 +48,7 @@ export class CountdownTimerComponent {
         clearInterval(this.timerRefreshInterval)
         this.timerEnd.emit()
       }
-    }, 250) // for precision purposes check every 250ms
+    }, 100) // for precision purposes check every 250ms
   }
 
   private updateTimerLabel() {
