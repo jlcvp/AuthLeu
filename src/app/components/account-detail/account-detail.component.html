@@ -13,8 +13,8 @@
       </ion-row>
       <ion-row class="center-vertical">
         <ion-col size="auto" class="center-vertical">
-          <ion-button size="large" fill="clear" (click)="copyCode($event)">
-            <ion-text color="light"><strong>{{token}}</strong></ion-text>
+          <ion-button class="large-text" size="large" fill="clear" (click)="copyCode($event)">
+            <ion-text class="code-color"><strong>{{token}}</strong></ion-text>
             <ion-icon slot="end" name="copy-outline"></ion-icon>
           </ion-button>
         </ion-col>
@@ -22,7 +22,7 @@
       </ion-row>
       <ion-row>
         <ion-col size="12">
-          Expira em: <h2><strong>{{timer}}</strong>s</h2>
+         <h2>{{timer}}s</h2>
         </ion-col>
       </ion-row>
   </ng-container>
