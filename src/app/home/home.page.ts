@@ -42,7 +42,7 @@ export class HomePage implements OnInit {
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   validations_form: FormGroup;
-
+  private currentCameraIndex = 0
   constructor(
     private authService: AuthenticationService, 
     private accountsService: Account2faService,
@@ -194,7 +194,6 @@ export class HomePage implements OnInit {
   }
 
   async createAccount(formValues: any) {
-    
     console.log({formValues})
     const logo = this.draftLogoURL
     await this.closeAddAccountModal()
@@ -245,6 +244,22 @@ export class HomePage implements OnInit {
     this.isScanActive = false
     
     this.processQRCode(evt && evt[0]?.value || '')
+  }
+
+  async cycleCamera() {
+    console.log("cycle camera")
+    const current = this.qrscanner.deviceIndexActive
+    console.log({current})
+    const devices = await firstValueFrom(this.qrscanner.devices)
+    console.log({devices})
+    const next = (current + 1) % devices.length
+    const nextDevice = devices[next]
+    this.qrscanner.playDevice(nextDevice.deviceId)
+  }
+
+  async toggleTorch() {
+    const currentState = await firstValueFrom(this.qrscanner.torcher())
+    this.qrscanner.isTorch = !currentState
   }
 
   private processQRCode(evt: string) {

@@ -42,7 +42,24 @@
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding">
-        <ngx-scanner-qrcode *ngIf="isScanActive;else nonScan" #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)" [config]="qrScannerOpts"></ngx-scanner-qrcode>
+        <ng-container *ngIf="isScanActive;else nonScan">
+          <ngx-scanner-qrcode  #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)" [config]="qrScannerOpts"></ngx-scanner-qrcode>
+          <ion-grid>
+            <ion-row>
+              <ion-col size="auto">
+                <ion-button size="large" (click)="toggleTorch()">
+                  <ion-icon slot="icon-only" name="flashlight-outline"></ion-icon>
+                </ion-button>
+              </ion-col>
+              <ion-col></ion-col>
+              <ion-col size="auto">
+                <ion-button size="large" (click)="cycleCamera()">
+                  <ion-icon slot="icon-only" name="sync-outline"></ion-icon>
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ng-container>
         <ng-template #nonScan>
           <ng-container *ngIf="!manualInput;else manualForm">
             <ion-button expand="block" (click)="scanCode()">

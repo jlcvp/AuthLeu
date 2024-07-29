@@ -33,4 +33,8 @@ export class LocalStorageService {
     currentArray.unshift(value)
     return this.set(key, currentArray)
   }
+
+  async clearStorage(): Promise<void> {
+    return this.storage.clear()
+  }
 }

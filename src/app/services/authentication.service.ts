@@ -1,13 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { Auth, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
 import { NavController } from '@ionic/angular';
+import { LocalStorageService } from './local-storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
   private afAuth: Auth = inject(Auth)
-  constructor(private navCtrl: NavController) { }
+  constructor(private navCtrl: NavController, private localStorage: LocalStorageService) { }
 
   async canActivate(): Promise<boolean> {
     await this.afAuth.authStateReady()
@@ -26,6 +27,7 @@ export class AuthenticationService {
 
   public async logout() {
     await signOut(this.afAuth)
+    await this.localStorage.clearStorage()
     console.log("logged out")
   }
 

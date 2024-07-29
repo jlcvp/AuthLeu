@@ -16,12 +16,10 @@ export class Account2faService {
     const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
 
     // by default, order by added date
-    const q = query(accountCollection, orderBy('added', 'desc'))
-    this.accounts$ = collectionData(q)
-      .pipe(map(accounts => {
-        console.log({accounts})
+    const q = query(accountCollection, orderBy('added', 'asc'))
+    this.accounts$ = collectionData(q).pipe(map(accounts => {
         return accounts.map(account => Account2FA.fromDictionary(account as IAccount2FA)) 
-      }))
+    }))
   }
   
   public getAccounts(): Observable<Account2FA[]> {
