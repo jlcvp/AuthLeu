@@ -42,7 +42,7 @@ export class HomePage implements OnInit {
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   validations_form: FormGroup;
-  private currentCameraIndex = 0
+
   constructor(
     private authService: AuthenticationService, 
     private accountsService: Account2faService,
@@ -197,7 +197,7 @@ export class HomePage implements OnInit {
     console.log({formValues})
     const logo = this.draftLogoURL
     await this.closeAddAccountModal()
-    const newAccountDict = Object.assign(formValues, {logo})
+    const newAccountDict = Object.assign(formValues, {logo, active: true })
     const account = Account2FA.fromDictionary(newAccountDict)
     console.log({account2fa: account})
     const loading = await this.loadingController.create({

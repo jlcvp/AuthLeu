@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Account2FA, IAccount2FA } from '../models/account2FA.model';
-import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, getDocs, orderBy, query, serverTimestamp, setDoc, terminate, where } from '@angular/fire/firestore';
+import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, orderBy, query, serverTimestamp, setDoc, terminate, where } from '@angular/fire/firestore';
 import { map, Observable } from 'rxjs';
 
 @Injectable({
@@ -16,7 +16,7 @@ export class Account2faService {
     const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
 
     // by default, order by added date
-    const q = query(accountCollection, orderBy('added', 'asc'))
+    const q = query(accountCollection, orderBy('added', 'asc'), where('active', '==', true))
     this.accounts$ = collectionData(q).pipe(map(accounts => {
         return accounts.map(account => Account2FA.fromDictionary(account as IAccount2FA)) 
     }))
