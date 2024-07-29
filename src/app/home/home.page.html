@@ -26,9 +26,9 @@
 </ion-header>
 
 <ion-content>
-  <div id="container">
-    <app-account-detail id="code-container" [account]="selectedAccount"></app-account-detail>
-    <app-account-list [accounts]="accounts$ | async | accountFilter: searchTxt" [type]="accountListType" (accountSelected)="selectAccount($event)"></app-account-list>
+  <div id="container" [ngClass]="layoutOrientationClass">
+    <app-account-detail [ngClass]="layoutOrientationClass" id="code-container" [account]="selectedAccount"></app-account-detail>
+    <app-account-list [ngClass]="layoutOrientationClass" id="accounts-container" [accounts]="accounts$ | async | accountFilter: searchTxt" [type]="accountListType" (accountSelected)="selectAccount($event)"></app-account-list>
   </div>
 
   <ion-modal [isOpen]="isAddAccountModalOpen" (willDismiss)="onWillDismissModal($event)">

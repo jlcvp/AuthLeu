@@ -1,37 +1,37 @@
-<div id="code-container" class="ion-justify-content-center ion-align-items-center">
+<div id="code-container-component" class="ion-justify-content-center ion-align-items-center">
   <ng-container *ngIf="account;else selectAccountContainer">
-    <ion-grid>
-      <ion-row>
+    
+      <ion-row *ngIf="account.logo; else serviceNameInfo">
         <ion-col size="12">
           <img src="{{account.getLogo()}}" alt="code" class="service-logo">
         </ion-col>
       </ion-row>
-      <ion-row>
-        <ion-col size="12">
-          <p>{{account.serviceName}}</p>
-        </ion-col>
-      </ion-row>
+      <ng-template #serviceNameInfo>
+        <ion-row>
+          <ion-col size="12">
+            <h2>{{account.serviceName}}</h2>
+          </ion-col>
+        </ion-row>
+      </ng-template>
       <ion-row>
         <ion-col size="12">
           <p>{{account.accountName}}</p>
         </ion-col>
       </ion-row>
-      <ion-row>
-        <ion-col size="auto">
-          <p>{{token}}</p>
-        </ion-col>
-        <ion-col size="auto">
-          <ion-button (click)="copyCode($event)">
-            <ion-icon slot="icon-only" name="copy-outline"></ion-icon>
+      <ion-row class="center-vertical">
+        <ion-col size="auto" class="center-vertical">
+          <ion-button size="large" fill="clear" (click)="copyCode($event)">
+            <ion-text color="light"><strong>{{token}}</strong></ion-text>
+            <ion-icon slot="end" name="copy-outline"></ion-icon>
           </ion-button>
         </ion-col>
+        
       </ion-row>
       <ion-row>
         <ion-col size="12">
           <p>Token expires in: {{timer}}s</p>
         </ion-col>
       </ion-row>
-    </ion-grid>
   </ng-container>
   <ng-template #selectAccountContainer>
     <p>Selecione uma conta para iniciar...</p>
