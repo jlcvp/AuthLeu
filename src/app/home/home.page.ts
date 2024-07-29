@@ -66,7 +66,9 @@ export class HomePage implements OnInit {
   validations_form: FormGroup;
   currentDarkModePref: string = '';
   supportsWebCredentialManagement: boolean = false
-
+  lockScreenConfig: "webauth" | "password" | undefined
+  isScreenLocked: boolean = true
+  lockScreenPasswordInput: string = ''
   constructor(
     private authService: AuthenticationService, 
     private accountsService: Account2faService,
@@ -117,6 +119,17 @@ export class HomePage implements OnInit {
         return 'Sistema'
     }
   }
+
+  get appLockStateLabel() {
+    switch (this.lockScreenConfig) {
+      case 'webauth':
+        return 'Device'
+      case 'password':
+        return 'Senha'
+      default:
+        return ''
+    }
+  }
   
   async ngOnInit() {
     this.onWindowResize()
@@ -126,7 +139,7 @@ export class HomePage implements OnInit {
       backdropDismiss: false
     })
     await loading.present()
-    await this.setupWebAuth()
+    await this.setupWebAuthAPI()
     const userId = await this.authService.getCurrentUserId()
     if(userId) {
       this.accountsService.loadAccounts(userId)
@@ -387,11 +400,77 @@ export class HomePage implements OnInit {
     this.isPopoverOpen = false;
   }
 
-  private async setupWebAuth() {
-    const webAuthState = await this.storageService.get<boolean>('webAuthEnabled')
-    if(webAuthState) {
-      this.supportsWebCredentialManagement = true
+  async unlockScreen() {
+    const storedWebAuthHash = await this.storageService.get<string>('savedWebCredential')
+    if(storedWebAuthHash) {
+      await this.unlockUsingWebAuth()
+    } else {
+      await this.unlockUsingPassword()
+    }
+    
+  }
+
+  private async unlockUsingPassword() {
+    const password = this.lockScreenPasswordInput
+    const hashed = await this.authService.hashPassword(password)
+    const storedHash = await this.storageService.get<string>('lockScreenHash')
+    if(hashed === storedHash) {
+      this.isScreenLocked = false
+    } else {
+      const toast = await this.toastController.create({
+        message: "Senha incorreta",
+        duration: 2000,
+        color: 'danger',
+        position: 'middle',
+        cssClass: 'width-auto'
+      })
+      await toast.present()
+    }
+  }
+
+  private async unlockUsingWebAuth() {
+    const storedHash = await this.storageService.get<string>('savedWebCredential')
+    if(storedHash) {
+      const credential = await this.authService.getWebCredential(storedHash)
+      if(credential) {
+        console.log("Credential", {credential})
+        if(storedHash === credential.id) {
+          this.isScreenLocked = false
+        } else {
+          console.log("WebAuth credential not found")
+        }
+      }
+    }
+  }
+
+  async activateWebAuthLock() {
+    this.storageService.set('webAuthLockEnabled', true)
+    const webCred = await this.authService.createWebCredential()
+    console.log("webCred", {webCred})
+    this.storageService.set('savedWebCredential', webCred?.id)
+  }
+
+  private async setupWebAuthAPI() {
+    const supportsWebAuth = await this.authService.supportsWebCredentialManagement()
+    if(!supportsWebAuth) {
+      console.log("WebAuth not supported")
+      this.isScreenLocked = false
       return
+    }
+    this.supportsWebCredentialManagement = supportsWebAuth
+    const webAuthLockState = await this.storageService.get<boolean>('webAuthLockEnabled')
+    if(webAuthLockState) {
+      this.lockScreenConfig = "webauth"
+      this.isScreenLocked = true
+    } else {
+      const storedHash = await this.storageService.get<string>('lockScreenHash')
+      if(storedHash) {
+        this.lockScreenConfig = "password"
+        this.isScreenLocked = true
+      } else {
+        console.log("No lock screen config found")
+        this.isScreenLocked = false
+      }
     }
   }
 }
