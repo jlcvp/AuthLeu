@@ -290,6 +290,22 @@ export class HomePage implements OnInit {
     })
     await loading.present()
     await firstValueFrom(this.qrscanner.start())
+    const devices = (await firstValueFrom(this.qrscanner.devices)).filter(device => device.kind === 'videoinput')
+    console.log({devices})
+    // find back camera
+    let backCamera = devices.find(device => device.label.toLowerCase().includes('back camera'))
+    if(!backCamera) {
+      backCamera = devices.find(device => device.label.toLowerCase().match(/.*back.*camera.*/))
+    }
+    // defaults to the first one if no back camera is found
+    if(!backCamera) {
+      backCamera = devices[0]
+    }
+
+    if(backCamera && backCamera.deviceId) {
+      console.log("using device", {backCamera})
+      this.qrscanner.playDevice(backCamera.deviceId)
+    }
     await loading.dismiss()
   }
 
