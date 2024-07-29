@@ -1,3 +1,7 @@
+ion-content {
+  overflow: hidden;
+}
+
 #container {
   display: flex;
   height: 100%;
@@ -29,7 +33,6 @@
 
 #accounts-container {
   overflow-y: auto;
-  border: 1px blue solid;
 }
 
 #accounts-container.landscape {

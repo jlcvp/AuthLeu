@@ -15,8 +15,8 @@ export class AccountFilterPipe implements PipeTransform {
     }
 
     return data.filter((account) => { 
-      return (account.serviceName.toLocaleLowerCase().includes(search.toLocaleLowerCase()) || 
-              account.accountName.toLocaleLowerCase().includes(search.toLocaleLowerCase()))
+      return (account.label.toLocaleLowerCase().includes(search.toLocaleLowerCase()) || 
+              account.issuer?.toLocaleLowerCase().includes(search.toLocaleLowerCase()))
     })
   }
 }
