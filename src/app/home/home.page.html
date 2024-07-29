@@ -31,7 +31,7 @@
     <app-account-list [ngClass]="layoutOrientationClass" id="accounts-container" [accounts]="accounts$ | async | accountFilter: searchTxt" [type]="accountListType" (accountSelected)="selectAccount($event)"></app-account-list>
   </div>
 
-  <ion-modal [isOpen]="isAddAccountModalOpen" (willDismiss)="onWillDismissModal($event)">
+  <ion-modal [isOpen]="isAddAccountModalOpen" (didDismiss)="onDidDismissModal($event)">
     <ng-template>
       <ion-header>
         <ion-toolbar>
