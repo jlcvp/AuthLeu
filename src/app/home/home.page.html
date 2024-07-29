@@ -43,7 +43,7 @@
       </ion-header>
       <ion-content class="ion-padding">
         <ng-container *ngIf="isScanActive;else nonScan">
-          <ngx-scanner-qrcode  #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)" [config]="qrScannerOpts"></ngx-scanner-qrcode>
+          <ngx-scanner-qrcode #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)" [config]="qrScannerOpts"></ngx-scanner-qrcode>
           <ion-grid>
             <ion-row>
               <ion-col size="auto">
@@ -62,12 +62,12 @@
         </ng-container>
         <ng-template #nonScan>
           <ng-container *ngIf="!manualInput;else manualForm">
-            <ion-button expand="block" (click)="scanCode()">
+            <ion-button size="large" expand="block" (click)="scanCode()">
               <ion-icon slot="start" name="qr-code-outline"></ion-icon>
               Escanear QR Code
             </ion-button>
             <div class="ion-padding-top"></div>
-            <ion-button expand="block" fill="outline" (click)="manualInput=true">
+            <ion-button size="large" expand="block" fill="outline" (click)="manualInput=true">
               <ion-icon slot="start" name="create-outline"></ion-icon>
               Input Manual
             </ion-button>
@@ -98,12 +98,6 @@
                           <p>No Logo</p>
                         </ion-card>
                       </ion-col>
-                      <!-- <ion-col size-xs="6" size-sm="4">
-                        <ion-card class="logo-card" (click)="selectLogo('')" [ngClass]="{ 'selected-logo': !draftLogoURL }">
-                          <img class="ion-padding ion-margin logo-img" src="../../assets/icon/favicon.png">
-                          <p>No-Logo</p>
-                        </ion-card>
-                      </ion-col> -->
                       <ion-col size-xs="6" size-sm="4" *ngFor="let logoResult of searchLogoResults">
                         <ion-card class="logo-card" (click)="selectLogo(logoResult)" [ngClass]="{ 'selected-logo': logoResult === draftLogoURL }">
                           <ion-img class="ion-padding ion-margin logo-img" [src]="logoResult"></ion-img>
