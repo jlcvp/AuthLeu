@@ -49,10 +49,10 @@ export class Account2FA implements IAccount2FA {
         const pathComponents = url.replace('otpauth://', '')
             .split('/')
             .filter(e=>!!e)
-            .map(decodeURIComponent)
             .map(e=>e.replace(/\?.*/, ''))
-        const type = pathComponents[0];
+            .map(decodeURIComponent)
         
+        const type = pathComponents[0];
         console.log({url})
         if (type !== 'totp') {
             throw new Error('Only TOTP is supported');
