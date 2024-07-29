@@ -94,4 +94,21 @@ export class HomePage implements OnInit {
     }
     return this.otpService.generateTOTP(this.selectedAccount.secret, this.selectedAccount.interval || 30)
   }
+
+  async addAccount() {
+    let userId = await this.authService.getCurrentUserId()
+    if(!userId) {
+      return
+    }
+
+    userId = userId as string
+    const account = new Account2FA('', 'Google', 'My Account', 'JBSWY3D', 6, 30, true, 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png')
+    const loading = await this.loadingController.create({
+      message: "Adicionando conta...",
+      backdropDismiss: false
+    })
+    await loading.present()
+    await this.accountsService.addAccount(userId, account)
+    await loading.dismiss()
+  }
 }
