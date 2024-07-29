@@ -1,12 +1,12 @@
 <div id="code-container-component" class="ion-justify-content-center ion-align-items-center">
   <ng-container *ngIf="account;else selectAccountContainer">
-    
+   
       <ion-row>
-        <ion-col size="12">
-          <img src="{{account.getLogo()}}" alt="code" class="service-logo">
+        <ion-col class="ion-padding" size="12">
+          <img class="service-logo" [src]="account.getLogo()">
         </ion-col>
       </ion-row>
-      <ion-row>
+      <ion-row class="ion-padding-top">
         <ion-col size="12">
           {{account.label}}
         </ion-col>
@@ -18,13 +18,13 @@
             <ion-icon slot="end" name="copy-outline"></ion-icon>
           </ion-button>
         </ion-col>
-        
       </ion-row>
       <ion-row>
         <ion-col size="12">
-         <app-countdown-timer #countdownTimer [seconds]="tokenCountdown" (timerEnd)="timerEnd()"></app-countdown-timer>
+          <app-countdown-timer #countdownTimer [seconds]="tokenCountdown" (timerEnd)="timerEnd()"></app-countdown-timer>
         </ion-col>
       </ion-row>
+    
   </ng-container>
   <ng-template #selectAccountContainer>
     <p>Selecione uma conta para iniciar...</p>

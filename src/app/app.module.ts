@@ -8,10 +8,11 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import { enableIndexedDbPersistence, getFirestore, initializeFirestore, persistentLocalCache, provideFirestore } from '@angular/fire/firestore';
+import { initializeFirestore, persistentLocalCache, provideFirestore } from '@angular/fire/firestore';
 import { environment } from 'src/environments/environment';
 import { NgxScannerQrcodeModule, LOAD_WASM } from 'ngx-scanner-qrcode';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { IonicStorageModule } from '@ionic/storage-angular';
 
 LOAD_WASM().subscribe() // Preload NGXScanner WASM module
 @NgModule({
@@ -28,6 +29,9 @@ LOAD_WASM().subscribe() // Preload NGXScanner WASM module
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
+    }),
+    IonicStorageModule.forRoot({
+      name: '_authleu'
     })
   ],
   providers: [
