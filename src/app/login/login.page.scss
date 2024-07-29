@@ -1,0 +1,36 @@
+.login-card {
+    max-width: 600px;
+    margin:auto;
+    border-radius: 1em;
+}
+
+.login-card-container {
+    height: 100%;
+    position: relative;
+    top: 50%;
+    transform: translateY(-25%);
+}
+
+.form-rounded-bottom {
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+.form-rounded-top {
+    border-top-right-radius: 1em;
+    border-top-left-radius: 1em;
+}
+
+.logo {
+    width: 30%;
+}
+
+.login-bg, #background-content {
+    height: 100%;
+    background: linear-gradient(to right, var(--ion-color-light) 0%, var(--ion-color-light) 50%, var(--ion-color-dark) 50%, var(--ion-color-dark) 100%) !important;
+}
+
+.error-message {
+    color: var(--ion-color-danger);
+    font-size: 0.8em;
+    padding: 0;
+}
