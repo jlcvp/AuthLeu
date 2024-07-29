@@ -3,9 +3,11 @@
   flex-direction: column;
   height: 100%;
 }
+
 #code-container {
   height: 40%;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px red solid;
 }

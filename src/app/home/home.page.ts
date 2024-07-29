@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
-import { LoadingController, NavController } from '@ionic/angular';
+import { LoadingController, NavController, ToastController } from '@ionic/angular';
 import { Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/account2fa.service';
@@ -14,12 +14,17 @@ import { OtpService } from '../services/otp.service';
 export class HomePage implements OnInit {
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount: Account2FA | null = null
+  refreshTimeout: any
+  timerRefreshInterval: any
+  timer: number = 0
+
   constructor(
     private authService: AuthenticationService, 
     private navCtrl: NavController,
     private accountsService: Account2faService,
     private otpService: OtpService,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private toastController: ToastController
   ) {}
   
   async ngOnInit() {
@@ -42,8 +47,42 @@ export class HomePage implements OnInit {
   }
 
   selectAccount(account: any) {
-    console.log({account})
     this.selectedAccount = account
+    console.log("generating new code")
+    this.updateTimer()
+    if(this.refreshTimeout) {
+      clearTimeout(this.refreshTimeout)
+    }
+    
+    this.refreshTimeout = setTimeout(() => {
+      clearTimeout(this.refreshTimeout)
+      this.selectAccount(account)
+    }, account.getNextRollingTimeLeft() * 1000)
+  }
+
+  updateTimer() {
+    if(this.timerRefreshInterval) {
+      clearInterval(this.timerRefreshInterval)
+    }
+    if(this.selectedAccount) {
+      this.timer = this.selectedAccount.getNextRollingTimeLeft()
+      this.timerRefreshInterval = setInterval(() => {
+        this.timer = this.selectedAccount?.getNextRollingTimeLeft() || -10
+      }, 1000)
+    }
+  }
+
+  async copyCode() {
+    if(!this.selectedAccount) {
+      return
+    }
+    const code = this.selectedAccountCode
+    await navigator.clipboard.writeText(code)
+    const toast = await this.toastController.create({
+      message: `Código copiado`,
+      duration: 1000
+    })
+    await toast.present()
   }
 
   get selectedAccountCode() {
