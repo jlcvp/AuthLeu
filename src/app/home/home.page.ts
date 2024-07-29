@@ -3,7 +3,7 @@ import { AuthenticationService } from '../services/authentication.service';
 import { IonModal, LoadingController, ToastController } from '@ionic/angular';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
-import { Account2faService } from '../services/account2fa.service';
+import { Account2faService } from '../services/accounts/account2fa.service';
 import { LogoService } from '../services/logo.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
@@ -48,24 +48,23 @@ export class HomePage implements OnInit {
     }
   }
 
-  private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-
-  isLandscape: boolean = false
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount?: Account2FA
   searchTxt: string = ''
   draftLogoSearchTxt: string = ''
   searchLogoResults: any[] = []
   draftLogoURL: string = ''
+  validations_form: FormGroup;
 
   manualInput: boolean = false
   isPopoverOpen: boolean = false
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   isWindowFocused: boolean = true
-  validations_form: FormGroup;
-  currentDarkModePref: string = '';
-  supportsWebCredentialManagement: boolean = false
+
+  private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+  private isLandscape: boolean = false
+  private currentDarkModePref: string = '';
 
   constructor(
     private authService: AuthenticationService, 
@@ -126,18 +125,13 @@ export class HomePage implements OnInit {
       backdropDismiss: false
     })
     await loading.present()
-    await this.setupWebAuth()
-    const userId = await this.authService.getCurrentUserId()
-    if(userId) {
-      this.accountsService.loadAccounts(userId)
-      this.accounts$ = this.accountsService.getAccounts()
-      const lastSelectedAccountId: string | undefined = await this.storageService.get('lastSelectedAccountId')
-      if(lastSelectedAccountId) {
-        const accounts = await firstValueFrom(this.accounts$)
-        const lastSelectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
-        if(lastSelectedAccount) {
-          this.selectAccount(lastSelectedAccount)
-        }
+    this.accounts$ = await this.accountsService.getAccounts()
+    const lastSelectedAccountId: string | undefined = await this.storageService.get('lastSelectedAccountId')
+    if(lastSelectedAccountId) {
+      const accounts = await firstValueFrom(this.accounts$)
+      const lastSelectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
+      if(lastSelectedAccount) {
+        this.selectAccount(lastSelectedAccount)
       }
     }
     await loading.dismiss()
@@ -244,13 +238,7 @@ export class HomePage implements OnInit {
     })
     await loading.present()
     try {
-      
-      let userId = await this.authService.getCurrentUserId() as string
-      if(!userId) {
-        throw new Error('User not found')
-      }
-      
-      await this.accountsService.addAccount(userId, account)
+      await this.accountsService.addAccount(account)
       await loading.dismiss()
       // select new account
       this.selectAccount(account)
@@ -385,13 +373,5 @@ export class HomePage implements OnInit {
 
   private hidePopover() {
     this.isPopoverOpen = false;
-  }
-
-  private async setupWebAuth() {
-    const webAuthState = await this.storageService.get<boolean>('webAuthEnabled')
-    if(webAuthState) {
-      this.supportsWebCredentialManagement = true
-      return
-    }
   }
 }

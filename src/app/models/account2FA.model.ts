@@ -1,3 +1,5 @@
+import { Observable } from "rxjs";
+
 export interface IAccount2FA {
     id: string;
     label: string;
@@ -10,6 +12,13 @@ export interface IAccount2FA {
     logo?: string;
     added?: any;
 }
+
+export interface IAccount2FAProvider {
+    getAccounts(): Promise<Observable<Account2FA[]>>;
+    addAccount(account: Account2FA): Promise<string>;
+    clearCache?(): Promise<void>;
+}
+
 export class Account2FA implements IAccount2FA {
     id: string;
     label: string;

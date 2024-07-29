@@ -15,6 +15,26 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { IonicStorageModule } from '@ionic/storage-angular';
 
 LOAD_WASM().subscribe() // Preload NGXScanner WASM module
+
+const firebaseProviders = () => {
+  if (!environment.firebaseConfig) {
+    console.log("Firebase config not found")
+    return []
+  }
+
+  return [
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideAuth(() => getAuth()), 
+    provideFirestore(() =>  {
+      const firestore = initializeFirestore(getApp(), { 
+        localCache: persistentLocalCache({
+          cacheSizeBytes: 30_000_000, // 30MB
+        }) 
+      })
+      return firestore
+    })
+  ]
+}
 @NgModule({
   declarations: [
     AppComponent
@@ -36,14 +56,7 @@ LOAD_WASM().subscribe() // Preload NGXScanner WASM module
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
-    provideAuth(() => getAuth()), 
-    provideFirestore(() =>  {
-      const firestore = initializeFirestore(getApp(), { 
-        localCache: persistentLocalCache() 
-      })
-      return firestore
-    })
+    ...firebaseProviders()
   ],
   bootstrap: [AppComponent],
 })

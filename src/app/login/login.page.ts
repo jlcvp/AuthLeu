@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { LoadingController, NavController, ToastController } from '@ionic/angular';
 import { AuthenticationService } from '../services/authentication.service';
+import { AppConfigService } from '../services/app-config.service';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ export class LoginPage {
     private navCtrl: NavController,
     private authService: AuthenticationService,
     private toastController: ToastController,
+    private appConfig: AppConfigService,
     formBuilder: FormBuilder
   ) {
     
@@ -55,6 +57,7 @@ export class LoginPage {
     try {
       await this.authService.loginUser(value.email, value.password)
       this.errorMessage = ""
+      await this.appConfig.setOfflineMode(false)
       await loading.dismiss()
       this.navCtrl.navigateForward('/home', {skipLocationChange: true})
     } catch (error: any) {
@@ -85,6 +88,11 @@ export class LoginPage {
       position: "middle"
     })
     await toast.present();
+  }
+
+  continueOffline() {
+    this.appConfig.setOfflineMode(true)
+    this.navCtrl.navigateForward('/home', {skipLocationChange: true})
   }
 
 }

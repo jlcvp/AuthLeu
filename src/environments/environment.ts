@@ -6,6 +6,7 @@ export const environment = {
   production: false,
   LOGO_DEV_APIKEY: "pk_RLa24e-4TSG-aOyaPZxVIg",
   BRANDFETCH_APIKEY: "jaQ5CNpxROXg1e+IfGUMywN+fO3a+ZXDl5R2hqVmE1I=",
+  isOfflineEnv: false,
   firebaseConfig: {
     projectId: "authleu",
     appId: "1:946698001868:web:fb734cffc5a354a4099169",
