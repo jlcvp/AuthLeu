@@ -72,7 +72,7 @@ export class HomePage implements OnInit {
     }
   }
 
-  async copyCode() {
+  async copyCode(evt: any) {
     if(!this.selectedAccount) {
       return
     }
@@ -80,8 +80,11 @@ export class HomePage implements OnInit {
     await navigator.clipboard.writeText(code)
     const toast = await this.toastController.create({
       message: `Código copiado`,
-      duration: 1000
+      positionAnchor: evt.target,
+      cssClass: 'width-auto',
+      duration: 2000
     })
+    console.log({evt})
     await toast.present()
   }
 
