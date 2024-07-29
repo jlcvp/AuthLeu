@@ -1,7 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Account2FA } from 'src/app/models/account2FA.model';
 import { OtpService } from 'src/app/services/otp.service';
+import { CountdownTimerComponent } from '../countdown-timer/countdown-timer.component';
+import { debounceTime, pipe } from 'rxjs';
 
 @Component({
   selector: 'app-account-detail',
@@ -9,17 +11,18 @@ import { OtpService } from 'src/app/services/otp.service';
   styleUrls: ['./account-detail.component.scss'],
 })
 export class AccountDetailComponent {
+  @ViewChild(CountdownTimerComponent) countdownTimer!: CountdownTimerComponent;
 
-  private timerRefreshInterval: any
   private _account?: Account2FA
-  timer: number = 0 
   private _token = '000 000'
-
+  private _tokenCountdown = 30
+  private debounceTimeout: any
   @Input() set account(value: Account2FA | undefined) {
     this._account = value
+    this.updateTokenCountdown()
     this.updateCode()
-    this.updateTimer()
   }
+
   get account(): Account2FA | undefined {
     return this._account
   }
@@ -54,6 +57,17 @@ export class AccountDetailComponent {
     return this._token
   }
 
+  private set tokenCountdown(value: number) {
+    this._tokenCountdown = value
+    setTimeout(() => {
+      this.countdownTimer?.startTimer()
+    }, 50);
+  }
+
+  get tokenCountdown(): number {
+    return this._tokenCountdown
+  }
+
   async copyCode(evt: any) {
     if(!this.account) {
       return
@@ -70,30 +84,26 @@ export class AccountDetailComponent {
     await toast.present()
   }
 
-  updateTimer() {
-    if(this.timerRefreshInterval) {
-      clearInterval(this.timerRefreshInterval)
-    }
-    if(this.account) {
-      this.timer = this.account.getNextRollingTimeLeft()
-      this.timerRefreshInterval = setInterval(() => {
-        if(!this.account) {
-          clearInterval(this.timerRefreshInterval)
-          this.timer = NaN
-        } else {
-          this.timer = this.account.getNextRollingTimeLeft()
-          if (this.timer == this.account.interval) { // new code needed
-            this.updateCode()
-          }
-        }
-      }, 500) // for precision purposes update every 500ms
-    }
+  timerEnd() {
+    setTimeout(() => {
+      this.updateCode()
+      this.updateTokenCountdown()
+    }, 1000);
   }
 
   updateCode() {
     if(this.account) {
       console.log("generating new code")
       this.token = this.otpService.generateTOTP(this.account.secret, this.account.interval)
+    }
+  }
+
+  private updateTokenCountdown() {
+    if(!this.debounceTimeout) {
+      this.debounceTimeout = setTimeout(() => {
+        this.tokenCountdown = this.account?.getNextRollingTimeLeft() || this.account?.interval || 30
+        this.debounceTimeout = undefined
+      }, 150)
     }
   }
 }
