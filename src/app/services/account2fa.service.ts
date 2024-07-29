@@ -22,13 +22,15 @@ export class Account2faService {
     return this.accounts$.pipe(map(accounts => accounts.map(account => Account2FA.fromDictionary(account))))
   }
 
-  public async addAccount(userId: string, account: Account2FA) {
+  public async addAccount(userId: string, account: Account2FA): Promise<string> {
+    console.log("Adding account", {account, userId})
     const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
     const id = this.createId()
     const document = doc(accountCollection, id)
     
     account.id = id
     await setDoc(document, account.typeErased())
+    return id
   }
 
   private createId(): string {

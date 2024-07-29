@@ -28,7 +28,7 @@ export class Account2FA {
         const params = new URLSearchParams(urlObj.search);
         //otpauth://totp/ACME%20Co:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30
 
-        const pathComponents = urlObj.pathname.split('/').filter(e=>!!e);
+        const pathComponents = urlObj.pathname.split('/').filter(e=>!!e).map(decodeURIComponent);
         const type = pathComponents[0];
         
         if (type !== 'totp') {
@@ -36,13 +36,13 @@ export class Account2FA {
         }
 
         const label = pathComponents[1];
-        const serviceName = label.split(':')[0];
-        const accountName = label.split(':')[1].replace('%20', ' ');
-        if(!serviceName || !accountName) {
+        const serviceName = label.split(':')[0] || label;
+        const accountName = label.split(':')[1] || '';
+        if(!serviceName) {
             throw new Error('Missing required fields');
         }
 
-        const secret = params.get('secret');
+        const secret = params.get('secret')?.toUpperCase();
         if(!secret) {
             throw new Error('Missing secret key');
         }
@@ -62,6 +62,12 @@ export class Account2FA {
     }
 
     typeErased(): Object {
-        return Object.assign({}, this);
+        const typeErasedObject = Object.assign({}, this);
+        for (const key in typeErasedObject) {
+            if (!typeErasedObject[key]) {
+                delete typeErasedObject[key];
+            }
+        }
+        return typeErasedObject
     }
 }

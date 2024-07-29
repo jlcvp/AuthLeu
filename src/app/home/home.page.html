@@ -85,40 +85,43 @@
     <ng-template>
       <ion-header>
         <ion-toolbar>
-          <ion-buttons slot="start">
-            <ion-button (click)="cancelAddAccount()">Cancel</ion-button>
-          </ion-buttons>
           <ion-title>Adicionar conta</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeAddAccountModal()"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+          </ion-buttons>
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding">
-        <ngx-scanner-qrcode *ngIf="isScanActive;else nonScan" #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)"></ngx-scanner-qrcode>
+        <ngx-scanner-qrcode *ngIf="isScanActive;else nonScan" #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)" [config]="qrScannerOpts"></ngx-scanner-qrcode>
         <ng-template #nonScan>
-          <ion-button expand="block" (click)="scanCode()" *ngIf="!manualInput;else manualForm">
-            <ion-icon slot="start" name="qr-code-outline"></ion-icon>
-            Escanear QR Code
-          </ion-button>
+          <ng-container *ngIf="!manualInput;else manualForm">
+            <ion-button expand="block" (click)="scanCode()">
+              <ion-icon slot="start" name="qr-code-outline"></ion-icon>
+              Escanear QR Code
+            </ion-button>
+            <div class="ion-padding-top"></div>
+            <ion-button expand="block" fill="outline" (click)="manualInput=true">
+              <ion-icon slot="start" name="create-outline"></ion-icon>
+              Input Manual
+            </ion-button>
+          </ng-container>
+          
           <ng-template #manualForm>
             <form [formGroup]="validations_form" (ngSubmit)="createAccount(validations_form.value)">
               <ion-item>
-                <ion-label position="floating">Nome do serviço</ion-label>
-                <ion-input formControlName="serviceName"></ion-input>
+                <ion-input label="Nome do serviço" labelPlacement="stacked" formControlName="serviceName" placeholder="ex.: Google"></ion-input>
               </ion-item>
               <ion-item>
-                <ion-label position="floating">Nome da conta</ion-label>
-                <ion-input formControlName="accountName"></ion-input>
+                <ion-input label="Nome da conta" labelPlacement="stacked" formControlName="accountName" placeholder="ex.: teste@gmail.com"></ion-input>
               </ion-item>
               <ion-item>
-                <ion-label position="floating">Chave-segredo</ion-label>
-                <ion-input formControlName="secret"></ion-input>
+                <ion-input label="Chave-segredo" labelPlacement="stacked" formControlName="secret" placeholder="ex.: QAPERTPEO123"></ion-input>
               </ion-item>
               <ion-item>
-                <ion-label position="floating">Tamanho do token</ion-label>
-                <ion-input formControlName="tokenLength"></ion-input>
+                <ion-input label="Tamanho do token" labelPlacement="stacked" formControlName="tokenLength" placeholder="ex.: 6"></ion-input>
               </ion-item>
               <ion-item>
-                <ion-label position="floating">Intervalo de token (s)</ion-label>
-                <ion-input formControlName="interval"></ion-input>
+                <ion-input label="Intervalo de token (s)" labelPlacement="stacked" formControlName="interval" placeholder="ex.: 30"></ion-input>
               </ion-item>
               <ion-button [disabled]="!validations_form.valid" type="submit">Salvar conta</ion-button>
             </form>

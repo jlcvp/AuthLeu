@@ -1,13 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
 import { IonModal, LoadingController, NavController, ToastController, ToastOptions } from '@ionic/angular';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, lastValueFrom, Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/account2fa.service';
 import { OtpService } from '../services/otp.service';
 import { LogoService } from '../services/logo.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { NgxScannerQrcodeComponent, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
+import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 
 @Component({
   selector: 'app-home',
@@ -18,6 +18,10 @@ export class HomePage implements OnInit {
   @ViewChild('popover') popover: any;
   @ViewChild(IonModal) modal!: IonModal;
   @ViewChild('qrscanner') qrscanner!: NgxScannerQrcodeComponent;
+  qrScannerOpts: ScannerQRCodeConfig = {
+    isBeep: false,
+    vibrate: 100
+  }
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount: Account2FA | null = null
   refreshTimeout: any
@@ -167,16 +171,50 @@ export class HomePage implements OnInit {
   }
 
   onWillDismissModal(e: Event) {
-    console.log("Closing modal MODAL", {e})
     this.isAddAccountModalOpen = false
+    this.manualInput = false
+    this.isAddAccountModalOpen = false
+    this.isScanActive = false
+    // clear form
+    this.validations_form.reset()
   }
 
-  async cancelAddAccount() {
+  async closeAddAccountModal() {
     await this.modal.dismiss()
   }
 
-  createAccount(formValues: any) {
-
+  async createAccount(formValues: any) {
+    
+    console.log({formValues})
+    await this.closeAddAccountModal()
+    // TODO: get logo
+    const account = Account2FA.fromDictionary(formValues)
+    console.log({account2fa: account})
+    const loading = await this.loadingController.create({
+      message: "Adicionando conta...",
+      backdropDismiss: false
+    })
+    await loading.present()
+    try {
+      
+      let userId = await this.authService.getCurrentUserId() as string
+      if(!userId) {
+        throw new Error('User not found')
+      }
+      
+      const newAccId = await this.accountsService.addAccount(userId, account)
+      await loading.dismiss()
+      // select new account
+      this.selectAccount(account)
+    } catch (error: any) {
+      await loading.dismiss()
+      const toast = await this.toastController.create({
+        message: "Erro ao adicionar conta: " + error && error.message || "Erro desconhecido",
+        color: "danger",
+        duration: 2000
+      })
+      await toast.present()
+    }
   }
 
   async scanCode() {
@@ -189,24 +227,6 @@ export class HomePage implements OnInit {
     await loading.present()
     await firstValueFrom(this.qrscanner.start())
     await loading.dismiss()
-  }
-
-  waitQRScannerInit() {
-    return new Promise<void>((resolve, reject) => {
-      let tries = 0
-      const maxTries = 20
-      const interval = setInterval(() => {
-        if(!this.qrscanner.isLoading) {
-          clearInterval(interval)
-          resolve()
-        }
-        if(tries >= maxTries) {
-          clearInterval(interval)
-          reject()
-        }
-        tries++
-      }, 500)
-    })
   }
 
   onQRCodeScanned(evt: ScannerQRCodeResult[], qrscanner: NgxScannerQrcodeComponent) {
