@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { Component, HostListener, Input, ViewChild } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Account2FA } from 'src/app/models/account2FA.model';
 import { OtpService } from 'src/app/services/otp.service';
@@ -20,6 +20,20 @@ export class AccountDetailComponent {
     this._account = value
     this.updateTokenCountdown()
     this.updateCode()
+  }
+
+  @HostListener('window:focus', ['$event'])
+  onFocus(event: FocusEvent): void {
+    // resume timer
+    console.log("Window focused")
+    this.updateCode()
+    this.updateTokenCountdown()
+  }
+
+  @HostListener('window:blur', ['$event'])
+  onBlur(event: FocusEvent): void {
+    // stop timer, camera, etc
+    console.log("Window blurred")
   }
 
   get account(): Account2FA | undefined {
@@ -102,6 +116,7 @@ export class AccountDetailComponent {
   }
 
   private updateTokenCountdown() {
-    this.tokenCountdown = this.account?.getNextRollingTimeLeft() || this.account?.interval || 30      
+    const countdown = this.account?.getNextRollingTimeLeft() || this.account?.interval || 30   
+    this.tokenCountdown = countdown > 0 ? countdown : 0
   }
 }
