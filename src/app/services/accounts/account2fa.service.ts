@@ -11,8 +11,9 @@ import { AppConfigService } from '../app-config.service';
 })
 export class Account2faService {
   private accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
+  private remoteAccounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   private _service: IAccount2FAProvider | undefined;
-  
+
   get service(): IAccount2FAProvider {
     if (!this._service) {
       throw new Error('Service not initialized')
@@ -20,8 +21,10 @@ export class Account2faService {
     return this._service
   }
 
-  constructor(private appConfig: AppConfigService, private remoteService: RemoteAccount2faService, private localService: LocalAccount2faService) {
-    const useRemoteService = !environment.isOfflineEnv
+  constructor(private appConfig: AppConfigService,
+    private remoteService: RemoteAccount2faService,
+    private localService: LocalAccount2faService) {
+    
     this.setupService()
   }
 
