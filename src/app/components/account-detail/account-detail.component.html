@@ -7,12 +7,12 @@
         </ion-col>
         <ion-col size="2"></ion-col>
       </ion-row>
-      <ion-row class="ion-padding-top">
+      <ion-row class="ion-padding-top ion-text-center">
         <ion-col size="12">
           {{account.label}}
         </ion-col>
       </ion-row>
-      <ion-row class="center-vertical ion-no-padding">
+      <ion-row class="center-vertical ion-no-padding ion-text-center">
         <ion-col size="auto" class="center-vertical">
           <ion-button class="large-text" size="large" fill="clear" (click)="copyCode($event)">
             <ion-text class="code-color"><strong>{{token}}</strong></ion-text>
@@ -20,7 +20,7 @@
           </ion-button>
         </ion-col>
       </ion-row>
-      <ion-row class="ion-no-padding">
+      <ion-row class="ion-no-padding ion-text-center">
         <ion-col size="12">
           <app-countdown-timer #countdownTimer [seconds]="tokenCountdown" (timerEnd)="timerEnd()"></app-countdown-timer>
         </ion-col>
