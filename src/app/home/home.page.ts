@@ -8,6 +8,7 @@ import { LogoService } from '../services/logo.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { LocalStorageService } from '../services/local-storage.service';
+import { GlobalUtils } from '../utils/global-utils';
 
 @Component({
   selector: 'app-home',
@@ -354,8 +355,10 @@ export class HomePage implements OnInit {
   }
 
   async toggleTorch() {
-    const currentState = await firstValueFrom(this.qrscanner.torcher())
-    this.qrscanner.isTorch = !currentState
+    // const currentState = await firstValueFrom(this.qrscanner.torcher())
+    // this.qrscanner.isTorch = !currentState
+    const currentState = await GlobalUtils.getFlashlightStatus()
+    await GlobalUtils.setFlashlightStatus(!currentState)
   }
 
   private processQRCode(evt: string) {
