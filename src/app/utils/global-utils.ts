@@ -27,7 +27,13 @@ export class GlobalUtils {
             video: { deviceId: camera.deviceId }
         })
 
-        this.track = stream.getVideoTracks()[0];
+        const track = stream.getVideoTracks().find(track => track.readyState === 'live');
+        if (!track) {
+            console.log("No Active track found.");
+            return;
+        }
+
+        this.track = track;
 
         if (!(this.track.getCapabilities().torch)) {
             console.log("No torch available.");
@@ -36,10 +42,7 @@ export class GlobalUtils {
     }
 
     static async getFlashlightStatus() {
-        if (!this.track) {
-            console.log("Flashlight not accessed. Trying to access now.");
-            await this.accessFlashlight();
-        }
+        await this.accessFlashlight();
         if (!this.track) {
             console.log("Flashlight not accessed.");
             return;
@@ -49,10 +52,7 @@ export class GlobalUtils {
     }
 
     static async setFlashlightStatus(status: boolean) {
-        if (!this.track) {
-            console.log("Flashlight not accessed. Trying to access now.");
-            await this.accessFlashlight();
-        }
+        await this.accessFlashlight();
         if (!this.track) {
             console.log("Flashlight not accessed.");
             return;
