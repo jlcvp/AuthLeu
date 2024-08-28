@@ -354,15 +354,9 @@ export class HomePage implements OnInit {
     this.qrscanner.playDevice(nextDevice.deviceId)
   }
 
-  async toggleTorch() {
-    // const currentState = await firstValueFrom(this.qrscanner.torcher())
-    // this.qrscanner.isTorch = !currentState
-    const currentState = await GlobalUtils.getFlashlightStatus()
-    await GlobalUtils.setFlashlightStatus(!currentState)
-  }
-
   private processQRCode(evt: string) {
-    // otpauth://totp/Google:My%20Account?secret=JBSWY3D&issuer=Google&algorithm=SHA1&digits=6&period=30
+    // The URI format and params is described in https://github.com/google/google-authenticator/wiki/Key-Uri-Format
+    // otpauth://totp/ACME%20Co:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30
     try {
       const account = Account2FA.fromOTPAuthURL(evt)
       console.log({account})
