@@ -8,6 +8,7 @@ import { LogoService } from '../services/logo.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { LocalStorageService } from '../services/local-storage.service';
+import { GlobalUtils } from '../utils/global-utils';
 
 @Component({
   selector: 'app-home',
@@ -353,13 +354,9 @@ export class HomePage implements OnInit {
     this.qrscanner.playDevice(nextDevice.deviceId)
   }
 
-  async toggleTorch() {
-    const currentState = await firstValueFrom(this.qrscanner.torcher())
-    this.qrscanner.isTorch = !currentState
-  }
-
   private processQRCode(evt: string) {
-    // otpauth://totp/Google:My%20Account?secret=JBSWY3D&issuer=Google&algorithm=SHA1&digits=6&period=30
+    // The URI format and params is described in https://github.com/google/google-authenticator/wiki/Key-Uri-Format
+    // otpauth://totp/ACME%20Co:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30
     try {
       const account = Account2FA.fromOTPAuthURL(evt)
       console.log({account})
