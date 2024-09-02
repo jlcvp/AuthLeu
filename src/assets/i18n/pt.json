@@ -1,57 +1,57 @@
 {
-    "LOGIN": {
-        "EMAIL": "E-mail",
-        "PASSWORD": "Senha",
-        "SIGN_IN_BUTTON": "Entrar",
-        "AUTHENTICATING": "Autenticando...",
-        "ERROR_MSGS": {
-            "USER_NOT_FOUND": "Usuário não encontrado",
-            "INVALID_PASSWORD": "Senha inválida",
-            "TOO_MANY_ATTEMPTS_TRY_LATER": "Muitas tentativas de login. Tente novamente após 15 minutos",
-            "DEFAULT_ERROR": "Não foi possível fazer o login, verifique as credenciais e tente novamente"
-        }, 
-        "VALIDATION_MSGS": {
-            "REQUIRED_EMAIL": "Obrigatório informar um e-mail",
-            "EMAIL_PATTERN": "E-mail inválido",
-            "REQUIRED_PASSWORD": "Informe a senha"
-        }
-    },
     "ACCOUNT_DETAIL": {
-        "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar...",
-        "SECONDS_SHORT": "s"
+        "SECONDS_SHORT": "s",
+        "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar..."
+    },
+    "ADD_ACCOUNT_MODAL": {
+        "ADDING_ACCOUNT": "Adicionando conta...",
+        "ERROR_MSGS": {
+            "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
+            "INVALID_QR_CODE": "QR Code inválido",
+            "INVALID_SESSION": "Sessão inválida",
+            "UNKNOWN_ERROR": "Erro desconhecido"
+        },
+        "EXAMPLI_GRATIA_SHORT": "ex.:",
+        "LABEL": "Rótulo",
+        "LOADING_CAMERA": "Carregando câmera...",
+        "LOGO": "Logo",
+        "MANUAL_INPUT": "Inserir manualmente",
+        "NO_LOGO": "Sem Logo",
+        "SAVE": "Salvar Conta",
+        "SCAN_QR_CODE": "Escanear QR Code",
+        "SECRET_KEY": "Chave-Segredo",
+        "TITLE": "Adicionar Conta",
+        "TOKEN_INTERVAL": "Intervalo do Token (s)",
+        "TOKEN_SIZE": "Tamanho do Token"
     },
     "CONFIG_MENU": {
         "ADD_ACCOUNT": "Adicionar Conta",
         "COLOR_MODE": "Modo de Cor",
-        "COLOR_MODE_LIGHT": "Claro",
         "COLOR_MODE_DARK": "Escuro",
+        "COLOR_MODE_LIGHT": "Claro",
         "COLOR_MODE_SYSTEM": "Sistema",
         "LOGOUT": "Sair"
-    },
-    "SEARCH": "Pesquisar",
-    "ADD_ACCOUNT_MODAL": {
-        "TITLE": "Adicionar Conta",
-        "MANUAL_INPUT": "Inserir manualmente",
-        "SCAN_QR_CODE": "Escanear QR Code",
-        "EXAMPLI_GRATIA_SHORT": "ex.:",
-        "LABEL": "Rótulo",
-        "SECRET_KEY": "Chave-Segredo",
-        "TOKEN_SIZE": "Tamanho do Token",
-        "TOKEN_INTERVAL": "Intervalo do Token (s)",
-        "LOGO": "Logo",
-        "NO_LOGO": "Sem Logo",
-        "SAVE": "Salvar Conta",
-        "ADDING_ACCOUNT": "Adicionando conta...",
-        "LOADING_CAMERA": "Carregando câmera...",
-        "ERROR_MSGS": {
-            "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
-            "UNKNOWN_ERROR": "Erro desconhecido",
-            "INVALID_SESSION": "Sessão inválida",
-            "INVALID_QR_CODE": "QR Code inválido"
-        }
     },
     "HOME": {
         "LOADING_ACCOUNTS": "Carregando contas...",
         "LOGGING_OUT": "Saindo..."
-    }
+    },
+    "LOGIN": {
+        "AUTHENTICATING": "Autenticando...",
+        "EMAIL": "E-mail",
+        "ERROR_MSGS": {
+            "DEFAULT_ERROR": "Não foi possível fazer o login, verifique as credenciais e tente novamente",
+            "INVALID_PASSWORD": "Senha inválida",
+            "TOO_MANY_ATTEMPTS_TRY_LATER": "Muitas tentativas de login. Tente novamente após 15 minutos",
+            "USER_NOT_FOUND": "Usuário não encontrado"
+        },
+        "PASSWORD": "Senha",
+        "SIGN_IN_BUTTON": "Entrar",
+        "VALIDATION_MSGS": {
+            "EMAIL_PATTERN": "E-mail inválido",
+            "REQUIRED_EMAIL": "Obrigatório informar um e-mail",
+            "REQUIRED_PASSWORD": "Informe a senha"
+        }
+    },
+    "SEARCH": "Pesquisar"
 }
