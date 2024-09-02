@@ -1,0 +1,18 @@
+{
+    "LOGIN": {
+        "EMAIL": "E-mail",
+        "PASSWORD": "Senha",
+        "SIGN_IN_BUTTON": "Entrar",
+        "ERROR_MSGS": {
+            "USER_NOT_FOUND": "Usuário não encontrado",
+            "INVALID_PASSWORD": "Senha inválida",
+            "TOO_MANY_ATTEMPTS_TRY_LATER": "Muitas tentativas de login. Tente novamente após 15 minutos",
+            "DEFAULT_ERROR": "Não foi possível fazer o login, verifique as credenciais e tente novamente"
+        }, 
+        "VALIDATION_MSGS": {
+            "REQUIRED_EMAIL": "Obrigatório informar um e-mail",
+            "EMAIL_PATTERN": "E-mail inválido",
+            "REQUIRED_PASSWORD": "Informe a senha"
+        }
+    }
+}

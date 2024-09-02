@@ -1,0 +1,19 @@
+{
+    "LOGIN": {
+        "EMAIL": "E-mail",
+        "PASSWORD": "Password",
+        "SIGN_IN_BUTTON": "Sign in",
+        "ERROR_MSGS": {
+            "USER_NOT_FOUND": "User not found",
+            "INVALID_PASSWORD": "Invalid password",
+            "TOO_MANY_ATTEMPTS_TRY_LATER": "Too many attempts. Try again after 15 minutes",
+            "DEFAULT_ERROR": "Could not sign in, check the credentials and try again"
+        },
+        "VALIDATION_MSGS": {
+            "REQUIRED_EMAIL": "E-mail is required",
+            "EMAIL_PATTERN": "Invalid e-mail",
+            "REQUIRED_PASSWORD": "Password is required"
+        }
+    }
+        
+}
