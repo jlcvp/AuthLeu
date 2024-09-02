@@ -129,7 +129,6 @@ export class HomePage implements OnInit {
       backdropDismiss: false
     })
     await loading.present()
-    await this.setupWebAuth()
     const userId = await this.authService.getCurrentUserId()
     if(userId) {
       this.accountsService.loadAccounts(userId)
@@ -391,13 +390,5 @@ export class HomePage implements OnInit {
 
   private hidePopover() {
     this.isPopoverOpen = false;
-  }
-
-  private async setupWebAuth() {
-    const webAuthState = await this.storageService.get<boolean>('webAuthEnabled')
-    if(webAuthState) {
-      this.supportsWebCredentialManagement = true
-      return
-    }
   }
 }
