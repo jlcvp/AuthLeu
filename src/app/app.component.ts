@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
 import { AlertController, Platform } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -8,9 +9,10 @@ import { AlertController, Platform } from '@ionic/angular';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  constructor(platform: Platform, private alertController: AlertController, private updates: SwUpdate) {
+  constructor(platform: Platform, private alertController: AlertController, private updates: SwUpdate, private translate: TranslateService) {
     platform.ready().then(() => {
       this.subscribeToUpdates()
+      this.setupTranslate()
     }).finally(() => {
       this.hideSplashScreen()
     })
@@ -57,5 +59,16 @@ export class AppComponent {
         }, 250);
       }
     }, 500);
+  }
+
+  private async setupTranslate() {
+    this.translate.setDefaultLang('en')
+    const supportedLanguages = /en|pt/
+    // get the browser language
+    let browserLang = this.translate.getBrowserLang()
+    console.log("detected browser language: ", browserLang)
+    if (browserLang !== undefined && this.translate.getBrowserLang()?.match(supportedLanguages)) {
+      this.translate.use(browserLang)
+    }
   }
 }

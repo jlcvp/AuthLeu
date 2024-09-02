@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-searchbar [debounce]="250" (ionInput)="handleSearch($event)"></ion-searchbar>
+    <ion-searchbar placeholder="{{ 'SEARCH' | translate }}" [debounce]="250" (ionInput)="handleSearch($event)"></ion-searchbar>
     <ion-buttons slot="end">
       <ion-button (click)="showPopover($event)">
         <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
@@ -11,12 +11,12 @@
             <ion-list class="ion-no-padding">
               <ion-item button detail="false" (click)="addAccountAction()">
                 <ion-icon slot="start" name="add-outline"></ion-icon>
-                <ion-label>Adicionar Conta</ion-label>
+                <ion-label>{{ "CONFIG_MENU.ADD_ACCOUNT" | translate }}</ion-label>
               </ion-item>
               <ion-item button id="dark-mode-trigger">
                 <ion-icon slot="start" name="invert-mode-outline"></ion-icon>
-                <ion-label>Modo</ion-label>
-                <ion-note slot="end">{{darkModeLabel}}</ion-note>
+                <ion-label> {{ "CONFIG_MENU.COLOR_MODE" | translate }} </ion-label>
+                <ion-note slot="end">{{ darkModeLabel | translate }}</ion-note>
               </ion-item>
               <ion-popover trigger="dark-mode-trigger" [dismissOnSelect]="true" side="end">
                 <ng-template>
@@ -24,15 +24,15 @@
                     <ion-list>
                       <ion-item button detail="false" (click)="darkPaletteChange('light')">
                         <ion-icon slot="start" name="sunny-outline"></ion-icon>
-                        <ion-label>Claro</ion-label>
+                        <ion-label>{{ "CONFIG_MENU.COLOR_MODE_LIGHT" | translate }}</ion-label>
                       </ion-item>
                       <ion-item button detail="false" (click)="darkPaletteChange('dark')">
                         <ion-icon slot="start" name="moon-outline"></ion-icon>
-                        <ion-label>Escuro</ion-label>
+                        <ion-label>{{ "CONFIG_MENU.COLOR_MODE_DARK" | translate }}</ion-label>
                       </ion-item>
                       <ion-item button detail="false" (click)="darkPaletteChange('system')">
                         <ion-icon slot="start" name="contrast-outline"></ion-icon>
-                        <ion-label>Sistema</ion-label>
+                        <ion-label>{{ "CONFIG_MENU.COLOR_MODE_SYSTEM" | translate }}</ion-label>
                       </ion-item>
                     </ion-list>
                   </ion-content>
@@ -40,7 +40,7 @@
               </ion-popover>
               <ion-item button detail="false" (click)="logout()">
                 <ion-icon slot="start" name="log-out-outline"></ion-icon>
-                <ion-label>Logout</ion-label>
+                <ion-label>{{ "CONFIG_MENU.LOGOUT" | translate }}</ion-label>
               </ion-item>
 
             </ion-list>
@@ -65,7 +65,7 @@
     <ng-template>
       <ion-header>
         <ion-toolbar>
-          <ion-title>Adicionar conta</ion-title>
+          <ion-title>{{ "ADD_ACCOUNT_MODAL.TITLE" | translate }}</ion-title>
           <ion-buttons slot="end">
             <ion-button (click)="closeAddAccountModal()"><ion-icon slot="icon-only"
                 name="close-outline"></ion-icon></ion-button>
@@ -91,7 +91,7 @@
               <ion-col size="12">
                 <ion-button size="large" expand="block" (click)="isScanActive=false;manualInput=true">
                   <ion-icon slot="start" name="create-outline"></ion-icon>
-                  Input Manual
+                  {{ "ADD_ACCOUNT_MODAL.MANUAL_INPUT" | translate }}
                 </ion-button>
               </ion-col>
             </ion-row>
@@ -100,35 +100,35 @@
         <ng-template #manualForm>
           <ion-button size="large" expand="block" (click)="scanCode()">
             <ion-icon slot="start" name="qr-code-outline"></ion-icon>
-            Escanear QR Code
+            {{ "ADD_ACCOUNT_MODAL.SCAN_QR_CODE" | translate }}
           </ion-button>
           <form [formGroup]="validations_form" (ngSubmit)="createAccount(validations_form.value)">
             <ion-item>
-              <ion-input label="Label" labelPlacement="stacked" formControlName="label"
-                placeholder="ex.: Google:teste@gmail.com"></ion-input>
+              <ion-input label="{{ 'ADD_ACCOUNT_MODAL.LABEL' | translate }}" labelPlacement="stacked" formControlName="label"
+                placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} Google:teste@gmail.com"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-input label="Chave-segredo" labelPlacement="stacked" formControlName="secret"
-                placeholder="ex.: QAPERTPEO123"></ion-input>
+              <ion-input label="{{ 'ADD_ACCOUNT_MODAL.SECRET_KEY' | translate }}" labelPlacement="stacked" formControlName="secret"
+                placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} QAPERTPEO123"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-input label="Tamanho do token" labelPlacement="stacked" formControlName="tokenLength"
-                placeholder="ex.: 6"></ion-input>
+              <ion-input label="{{ 'ADD_ACCOUNT_MODAL.TOKEN_SIZE' | translate }}" labelPlacement="stacked" formControlName="tokenLength"
+                placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} 6"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-input label="Intervalo de token (s)" labelPlacement="stacked" formControlName="interval"
-                placeholder="ex.: 30"></ion-input>
+              <ion-input label="{{ 'ADD_ACCOUNT_MODAL.TOKEN_INTERVAL' | translate }}" labelPlacement="stacked" formControlName="interval"
+                placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} 30"></ion-input>
             </ion-item>
             <ion-item>
-              <ion-label position="stacked">Logo</ion-label>
-              <ion-searchbar class="ion-padding-top" [debounce]="250" [value]="draftLogoSearchTxt"
+              <ion-label position="stacked">{{ "ADD_ACCOUNT_MODAL.LOGO" | translate }}</ion-label>
+              <ion-searchbar placeholder="{{ 'SEARCH' | translate }}" class="ion-padding-top" [debounce]="250" [value]="draftLogoSearchTxt"
                 (ionInput)="handleSearchLogo($event)"></ion-searchbar>
               <ion-grid class="full-row">
                 <ion-row class="full-row">
                   <ion-col size-xs="6" size-sm="4" size="4">
                     <ion-card class="logo-card" (click)="selectLogo('')" [ngClass]="{ 'selected-logo': !draftLogoURL }">
                       <ion-img class="ion-padding logo-img" [src]="'../../assets/icon/favicon.png'"></ion-img>
-                      <p>No Logo</p>
+                      <p>{{ "ADD_ACCOUNT_MODAL.NO_LOGO" | translate }}</p>
                     </ion-card>
                   </ion-col>
                   <ion-col size-xs="6" size-sm="4" *ngFor="let logoResult of searchLogoResults">
@@ -142,7 +142,7 @@
               <p *ngIf="searchLogoResults.length > 0">Logos provided by <a href="https://brandfetch.com">Brandfetch</a>
               </p>
             </ion-item>
-            <ion-button expand="block" [disabled]="!validations_form.valid" type="submit">Salvar conta</ion-button>
+            <ion-button expand="block" [disabled]="!validations_form.valid" type="submit">{{ "ADD_ACCOUNT_MODAL.SAVE" | translate }}</ion-button>
           </form>
         </ng-template>
       </ion-content>

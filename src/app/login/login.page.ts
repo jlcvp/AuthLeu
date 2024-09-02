@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { LoadingController, NavController, ToastController } from '@ionic/angular';
 import { AuthenticationService } from '../services/authentication.service';
+import { TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -12,13 +14,12 @@ import { AuthenticationService } from '../services/authentication.service';
 export class LoginPage {
 
   validations_form: FormGroup;
-  errorMessage: string = '';
-
   constructor(
     private loadingController: LoadingController,
     private navCtrl: NavController,
     private authService: AuthenticationService,
     private toastController: ToastController,
+    private translateService: TranslateService,
     formBuilder: FormBuilder
   ) {
     
@@ -36,44 +37,46 @@ export class LoginPage {
 
   validation_messages = {
     'email': [
-      { type: 'required', message: 'Obrigatório informar um e-mail.' },
-      { type: 'pattern', message: 'Informe um e-mail.' }
+      { type: 'required', message: 'LOGIN.VALIDATION_MSGS.REQUIRED_EMAIL' },
+      { type: 'pattern', message: 'LOGIN.VALIDATION_MSGS.EMAIL_PATTERN' }
     ],
     'password': [
-      { type: 'required', message: 'Informe a senha.' }
+      { type: 'required', message: 'LOGIN.VALIDATION_MSGS.REQUIRED_PASSWORD' }
     ]
   };
 
 
   async loginUser(value: { email: string, password: string }) {
+    const message = await firstValueFrom(this.translateService.get('LOGIN.AUTHENTICATING'))
     const loading = await this.loadingController.create({
-      message: "Autenticando...",
+      message,
       backdropDismiss: false
     })
 
     await loading.present()
+    let errorMessage = ""
     try {
       await this.authService.loginUser(value.email, value.password)
-      this.errorMessage = ""
       await loading.dismiss()
       this.navCtrl.navigateForward('/home', {skipLocationChange: true})
     } catch (error: any) {
       switch(error.code) {
         case 'auth/user-not-found':
-          this.errorMessage = "Usuário não existe"
+          errorMessage = "LOGIN.ERROR_MSGS.USER_NOT_FOUND"
         break
         case 'auth/wrong-password':
-          this.errorMessage = "Senha incorreta"
+          errorMessage = "LOGIN.ERROR_MSGS.INVALID_PASSWORD"
         break
         case 'auth/too-many-requests':
-          this.errorMessage = "Muitas tentativas de login, a conta está bloqueada por 5 minutos."
+          errorMessage = "LOGIN.ERROR_MSGS.TOO_MANY_ATTEMPTS_TRY_LATER"
         break
         default:
-          this.errorMessage = "Não foi possível fazer o login, verifique as credenciais e tente novamente"
+          errorMessage = "LOGIN.ERROR_MSGS.DEFAULT_ERROR"
       }
+      const translatedMessage = await firstValueFrom(this.translateService.get(errorMessage))
       await loading.dismiss()
-      console.error(`Error logging in: ${this.errorMessage}`, {error})
-      await this.presentToast(this.errorMessage)
+      console.error(`Error logging in: ${translatedMessage}`, {error, errorMessage})
+      await this.presentToast(translatedMessage)
     }
   }
 

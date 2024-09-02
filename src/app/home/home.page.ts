@@ -8,7 +8,7 @@ import { LogoService } from '../services/logo.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { LocalStorageService } from '../services/local-storage.service';
-import { GlobalUtils } from '../utils/global-utils';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-home',
@@ -75,6 +75,7 @@ export class HomePage implements OnInit {
     private toastController: ToastController,
     private logoService: LogoService,
     private storageService: LocalStorageService,
+    private translateService: TranslateService,
     formBuilder: FormBuilder
   ) {
     this.validations_form = formBuilder.group({
@@ -111,23 +112,23 @@ export class HomePage implements OnInit {
   get darkModeLabel() {
     switch (this.currentDarkModePref) {
       case 'light':
-        return 'Claro'
+        return 'CONFIG_MENU.COLOR_MODE_LIGHT'
       case 'dark':
-        return 'Escuro'
+        return 'CONFIG_MENU.COLOR_MODE_DARK'
       default:
-        return 'Sistema'
+        return 'CONFIG_MENU.COLOR_MODE_SYSTEM'
     }
   }
   
   async ngOnInit() {
     this.onWindowResize()
     this.setupPalette()
+    const loadingMsg = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS'))
     const loading = await this.loadingController.create({
-      message: "Carregando contas...",
+      message: loadingMsg,
       backdropDismiss: false
     })
     await loading.present()
-    await this.setupWebAuth()
     const userId = await this.authService.getCurrentUserId()
     if(userId) {
       this.accountsService.loadAccounts(userId)
@@ -146,8 +147,9 @@ export class HomePage implements OnInit {
 
   async logout() {
     this.hidePopover()
+    const message = await firstValueFrom(this.translateService.get('HOME.LOGGING_OUT'))
     const loading = await this.loadingController.create({
-      message: "Logout...",
+      message,
       spinner: "circular",
       backdropDismiss: false
     })
@@ -239,8 +241,9 @@ export class HomePage implements OnInit {
     const newAccountDict = Object.assign(formValues, {logo, active: true })
     const account = Account2FA.fromDictionary(newAccountDict)
     console.log({account2fa: account})
+    const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ADDING_ACCOUNT'))
     const loading = await this.loadingController.create({
-      message: "Adicionando conta...",
+      message,
       backdropDismiss: false
     })
     await loading.present()
@@ -248,7 +251,7 @@ export class HomePage implements OnInit {
       
       let userId = await this.authService.getCurrentUserId() as string
       if(!userId) {
-        throw new Error('User not found')
+        throw new Error('INVALID_SESSION')
       }
       
       await this.accountsService.addAccount(userId, account)
@@ -257,8 +260,10 @@ export class HomePage implements OnInit {
       this.selectAccount(account)
     } catch (error: any) {
       await loading.dismiss()
+      const messageKey = error.message === 'INVALID_SESSION' ? 'ADD_ACCOUNT_MODAL.ERROR_INVALID_SESSION' : 'ADD_ACCOUNT_MODAL.ERROR_ADDING_ACCOUNT'
+      const message = await firstValueFrom(this.translateService.get(messageKey))
       const toast = await this.toastController.create({
-        message: "Erro ao adicionar conta: " + error && error.message || "Erro desconhecido",
+        message: message,
         color: "danger",
         duration: 2000
       })
@@ -308,8 +313,9 @@ export class HomePage implements OnInit {
   async scanCode() {
     // <ngx-scanner-qrcode #action="scanner" (event)="onEvent($event, action)"></ngx-scanner-qrcode>
     this.isScanActive = true
+    const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.LOADING_CAMERA'))
     const loading = await this.loadingController.create({
-      message: "Carregando camera...",
+      message,
       backdropDismiss: false
     })
     await loading.present()
@@ -354,7 +360,7 @@ export class HomePage implements OnInit {
     this.qrscanner.playDevice(nextDevice.deviceId)
   }
 
-  private processQRCode(evt: string) {
+  private async processQRCode(evt: string) {
     // The URI format and params is described in https://github.com/google/google-authenticator/wiki/Key-Uri-Format
     // otpauth://totp/ACME%20Co:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30
     try {
@@ -370,25 +376,19 @@ export class HomePage implements OnInit {
       const event = {detail: {value: serviceName}}
       this.handleSearchLogo(event)
     } catch (error) {
+      const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_QR_CODE'))
       console.error("Error processing QR code", error)
-      this.toastController.create({
-        message: "Código QR inválido",
+      const toast = await this.toastController.create({
+        message,
         duration: 2000,
         color: 'danger'
-      }).then(toast => toast.present())
+      })
+      await toast.present()
     }
     this.manualInput = true
   }
 
   private hidePopover() {
     this.isPopoverOpen = false;
-  }
-
-  private async setupWebAuth() {
-    const webAuthState = await this.storageService.get<boolean>('webAuthEnabled')
-    if(webAuthState) {
-      this.supportsWebCredentialManagement = true
-      return
-    }
   }
 }
