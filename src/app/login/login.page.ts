@@ -47,8 +47,9 @@ export class LoginPage {
 
 
   async loginUser(value: { email: string, password: string }) {
+    const message = await firstValueFrom(this.translateService.get('LOGIN.AUTHENTICATING'))
     const loading = await this.loadingController.create({
-      message: "Autenticando...",
+      message,
       backdropDismiss: false
     })
 

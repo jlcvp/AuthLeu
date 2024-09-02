@@ -10,6 +10,7 @@ import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 import { AccountListComponent } from '../components/account-list/account-list.component';
 import { AccountDetailComponent } from '../components/account-detail/account-detail.component';
 import { CountdownTimerComponent } from '../components/countdown-timer/countdown-timer.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 @NgModule({
@@ -21,6 +22,7 @@ import { CountdownTimerComponent } from '../components/countdown-timer/countdown
     HomePageRoutingModule,
     AccountFilterPipe,
     NgxScannerQrcodeModule,
+    TranslateModule.forChild()
   ],
   declarations: [HomePage, AccountListComponent, AccountDetailComponent, CountdownTimerComponent]
 })

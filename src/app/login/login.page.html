@@ -15,7 +15,7 @@
               <ng-container *ngFor="let validation of validation_messages.email">
                 <div class="error-message"
                   *ngIf="validations_form.get('email')?.hasError(validation.type) && (validations_form.get('email')?.dirty || validations_form.get('email')?.touched)">
-                  {{ validation.message | translate}}
+                  {{ validation.message | translate }}
                 </div>
               </ng-container>
             </div>

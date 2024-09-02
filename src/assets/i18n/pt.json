@@ -3,6 +3,7 @@
         "EMAIL": "E-mail",
         "PASSWORD": "Senha",
         "SIGN_IN_BUTTON": "Entrar",
+        "AUTHENTICATING": "Autenticando...",
         "ERROR_MSGS": {
             "USER_NOT_FOUND": "Usuário não encontrado",
             "INVALID_PASSWORD": "Senha inválida",
@@ -14,5 +15,43 @@
             "EMAIL_PATTERN": "E-mail inválido",
             "REQUIRED_PASSWORD": "Informe a senha"
         }
+    },
+    "ACCOUNT_DETAIL": {
+        "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar...",
+        "SECONDS_SHORT": "s"
+    },
+    "CONFIG_MENU": {
+        "ADD_ACCOUNT": "Adicionar Conta",
+        "COLOR_MODE": "Modo de Cor",
+        "COLOR_MODE_LIGHT": "Claro",
+        "COLOR_MODE_DARK": "Escuro",
+        "COLOR_MODE_SYSTEM": "Sistema",
+        "LOGOUT": "Sair"
+    },
+    "SEARCH": "Pesquisar",
+    "ADD_ACCOUNT_MODAL": {
+        "TITLE": "Adicionar Conta",
+        "MANUAL_INPUT": "Inserir manualmente",
+        "SCAN_QR_CODE": "Escanear QR Code",
+        "EXAMPLI_GRATIA_SHORT": "ex.:",
+        "LABEL": "Rótulo",
+        "SECRET_KEY": "Chave-Segredo",
+        "TOKEN_SIZE": "Tamanho do Token",
+        "TOKEN_INTERVAL": "Intervalo do Token (s)",
+        "LOGO": "Logo",
+        "NO_LOGO": "Sem Logo",
+        "SAVE": "Salvar Conta",
+        "ADDING_ACCOUNT": "Adicionando conta...",
+        "LOADING_CAMERA": "Carregando câmera...",
+        "ERROR_MSGS": {
+            "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
+            "UNKNOWN_ERROR": "Erro desconhecido",
+            "INVALID_SESSION": "Sessão inválida",
+            "INVALID_QR_CODE": "QR Code inválido"
+        }
+    },
+    "HOME": {
+        "LOADING_ACCOUNTS": "Carregando contas...",
+        "LOGGING_OUT": "Saindo..."
     }
 }
