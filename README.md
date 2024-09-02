@@ -14,6 +14,7 @@ If you want, you may sync your 2FA tokens and have your own URL using Firebase F
 - [ ] Encrypt 2FA Secrets in the local storage using a master password.
 - [ ] Encrypt 2FA Secrets in the firestore using a master password. 
 - [ ] Support for other 2FA methods like HOTP.
+- [ ] Internationalization.
 
 ## Screenshots
 ### Portrait layout
