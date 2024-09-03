@@ -9,6 +9,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { LocalStorageService } from '../services/local-storage.service';
 import { TranslateService } from '@ngx-translate/core';
+import { GlobalUtils } from '../utils/global-utils';
 
 @Component({
   selector: 'app-home',
@@ -128,6 +129,7 @@ export class HomePage implements OnInit {
       message: loadingMsg,
       backdropDismiss: false
     })
+    GlobalUtils.hideSplashScreen()
     await loading.present()
     const userId = await this.authService.getCurrentUserId()
     if(userId) {

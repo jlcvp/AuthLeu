@@ -53,5 +53,10 @@
             "REQUIRED_PASSWORD": "Informe a senha"
         }
     },
-    "SEARCH": "Pesquisar"
+    "SEARCH": "Pesquisar",
+    "UPDATER": {
+        "UPDATE_AVAILABLE_BODY": "Uma nova versão da aplicação está disponível e será instalada automaticamente para obter as últimas funcionalidades e correções de bugs.",
+        "UPDATE_AVAILABLE_HEADER": "Atualização disponível",
+        "UPDATE_NOW": "Atualizar agora"
+    }
 }

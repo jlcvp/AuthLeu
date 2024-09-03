@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
 import { AlertController, Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -13,11 +14,9 @@ export class AppComponent {
     platform.ready().then(() => {
       this.subscribeToUpdates()
       this.setupTranslate()
-    }).finally(() => {
-      this.hideSplashScreen()
     })
   }
-  
+
   private subscribeToUpdates() {
     this.updates.versionUpdates.subscribe(async (evt) => {
       switch (evt.type) {
@@ -27,20 +26,7 @@ export class AppComponent {
         case 'VERSION_READY':
           console.info(`Current app version: ${evt.currentVersion.hash}`);
           console.info(`New app version ready for use: ${evt.latestVersion.hash}`);
-          const alert = await this.alertController.create({
-            backdropDismiss: false,
-            header: 'Atualização disponível',
-            message: 'Uma nova versão da aplicação está disponível e será carregada automaticamente',
-            buttons: [
-              {
-                text: 'Atualizar',
-                handler: () => {
-                  document.location.reload()
-                }
-              }
-            ]
-          })
-          await alert.present()
+          await this.showUpdateAlert()
           break;
         case 'VERSION_INSTALLATION_FAILED':
           console.info(`Failed to install new app version '${evt.version.hash}': ${evt.error}`);
@@ -49,16 +35,24 @@ export class AppComponent {
     })
   }
 
-  private hideSplashScreen() {
-    setTimeout(() => {
-      let splash = document.getElementById('splash-container')
-      if (splash != null) {
-        splash.style.opacity = '0'
-        setTimeout(() => {
-          splash?.remove()
-        }, 250);
-      }
-    }, 500);
+  private async showUpdateAlert() {
+    const header = await firstValueFrom(this.translate.get('UPDATER.UPDATE_AVAILABLE_HEADER'))
+    const message = await firstValueFrom(this.translate.get('UPDATER.UPDATE_AVAILABLE_BODY'))
+    const confirm = await firstValueFrom(this.translate.get('UPDATER.UPDATE_NOW'))
+    const alert = await this.alertController.create({
+      backdropDismiss: false,
+      header,
+      message,
+      buttons: [
+        {
+          text: confirm,
+          handler: () => {
+            document.location.reload()
+          }
+        }
+      ]
+    })
+    await alert.present()
   }
 
   private async setupTranslate() {

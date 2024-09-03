@@ -5,13 +5,14 @@ import { LoadingController, NavController, ToastController } from '@ionic/angula
 import { AuthenticationService } from '../services/authentication.service';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
+import { GlobalUtils } from '../utils/global-utils';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
 
   validations_form: FormGroup;
   constructor(
@@ -45,6 +46,9 @@ export class LoginPage {
     ]
   };
 
+  ngOnInit() {
+    GlobalUtils.hideSplashScreen()
+  }
 
   async loginUser(value: { email: string, password: string }) {
     const message = await firstValueFrom(this.translateService.get('LOGIN.AUTHENTICATING'))
