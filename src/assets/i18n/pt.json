@@ -1,7 +1,8 @@
 {
     "ACCOUNT_DETAIL": {
         "SECONDS_SHORT": "s",
-        "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar..."
+        "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar...",
+        "CODE_COPIED": "Código copiado para a área de transferência"
     },
     "ADD_ACCOUNT_MODAL": {
         "ADDING_ACCOUNT": "Adicionando conta...",

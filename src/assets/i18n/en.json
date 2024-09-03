@@ -1,7 +1,8 @@
 {
     "ACCOUNT_DETAIL": {
         "SECONDS_SHORT": "s",
-        "SELECT_ACCOUNT_HINT": "Select an account to start..."
+        "SELECT_ACCOUNT_HINT": "Select an account to start...",
+        "CODE_COPIED": "Code copied to clipboard"
     },
     "ADD_ACCOUNT_MODAL": {
         "ADDING_ACCOUNT": "Adding account...",

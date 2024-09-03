@@ -3,7 +3,8 @@ import { ToastController } from '@ionic/angular';
 import { Account2FA } from 'src/app/models/account2FA.model';
 import { OtpService } from 'src/app/services/otp.service';
 import { CountdownTimerComponent } from '../countdown-timer/countdown-timer.component';
-import { debounceTime, pipe } from 'rxjs';
+import { debounceTime, firstValueFrom, pipe } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-account-detail',
@@ -40,7 +41,7 @@ export class AccountDetailComponent {
     return this._account
   }
 
-  constructor(private otpService: OtpService, private toastController: ToastController) { }
+  constructor(private otpService: OtpService, private toastController: ToastController, private translateService: TranslateService) { }
 
   set token(value: string) {
     if(value.length <= 4) { // if token length is 4 or less, use it as is
@@ -89,8 +90,9 @@ export class AccountDetailComponent {
     const code = this.token.replace(/\s/g, '')
     await navigator.clipboard.writeText(code)
     console.log("code copied")
+    const message = await firstValueFrom(this.translateService.get('ACCOUNT_DETAIL.CODE_COPIED'))
     const toast = await this.toastController.create({
-      message: `Código copiado`,
+      message,
       positionAnchor: evt.target,
       //position: 'middle'
       mode: 'md',
