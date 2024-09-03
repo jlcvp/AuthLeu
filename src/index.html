@@ -23,6 +23,43 @@
 </head>
 
 <body>
+  <style>
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #682f8d;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 250ms ease-in-out;
+    }
+    .centered-img {
+      width: 200px;
+      height: 200px;
+    }
+    #splash-image {
+      display: inline-block;
+      animation: wiggling 0.8s infinite ease-in-out;
+    }
+    @keyframes wiggling {
+      0% {
+        transform: rotate(-5deg);
+      }
+      50% {
+        transform: rotate(5deg);
+      }
+      100% {
+        transform: rotate(-5deg);
+      }
+    }
+  </style>
+  <div id="splash-container" class="splash-screen">
+    <img id="splash-image" class="centered-img" src="assets/icon/256.png" alt="AuthLeu Logo" />
+  </div>
   <app-root></app-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
 </body>

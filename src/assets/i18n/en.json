@@ -1,0 +1,63 @@
+{
+    "ACCOUNT_DETAIL": {
+        "SECONDS_SHORT": "s",
+        "SELECT_ACCOUNT_HINT": "Select an account to start...",
+        "CODE_COPIED": "Code copied to clipboard"
+    },
+    "ADD_ACCOUNT_MODAL": {
+        "ADDING_ACCOUNT": "Adding account...",
+        "ERROR_MSGS": {
+            "ERROR_ADDING_ACCOUNT": "Error adding account",
+            "INVALID_QR_CODE": "Invalid QR Code",
+            "INVALID_SESSION": "Invalid session",
+            "UNKNOWN_ERROR": "Unknown error"
+        },
+        "EXAMPLI_GRATIA_SHORT": "e.g.",
+        "LABEL": "Label",
+        "LOADING_CAMERA": "Loading camera...",
+        "LOGO": "Logo",
+        "MANUAL_INPUT": "Manually input",
+        "NO_LOGO": "No Logo",
+        "SAVE": "Save Account",
+        "SCAN_QR_CODE": "Scan QR Code",
+        "SECRET_KEY": "Secret Key",
+        "TITLE": "Add Account",
+        "TOKEN_INTERVAL": "Token Interval (s)",
+        "TOKEN_SIZE": "Token Size"
+    },
+    "CONFIG_MENU": {
+        "ADD_ACCOUNT": "Add Account",
+        "COLOR_MODE": "Color Mode",
+        "COLOR_MODE_DARK": "Dark",
+        "COLOR_MODE_LIGHT": "Light",
+        "COLOR_MODE_SYSTEM": "System",
+        "LOGOUT": "Sign out"
+    },
+    "HOME": {
+        "LOADING_ACCOUNTS": "Loading accounts...",
+        "LOGGING_OUT": "Signing out..."
+    },
+    "LOGIN": {
+        "AUTHENTICATING": "Authenticating...",
+        "EMAIL": "E-mail",
+        "ERROR_MSGS": {
+            "DEFAULT_ERROR": "Could not sign in, check the credentials and try again",
+            "INVALID_PASSWORD": "Invalid password",
+            "TOO_MANY_ATTEMPTS_TRY_LATER": "Too many attempts. Try again after 15 minutes",
+            "USER_NOT_FOUND": "User not found"
+        },
+        "PASSWORD": "Password",
+        "SIGN_IN_BUTTON": "Sign in",
+        "VALIDATION_MSGS": {
+            "EMAIL_PATTERN": "Invalid e-mail",
+            "REQUIRED_EMAIL": "E-mail is required",
+            "REQUIRED_PASSWORD": "Password is required"
+        }
+    },
+    "SEARCH": "Search",
+    "UPDATER": {
+        "UPDATE_AVAILABLE_BODY": "A new version of the app is available and will be installed automatically to get the latest features and bug fixes.",
+        "UPDATE_AVAILABLE_HEADER": "Update available",
+        "UPDATE_NOW": "Update now"
+    }
+}
