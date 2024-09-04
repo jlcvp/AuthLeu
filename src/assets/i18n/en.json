@@ -39,6 +39,7 @@
     },
     "LOGIN": {
         "AUTHENTICATING": "Authenticating...",
+        "CONTINUE_OFFLINE": "Continue offline",
         "EMAIL": "E-mail",
         "ERROR_MSGS": {
             "DEFAULT_ERROR": "Could not sign in, check the credentials and try again",

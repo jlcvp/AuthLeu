@@ -24,7 +24,7 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
   async addAccount(account: Account2FA): Promise<string> {
     const userId = await this.authService.getCurrentUserId()
     if(!userId) {
-      throw new Error('User not logged in')
+      throw new Error('INVALID_SESSION')
     }
     console.log("Adding account", {account})
     const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
@@ -48,7 +48,7 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
   private async loadAccounts() {
     const userId = await this.authService.getCurrentUserId()
     if(!userId) {
-      throw new Error('User not logged in')
+      throw new Error('INVALID_SESSION')
     }
 
     const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)

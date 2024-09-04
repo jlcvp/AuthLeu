@@ -39,6 +39,7 @@
     },
     "LOGIN": {
         "AUTHENTICATING": "Autenticando...",
+        "CONTINUE_OFFLINE": "Continue offline",
         "EMAIL": "E-mail",
         "ERROR_MSGS": {
             "DEFAULT_ERROR": "Não foi possível fazer o login, verifique as credenciais e tente novamente",
