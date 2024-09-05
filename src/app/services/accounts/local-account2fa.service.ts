@@ -33,7 +33,7 @@ export class LocalAccount2faService implements IAccount2FAProvider {
     const id = this.createId()
     account.id = id
 
-    const timestamp = new Date()
+    const timestamp = Date.now()
     account.added = timestamp
 
     this.accounts.push(account)
@@ -82,14 +82,6 @@ export class LocalAccount2faService implements IAccount2FAProvider {
   }
 
   private sortAccounts() {
-    this.accounts.sort((a, b) => {
-      if (a.added > b.added) {
-        return -1
-      } else if (a.added < b.added) {
-        return 1
-      } else {
-        return 0
-      }
-    })
+    this.accounts = this.accounts.sort((a, b) => a.added - b.added)
   }
 }

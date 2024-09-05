@@ -11,6 +11,9 @@ export interface IAccount2FA {
     active?: boolean;
     logo?: string;
     added?: any;
+    encryptedSecret?: string;
+    iv?: string;
+    salt?: string;
 }
 
 export interface IAccount2FAProvider {
@@ -30,7 +33,10 @@ export class Account2FA implements IAccount2FA {
     active?: boolean;
     logo?: string;
     added?: any;
-    constructor(id: string, label: string, secret: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string) {
+    encryptedSecret?: string;
+    iv?: string;
+    salt?: string;
+    constructor(id: string, label: string, secret: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string, encryptedSecret?: string, iv?: string, salt?: string) {
         this.id = id;
         this.label = label;
         this.secret = secret;
@@ -40,10 +46,13 @@ export class Account2FA implements IAccount2FA {
         this.issuer = issuer;
         this.active = active;
         this.logo = logo;
+        this.encryptedSecret = encryptedSecret;
+        this.iv = iv;
+        this.salt = salt;
     }
 
     static fromDictionary(data: IAccount2FA): Account2FA {
-        return new Account2FA(data.id, data.label, data.secret, data.tokenLength, data.interval, data.algorithm, data.issuer, data.active, data.logo);
+        return new Account2FA(data.id, data.label, data.secret, data.tokenLength, data.interval, data.algorithm, data.issuer, data.active, data.logo, data.encryptedSecret, data.iv, data.salt);
     }
 
     static fromOTPAuthURL(url: string): Account2FA {

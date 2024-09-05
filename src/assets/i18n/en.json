@@ -1,8 +1,8 @@
 {
     "ACCOUNT_DETAIL": {
+        "CODE_COPIED": "Code copied to clipboard",
         "SECONDS_SHORT": "s",
-        "SELECT_ACCOUNT_HINT": "Select an account to start...",
-        "CODE_COPIED": "Code copied to clipboard"
+        "SELECT_ACCOUNT_HINT": "Select an account to start..."
     },
     "ADD_ACCOUNT_MODAL": {
         "ADDING_ACCOUNT": "Adding account...",
@@ -31,9 +31,14 @@
         "COLOR_MODE_DARK": "Dark",
         "COLOR_MODE_LIGHT": "Light",
         "COLOR_MODE_SYSTEM": "System",
+        "EXPORT_ACCOUNTS": "Export Backup",
+        "IMPORT_ACCOUNTS": "Import Backup",
         "LOGOUT": "Sign out"
     },
+    "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
     "HOME": {
+        "EXPORTING_ACCOUNTS": "Exporting backup...",
+        "IMPORTING_ACCOUNTS": "Importing backup...",
         "LOADING_ACCOUNTS": "Loading accounts...",
         "LOGGING_OUT": "Signing out..."
     },

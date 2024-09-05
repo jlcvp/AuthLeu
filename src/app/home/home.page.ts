@@ -197,6 +197,40 @@ export class HomePage implements OnInit {
     this.scanCode()
   }
 
+  async exportAccountAction() {
+    this.hidePopover()
+    const message = await firstValueFrom(this.translateService.get('HOME.EXPORTING_ACCOUNTS'))
+    const loading = await this.loadingController.create({
+      message,
+      backdropDismiss: false
+    })
+    await loading.present()
+    await this.accountsService.exportAccounts()
+    await loading.dismiss()
+  }
+
+  async importAccountAction() {
+    this.hidePopover()
+    const message = await firstValueFrom(this.translateService.get('HOME.IMPORTING_ACCOUNTS'))
+    const loading = await this.loadingController.create({
+      message,
+      backdropDismiss: false
+    })
+    await loading.present()
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'application/json'
+    input.click()
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if(file) {
+        await this.accountsService.importAccounts(file)
+      }
+      input.remove()
+      await loading.dismiss()
+    }
+  }
+
   showPopover(e: Event) {
     this.popover.event = null
     this.popover.event = e;

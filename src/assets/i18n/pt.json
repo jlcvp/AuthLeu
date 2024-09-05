@@ -1,8 +1,8 @@
 {
     "ACCOUNT_DETAIL": {
+        "CODE_COPIED": "Código copiado para a área de transferência",
         "SECONDS_SHORT": "s",
-        "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar...",
-        "CODE_COPIED": "Código copiado para a área de transferência"
+        "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar..."
     },
     "ADD_ACCOUNT_MODAL": {
         "ADDING_ACCOUNT": "Adicionando conta...",
@@ -31,9 +31,14 @@
         "COLOR_MODE_DARK": "Escuro",
         "COLOR_MODE_LIGHT": "Claro",
         "COLOR_MODE_SYSTEM": "Sistema",
+        "EXPORT_ACCOUNTS": "Exportar Backup",
+        "IMPORT_ACCOUNTS": "Importar Backup",
         "LOGOUT": "Sair"
     },
+    "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
     "HOME": {
+        "EXPORTING_ACCOUNTS": "Exportando backup...",
+        "IMPORTING_ACCOUNTS": "Importando backup...",
         "LOADING_ACCOUNTS": "Carregando contas...",
         "LOGGING_OUT": "Saindo..."
     },
