@@ -40,7 +40,10 @@
         "EXPORTING_ACCOUNTS": "Exporting backup...",
         "IMPORTING_ACCOUNTS": "Importing backup...",
         "LOADING_ACCOUNTS": "Loading accounts...",
-        "LOGGING_OUT": "Signing out..."
+        "LOGGING_OUT": "Signing out...",
+        "CONFIRM_LOGOUT_MESSAGE": "Are you sure you want to sign out?\nAll local accounts will be deleted!\nThis action cannot be undone.",
+        "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
+        "CANCEL": "Cancel"
     },
     "LOGIN": {
         "AUTHENTICATING": "Authenticating...",

@@ -59,3 +59,7 @@ ion-content {
 .full-row {
   width: 100%;
 }
+
+app-account-list.landscape {
+  background-color: var(--ion-item-background, var(--ion-background-color, #fff));
+}

@@ -40,7 +40,10 @@
         "EXPORTING_ACCOUNTS": "Exportando backup...",
         "IMPORTING_ACCOUNTS": "Importando backup...",
         "LOADING_ACCOUNTS": "Carregando contas...",
-        "LOGGING_OUT": "Saindo..."
+        "LOGGING_OUT": "Saindo...",
+        "CONFIRM_LOGOUT_MESSAGE": "Tem certeza de que deseja sair?\nTodas as contas locais serão excluídas!\nEsta ação não pode ser desfeita.",
+        "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
+        "CANCEL": "Cancelar"
     },
     "LOGIN": {
         "AUTHENTICATING": "Autenticando...",

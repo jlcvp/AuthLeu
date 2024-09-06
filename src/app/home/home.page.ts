@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
-import { IonModal, LoadingController, ToastController } from '@ionic/angular';
+import { AlertController, IonModal, LoadingController, ToastController } from '@ionic/angular';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
@@ -73,6 +73,7 @@ export class HomePage implements OnInit {
     private accountsService: Account2faService,
     private loadingController: LoadingController,
     private toastController: ToastController,
+    private alertController: AlertController,
     private logoService: LogoService,
     private storageService: LocalStorageService,
     private translateService: TranslateService,
@@ -143,7 +144,11 @@ export class HomePage implements OnInit {
   }
 
   async logout() {
-    this.hidePopover()
+    const confirm = await this.confirmLogout()
+    if(!confirm) {
+      return
+    }
+
     const message = await firstValueFrom(this.translateService.get('HOME.LOGGING_OUT'))
     const loading = await this.loadingController.create({
       message,
@@ -192,13 +197,11 @@ export class HomePage implements OnInit {
   }
 
   async addAccountAction() {
-    this.hidePopover()
     this.isAddAccountModalOpen = true
     this.scanCode()
   }
 
   async exportAccountAction() {
-    this.hidePopover()
     const message = await firstValueFrom(this.translateService.get('HOME.EXPORTING_ACCOUNTS'))
     const loading = await this.loadingController.create({
       message,
@@ -209,14 +212,7 @@ export class HomePage implements OnInit {
     await loading.dismiss()
   }
 
-  async importAccountAction() {
-    this.hidePopover()
-    const message = await firstValueFrom(this.translateService.get('HOME.IMPORTING_ACCOUNTS'))
-    const loading = await this.loadingController.create({
-      message,
-      backdropDismiss: false
-    })
-    await loading.present()
+  async importAccountAction() {    
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'application/json'
@@ -224,17 +220,23 @@ export class HomePage implements OnInit {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if(file) {
+        const message = await firstValueFrom(this.translateService.get('HOME.IMPORTING_ACCOUNTS'))
+        const loading = await this.loadingController.create({
+          message,
+          backdropDismiss: false
+        })
+        await loading.present()
         await this.accountsService.importAccounts(file)
+        await loading.dismiss()
       }
       input.remove()
-      await loading.dismiss()
     }
   }
 
   showPopover(e: Event) {
     this.popover.event = null
     this.popover.event = e;
-    this.hidePopover()
+    this.isPopoverOpen = false;
     setTimeout(() => {
       this.isPopoverOpen = true;
     }, 50);
@@ -413,7 +415,30 @@ export class HomePage implements OnInit {
     this.manualInput = true
   }
 
-  private hidePopover() {
-    this.isPopoverOpen = false;
+  private confirmLogout(): Promise<boolean> {
+    return new Promise(async (resolve, reject) => {
+      const message = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_MESSAGE'))
+      const yesBtnText = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_YES'))
+      const cancelBtnText = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
+      const confirmPrompt = await this.alertController.create({
+        message,
+        buttons: [
+          {
+            text: cancelBtnText,
+            role: 'cancel',
+            handler: () => {
+              resolve(false)
+            }
+          }, {
+            text: yesBtnText,
+            role: 'destructive',
+            handler: () => {
+              resolve(true)
+            }
+          }
+        ]
+      });
+      await confirmPrompt.present()
+    })
   }
 }
