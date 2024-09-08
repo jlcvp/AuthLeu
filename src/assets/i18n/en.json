@@ -33,7 +33,8 @@
         "COLOR_MODE_SYSTEM": "System",
         "EXPORT_ACCOUNTS": "Export Backup",
         "IMPORT_ACCOUNTS": "Import Backup",
-        "LOGOUT": "Sign out"
+        "LOGOUT": "Sign out",
+        "LOGIN": "Sign in"
     },
     "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
     "HOME": {
@@ -41,7 +42,8 @@
         "IMPORTING_ACCOUNTS": "Importing backup...",
         "LOADING_ACCOUNTS": "Loading accounts...",
         "LOGGING_OUT": "Signing out...",
-        "CONFIRM_LOGOUT_MESSAGE": "Are you sure you want to sign out?\nAll local accounts will be deleted!\nThis action cannot be undone.",
+        "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
+        "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
         "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
         "CANCEL": "Cancel"
     },

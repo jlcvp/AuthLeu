@@ -33,7 +33,8 @@
         "COLOR_MODE_SYSTEM": "Sistema",
         "EXPORT_ACCOUNTS": "Exportar Backup",
         "IMPORT_ACCOUNTS": "Importar Backup",
-        "LOGOUT": "Sair"
+        "LOGOUT": "Sair",
+        "LOGIN": "Entrar"
     },
     "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
     "HOME": {
@@ -41,13 +42,14 @@
         "IMPORTING_ACCOUNTS": "Importando backup...",
         "LOADING_ACCOUNTS": "Carregando contas...",
         "LOGGING_OUT": "Saindo...",
-        "CONFIRM_LOGOUT_MESSAGE": "Tem certeza de que deseja sair?\nTodas as contas locais serão excluídas!\nEsta ação não pode ser desfeita.",
+        "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
+        "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
         "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
         "CANCEL": "Cancelar"
     },
     "LOGIN": {
         "AUTHENTICATING": "Autenticando...",
-        "CONTINUE_OFFLINE": "Continue offline",
+        "CONTINUE_OFFLINE": "Usar offline",
         "EMAIL": "E-mail",
         "ERROR_MSGS": {
             "DEFAULT_ERROR": "Não foi possível fazer o login, verifique as credenciais e tente novamente",

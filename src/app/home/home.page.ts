@@ -160,7 +160,7 @@ export class HomePage implements OnInit {
     await this.authService.logout()
     //reload window
     await loading.dismiss()
-    window.location.reload()
+    window.location.href = '/'
   }
 
   selectAccount(account: any) {
@@ -428,10 +428,12 @@ export class HomePage implements OnInit {
 
   private confirmLogout(): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
+      const title = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_TITLE'))
       const message = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_MESSAGE'))
       const yesBtnText = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_YES'))
       const cancelBtnText = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
       const confirmPrompt = await this.alertController.create({
+        header: title,
         message,
         buttons: [
           {

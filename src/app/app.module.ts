@@ -49,7 +49,9 @@ export function createTranslateLoader(http: HttpClient) {
   ],
   imports: [
     BrowserModule, 
-    IonicModule.forRoot(), 
+    IonicModule.forRoot({
+      innerHTMLTemplatesEnabled: true
+    }), 
     AppRoutingModule,
     NgxScannerQrcodeModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
