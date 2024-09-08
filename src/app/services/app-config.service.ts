@@ -18,4 +18,8 @@ export class AppConfigService {
   async setOfflineMode(isOffline: boolean) {
     await this.localStorage.set('isOfflineMode', isOffline);
   }
+
+  isOfflineEnv() {
+    return environment.isOfflineEnv;
+  }
 }

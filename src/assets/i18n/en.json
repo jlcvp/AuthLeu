@@ -58,6 +58,7 @@
             "USER_NOT_FOUND": "User not found"
         },
         "PASSWORD": "Password",
+        "CLOUD_SYNC": "Cloud sync",
         "SIGN_IN_BUTTON": "Sign in",
         "VALIDATION_MSGS": {
             "EMAIL_PATTERN": "Invalid e-mail",

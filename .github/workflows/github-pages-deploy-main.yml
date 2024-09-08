@@ -1,0 +1,21 @@
+# Deploy to github pages on push to main
+
+name: Deploy to GitHub Pages on push to main
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build
+        run: npm ci && npm run build:githubpages
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: www # The folder the action should deploy.

@@ -16,6 +16,7 @@ import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClient, provideHttpClient } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations'
 
 LOAD_WASM().subscribe() // Preload NGXScanner WASM module
 
@@ -75,6 +76,7 @@ export function createTranslateLoader(http: HttpClient) {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideHttpClient(),
+    provideAnimations(),
     ...firebaseProviders(),
   ],
   bootstrap: [AppComponent],

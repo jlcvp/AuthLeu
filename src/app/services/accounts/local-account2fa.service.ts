@@ -21,7 +21,6 @@ export class LocalAccount2faService implements IAccount2FAProvider {
     await this.loadAccountsFromStorage()
     this.sortAccounts()
     setTimeout(() => {
-      console.log("Accounts", {accounts: this.accounts})
       this.accountsSubject.next(this.accounts)
     }, 100);
     return this.accountsSubject.asObservable()
@@ -63,7 +62,6 @@ export class LocalAccount2faService implements IAccount2FAProvider {
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     // The largest byte value that is a multiple of `char.length`.
     const maxMultiple = Math.floor(256 / chars.length) * chars.length;
-
 
     let autoId = '';
     const targetLength = 20;

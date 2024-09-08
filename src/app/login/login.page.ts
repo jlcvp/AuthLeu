@@ -7,14 +7,22 @@ import { AppConfigService } from '../services/app-config.service';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { GlobalUtils } from '../utils/global-utils';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
+  animations: [
+    trigger('openClose', [
+      state('true', style({height: '*'})),
+      state('false', style({height: '0px'})),
+      transition('false <=> true', animate(300)),
+    ])
+  ]
 })
 export class LoginPage implements OnInit {
-
+  loginFormVisible = false;
   validations_form: FormGroup;
   constructor(
     private loadingController: LoadingController,
@@ -48,8 +56,15 @@ export class LoginPage implements OnInit {
     ]
   };
 
-  ngOnInit() {
+  async ngOnInit() {
+    const offlineMode = await this.appConfig.isOfflineEnv()
+    this.loginFormVisible = !offlineMode
+    console.log("Offline mode: ", offlineMode)
     GlobalUtils.hideSplashScreen()
+  }
+
+  showLoginForm() {
+    this.loginFormVisible = true;
   }
 
   async loginUser(value: { email: string, password: string }) {
