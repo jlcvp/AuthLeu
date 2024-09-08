@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
-import { AlertController, IonModal, LoadingController, ToastController } from '@ionic/angular';
+import { AlertController, IonModal, LoadingController, NavController, ToastController } from '@ionic/angular';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
@@ -77,6 +77,7 @@ export class HomePage implements OnInit {
     private logoService: LogoService,
     private storageService: LocalStorageService,
     private translateService: TranslateService,
+    private navCtrl: NavController,
     formBuilder: FormBuilder
   ) {
     this.validations_form = formBuilder.group({
@@ -160,7 +161,9 @@ export class HomePage implements OnInit {
     await this.authService.logout()
     //reload window
     await loading.dismiss()
-    window.location.href = '/'
+    await this.navCtrl.navigateRoot('/').then(() => {
+      window.location.reload()
+    })
   }
 
   selectAccount(account: any) {

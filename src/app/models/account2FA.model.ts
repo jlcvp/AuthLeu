@@ -95,7 +95,7 @@ export class Account2FA implements IAccount2FA {
     }
 
     getLogo(): string {
-        return this.logo || '../assets/icon/128.png';
+        return this.logo || 'assets/icon/128.png';
     }
 
     getNextRollingTimeLeft(): number {

@@ -42,7 +42,7 @@ const firebaseProviders = () => {
 
 // exported function for the translation loader to work with AoT
 export function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http);
+  return new TranslateHttpLoader(http, './assets/i18n/');
 }
 @NgModule({
   declarations: [
