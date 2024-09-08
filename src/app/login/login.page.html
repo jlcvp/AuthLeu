@@ -6,7 +6,7 @@
           <img class="logo ion-align-self-center" src="../../assets/pwaicons/ios/192.png" />
         </ion-card-header>
         <ion-card-content color="primary" class="ion-padding card-content-bg">
-          <form class="form" [formGroup]="validations_form" (ngSubmit)="loginUser(validations_form.value)">
+          <form [@openClose]="loginFormVisible" class="form" [class.form-expand]="loginFormVisible" [formGroup]="validations_form" (ngSubmit)="loginUser(validations_form.value)">
             <ion-item class="form-rounded-top">
               <ion-label class="ion-padding-start" position="stacked"> {{ "LOGIN.EMAIL" | translate }}</ion-label>
               <ion-input type="text" formControlName="email"></ion-input>
@@ -33,13 +33,13 @@
               </ng-container>
             </div>
 
-            <ion-button color="primary" class="submit-btn ion-margin-top ion-padding-top ion-padding-bottom" expand="block" type="submit"
+            <ion-button color="primary" class="ion-margin-top ion-padding-top ion-padding-bottom" expand="block" type="submit"
               [disabled]="!validations_form.valid">{{ "LOGIN.SIGN_IN_BUTTON" | translate }}</ion-button>
           </form>
+          <ion-button fill="outline" class="ion-padding-top ion-padding-bottom" expand="block" (click)="continueOffline()">{{ "LOGIN.CONTINUE_OFFLINE" | translate }}</ion-button>
+          <ion-button *ngIf="!loginFormVisible" fill="outline" class="ion-padding-top ion-padding-bottom" expand="block" (click)="loginFormVisible = true">{{ "LOGIN.CLOUD_SYNC" | translate }}</ion-button>
         </ion-card-content>
-      </ion-card>
-    
-    
+      </ion-card>    
     </div>
   </div>
 </ion-content>

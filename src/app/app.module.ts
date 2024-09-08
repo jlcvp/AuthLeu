@@ -16,8 +16,29 @@ import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClient, provideHttpClient } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations'
 
 LOAD_WASM().subscribe() // Preload NGXScanner WASM module
+
+const firebaseProviders = () => {
+  if (!environment.firebaseConfig) {
+    console.log("Firebase config not found")
+    return []
+  }
+
+  return [
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideAuth(() => getAuth()), 
+    provideFirestore(() =>  {
+      const firestore = initializeFirestore(getApp(), { 
+        localCache: persistentLocalCache({
+          cacheSizeBytes: 30_000_000, // 30MB
+        }) 
+      })
+      return firestore
+    })
+  ]
+}
 
 // exported function for the translation loader to work with AoT
 export function createTranslateLoader(http: HttpClient) {
@@ -29,7 +50,9 @@ export function createTranslateLoader(http: HttpClient) {
   ],
   imports: [
     BrowserModule, 
-    IonicModule.forRoot(), 
+    IonicModule.forRoot({
+      innerHTMLTemplatesEnabled: true
+    }), 
     AppRoutingModule,
     NgxScannerQrcodeModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
@@ -53,14 +76,8 @@ export function createTranslateLoader(http: HttpClient) {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideHttpClient(),
-    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
-    provideAuth(() => getAuth()), 
-    provideFirestore(() =>  {
-      const firestore = initializeFirestore(getApp(), { 
-        localCache: persistentLocalCache() 
-      })
-      return firestore
-    })
+    provideAnimations(),
+    ...firebaseProviders(),
   ],
   bootstrap: [AppComponent],
 })

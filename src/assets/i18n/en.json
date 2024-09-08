@@ -1,8 +1,8 @@
 {
     "ACCOUNT_DETAIL": {
+        "CODE_COPIED": "Code copied to clipboard",
         "SECONDS_SHORT": "s",
-        "SELECT_ACCOUNT_HINT": "Select an account to start...",
-        "CODE_COPIED": "Code copied to clipboard"
+        "SELECT_ACCOUNT_HINT": "Select an account to start..."
     },
     "ADD_ACCOUNT_MODAL": {
         "ADDING_ACCOUNT": "Adding account...",
@@ -31,14 +31,25 @@
         "COLOR_MODE_DARK": "Dark",
         "COLOR_MODE_LIGHT": "Light",
         "COLOR_MODE_SYSTEM": "System",
-        "LOGOUT": "Sign out"
+        "EXPORT_ACCOUNTS": "Export Backup",
+        "IMPORT_ACCOUNTS": "Import Backup",
+        "LOGOUT": "Sign out",
+        "LOGIN": "Sign in"
     },
+    "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
     "HOME": {
+        "EXPORTING_ACCOUNTS": "Exporting backup...",
+        "IMPORTING_ACCOUNTS": "Importing backup...",
         "LOADING_ACCOUNTS": "Loading accounts...",
-        "LOGGING_OUT": "Signing out..."
+        "LOGGING_OUT": "Signing out...",
+        "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
+        "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
+        "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
+        "CANCEL": "Cancel"
     },
     "LOGIN": {
         "AUTHENTICATING": "Authenticating...",
+        "CONTINUE_OFFLINE": "Continue offline",
         "EMAIL": "E-mail",
         "ERROR_MSGS": {
             "DEFAULT_ERROR": "Could not sign in, check the credentials and try again",
@@ -47,6 +58,7 @@
             "USER_NOT_FOUND": "User not found"
         },
         "PASSWORD": "Password",
+        "CLOUD_SYNC": "Cloud sync",
         "SIGN_IN_BUTTON": "Sign in",
         "VALIDATION_MSGS": {
             "EMAIL_PATTERN": "Invalid e-mail",

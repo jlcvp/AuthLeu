@@ -2,15 +2,21 @@ import { inject, Injectable } from '@angular/core';
 import { Auth, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
 import { NavController } from '@ionic/angular';
 import { LocalStorageService } from './local-storage.service';
+import { environment } from 'src/environments/environment';
+import { AppConfigService } from './app-config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
   private afAuth: Auth = inject(Auth)
-  constructor(private navCtrl: NavController, private localStorage: LocalStorageService) { }
+  constructor(private navCtrl: NavController, private localStorage: LocalStorageService, private appConfig: AppConfigService) { }
 
   async canActivate(): Promise<boolean> {
+    if(await this.appConfig.isOfflineMode()) {
+      return true
+    }
+    
     await this.afAuth.authStateReady()
     
     if (this.afAuth.currentUser) {

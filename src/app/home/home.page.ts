@@ -1,9 +1,9 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
-import { IonModal, LoadingController, ToastController } from '@ionic/angular';
+import { AlertController, IonModal, LoadingController, ToastController } from '@ionic/angular';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
-import { Account2faService } from '../services/account2fa.service';
+import { Account2faService } from '../services/accounts/account2fa.service';
 import { LogoService } from '../services/logo.service';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
@@ -50,30 +50,30 @@ export class HomePage implements OnInit {
     }
   }
 
-  private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-
-  isLandscape: boolean = false
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount?: Account2FA
   searchTxt: string = ''
   draftLogoSearchTxt: string = ''
   searchLogoResults: any[] = []
   draftLogoURL: string = ''
+  validations_form: FormGroup;
 
   manualInput: boolean = false
   isPopoverOpen: boolean = false
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   isWindowFocused: boolean = true
-  validations_form: FormGroup;
-  currentDarkModePref: string = '';
-  supportsWebCredentialManagement: boolean = false
+
+  private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+  private isLandscape: boolean = false
+  private currentDarkModePref: string = '';
 
   constructor(
     private authService: AuthenticationService, 
     private accountsService: Account2faService,
     private loadingController: LoadingController,
     private toastController: ToastController,
+    private alertController: AlertController,
     private logoService: LogoService,
     private storageService: LocalStorageService,
     private translateService: TranslateService,
@@ -131,24 +131,24 @@ export class HomePage implements OnInit {
     })
     GlobalUtils.hideSplashScreen()
     await loading.present()
-    const userId = await this.authService.getCurrentUserId()
-    if(userId) {
-      this.accountsService.loadAccounts(userId)
-      this.accounts$ = this.accountsService.getAccounts()
-      const lastSelectedAccountId: string | undefined = await this.storageService.get('lastSelectedAccountId')
-      if(lastSelectedAccountId) {
-        const accounts = await firstValueFrom(this.accounts$)
-        const lastSelectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
-        if(lastSelectedAccount) {
-          this.selectAccount(lastSelectedAccount)
-        }
+    this.accounts$ = await this.accountsService.getAccounts()
+    const lastSelectedAccountId: string | undefined = await this.storageService.get('lastSelectedAccountId')
+    if(lastSelectedAccountId) {
+      const accounts = await firstValueFrom(this.accounts$)
+      const lastSelectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
+      if(lastSelectedAccount) {
+        this.selectAccount(lastSelectedAccount)
       }
     }
     await loading.dismiss()
   }
 
   async logout() {
-    this.hidePopover()
+    const confirm = await this.confirmLogout()
+    if(!confirm) {
+      return
+    }
+
     const message = await firstValueFrom(this.translateService.get('HOME.LOGGING_OUT'))
     const loading = await this.loadingController.create({
       message,
@@ -160,7 +160,7 @@ export class HomePage implements OnInit {
     await this.authService.logout()
     //reload window
     await loading.dismiss()
-    window.location.reload()
+    window.location.href = '/'
   }
 
   selectAccount(account: any) {
@@ -197,15 +197,46 @@ export class HomePage implements OnInit {
   }
 
   async addAccountAction() {
-    this.hidePopover()
     this.isAddAccountModalOpen = true
     this.scanCode()
+  }
+
+  async exportAccountAction() {
+    const message = await firstValueFrom(this.translateService.get('HOME.EXPORTING_ACCOUNTS'))
+    const loading = await this.loadingController.create({
+      message,
+      backdropDismiss: false
+    })
+    await loading.present()
+    await this.accountsService.exportAccounts()
+    await loading.dismiss()
+  }
+
+  async importAccountAction() {    
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'application/json'
+    input.click()
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if(file) {
+        const message = await firstValueFrom(this.translateService.get('HOME.IMPORTING_ACCOUNTS'))
+        const loading = await this.loadingController.create({
+          message,
+          backdropDismiss: false
+        })
+        await loading.present()
+        await this.accountsService.importAccounts(file)
+        await loading.dismiss()
+      }
+      input.remove()
+    }
   }
 
   showPopover(e: Event) {
     this.popover.event = null
     this.popover.event = e;
-    this.hidePopover()
+    this.isPopoverOpen = false;
     setTimeout(() => {
       this.isPopoverOpen = true;
     }, 50);
@@ -227,7 +258,9 @@ export class HomePage implements OnInit {
   }
 
   onWillDismissModal(e: Event) {
+    console.log("Will dismiss modal", e)
     if(this.qrscanner) {
+      console.log("STOP QR")
       this.qrscanner.stop()
     }
   }
@@ -250,13 +283,7 @@ export class HomePage implements OnInit {
     })
     await loading.present()
     try {
-      
-      let userId = await this.authService.getCurrentUserId() as string
-      if(!userId) {
-        throw new Error('INVALID_SESSION')
-      }
-      
-      await this.accountsService.addAccount(userId, account)
+      await this.accountsService.addAccount(account)
       await loading.dismiss()
       // select new account
       this.selectAccount(account)
@@ -362,6 +389,15 @@ export class HomePage implements OnInit {
     this.qrscanner.playDevice(nextDevice.deviceId)
   }
 
+  manualInputAction() {
+    if(this.qrscanner) {
+      console.log("STOP QR Reading")
+      this.qrscanner.stop()
+    }
+    this.isScanActive=false;
+    this.manualInput=true
+  }
+
   private async processQRCode(evt: string) {
     // The URI format and params is described in https://github.com/google/google-authenticator/wiki/Key-Uri-Format
     // otpauth://totp/ACME%20Co:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30
@@ -390,7 +426,32 @@ export class HomePage implements OnInit {
     this.manualInput = true
   }
 
-  private hidePopover() {
-    this.isPopoverOpen = false;
+  private confirmLogout(): Promise<boolean> {
+    return new Promise(async (resolve, reject) => {
+      const title = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_TITLE'))
+      const message = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_MESSAGE'))
+      const yesBtnText = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_YES'))
+      const cancelBtnText = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
+      const confirmPrompt = await this.alertController.create({
+        header: title,
+        message,
+        buttons: [
+          {
+            text: cancelBtnText,
+            role: 'cancel',
+            handler: () => {
+              resolve(false)
+            }
+          }, {
+            text: yesBtnText,
+            role: 'destructive',
+            handler: () => {
+              resolve(true)
+            }
+          }
+        ]
+      });
+      await confirmPrompt.present()
+    })
   }
 }
