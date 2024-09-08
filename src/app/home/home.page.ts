@@ -258,7 +258,9 @@ export class HomePage implements OnInit {
   }
 
   onWillDismissModal(e: Event) {
+    console.log("Will dismiss modal", e)
     if(this.qrscanner) {
+      console.log("STOP QR")
       this.qrscanner.stop()
     }
   }
@@ -385,6 +387,15 @@ export class HomePage implements OnInit {
     const next = (current + 1) % devices.length
     const nextDevice = devices[next]
     this.qrscanner.playDevice(nextDevice.deviceId)
+  }
+
+  manualInputAction() {
+    if(this.qrscanner) {
+      console.log("STOP QR Reading")
+      this.qrscanner.stop()
+    }
+    this.isScanActive=false;
+    this.manualInput=true
   }
 
   private async processQRCode(evt: string) {
