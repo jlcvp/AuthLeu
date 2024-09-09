@@ -4,7 +4,7 @@
 [![GitHub pages deploy](https://github.com/jlcvp/AuthLeu/actions/workflows/deploy_gh_pages.yml/badge.svg)](https://github.com/jlcvp/AuthLeu/actions/workflows/deploy_gh_pages.yml)  
 An open-source, self-hosted alternative to Twilio's Authy, capable of syncing or operating fully offline. It can also serve as a substitute for TOTP 2FA apps like Google Authenticator and Microsoft Authenticator.
 
-If preferred, you can synchronize your 2FA tokens and have your own URL using Firebase Firestore and Firebase Hosting with your Google account.
+All the firebase integration is optional, and we currently don't offer a SaaS option (because rea$ons), but you change the `environment.x.ts` files to use your own firebase project or you can use the app fully offline, but in this case you will need to manually export and import your accounts between devices.
 
 ## Current and Planned Features
 - [x] Progressive Web App (PWA) support.
@@ -23,8 +23,11 @@ If preferred, you can synchronize your 2FA tokens and have your own URL using Fi
     - [ ] Other languages support (HELP WANTED)
 - [x] Dark mode support.
 
+## Live version on github pages
+https://jlcvp.github.io/AuthLeu
+
 ## Screenshots
 ### Portrait layout
 ![Portrait](resources/screenshots/screenshot_1.png)
 ### Landscape layout
-![Landscape](resources/screenshots/screenshot_2.png) 
+![Landscape](resources/screenshots/screenshot_2.png)
