@@ -8,6 +8,7 @@
         "ADDING_ACCOUNT": "Adding account...",
         "ERROR_MSGS": {
             "ERROR_ADDING_ACCOUNT": "Error adding account",
+            "ERROR_STARTING_CAMERA": "Could not start the camera, make sure camera usage permission was given",
             "INVALID_QR_CODE": "Invalid QR Code",
             "INVALID_SESSION": "Invalid session",
             "UNKNOWN_ERROR": "Unknown error"

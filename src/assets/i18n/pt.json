@@ -8,6 +8,7 @@
         "ADDING_ACCOUNT": "Adicionando conta...",
         "ERROR_MSGS": {
             "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
+            "ERROR_STARTING_CAMERA": "Nao foi possível iniciar a camera, certifique-se de conceder permiss~ao para uso da camera",
             "INVALID_QR_CODE": "QR Code inválido",
             "INVALID_SESSION": "Sessão inválida",
             "UNKNOWN_ERROR": "Erro desconhecido"
