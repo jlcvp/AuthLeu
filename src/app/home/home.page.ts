@@ -366,6 +366,7 @@ export class HomePage implements OnInit {
       await alert.present()
       this.manualInput = true
       this.isScanActive = false
+      return
     }
     
 
