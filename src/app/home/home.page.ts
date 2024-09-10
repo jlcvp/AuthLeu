@@ -355,8 +355,10 @@ export class HomePage implements OnInit {
       await firstValueFrom(this.qrscanner.start())
     } catch (error) {
       // camera permission denial
-      const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA'))
+      const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
+      const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))
       const alert = await this.alertController.create({
+        header,
         message,
         buttons: ['OK']
       })

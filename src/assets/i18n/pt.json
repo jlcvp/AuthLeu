@@ -8,6 +8,7 @@
         "ADDING_ACCOUNT": "Adicionando conta...",
         "ERROR_MSGS": {
             "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
+            "ERROR_CAMERA_HEADER": "Câmera não disponível",
             "ERROR_CAMERA": "<p>O acesso à câmera é necessário para escanear QR codes, mas parece que seu dispositivo não possui uma câmera ou as permissões da câmera foram negadas.</p><p>Verifique as permissões e/ou configurações do seu dispositivo e tente novamente.</p>",
             "INVALID_QR_CODE": "QR Code inválido",
             "INVALID_SESSION": "Sessão inválida",
