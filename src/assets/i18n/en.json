@@ -8,7 +8,7 @@
         "ADDING_ACCOUNT": "Adding account...",
         "ERROR_MSGS": {
             "ERROR_ADDING_ACCOUNT": "Error adding account",
-            "ERROR_STARTING_CAMERA": "Could not start the camera, make sure camera usage permission was given",
+            "ERROR_CAMERA": "<p>Camera access is required to scan QR codes, but it seems your device either lacks a camera or camera permissions were denied. </p><p>Please check your device/permissions settings and try again.</p>",
             "INVALID_QR_CODE": "Invalid QR Code",
             "INVALID_SESSION": "Invalid session",
             "UNKNOWN_ERROR": "Unknown error"
