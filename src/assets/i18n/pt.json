@@ -8,6 +8,8 @@
         "ADDING_ACCOUNT": "Adicionando conta...",
         "ERROR_MSGS": {
             "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
+            "ERROR_CAMERA_HEADER": "Câmera não disponível",
+            "ERROR_CAMERA_MESSAGE": "<p>O acesso à câmera é necessário para escanear QR codes, mas parece que seu dispositivo não possui uma câmera ou as permissões da câmera foram negadas.</p><p>Verifique as permissões e/ou configurações do seu dispositivo e tente novamente.</p>",
             "INVALID_QR_CODE": "QR Code inválido",
             "INVALID_SESSION": "Sessão inválida",
             "UNKNOWN_ERROR": "Erro desconhecido"
@@ -33,22 +35,23 @@
         "COLOR_MODE_SYSTEM": "Sistema",
         "EXPORT_ACCOUNTS": "Exportar Backup",
         "IMPORT_ACCOUNTS": "Importar Backup",
-        "LOGOUT": "Sair",
-        "LOGIN": "Entrar"
+        "LOGIN": "Entrar",
+        "LOGOUT": "Sair"
     },
     "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
     "HOME": {
+        "CANCEL": "Cancelar",
+        "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
+        "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
+        "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
         "EXPORTING_ACCOUNTS": "Exportando backup...",
         "IMPORTING_ACCOUNTS": "Importando backup...",
         "LOADING_ACCOUNTS": "Carregando contas...",
-        "LOGGING_OUT": "Saindo...",
-        "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
-        "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
-        "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
-        "CANCEL": "Cancelar"
+        "LOGGING_OUT": "Saindo..."
     },
     "LOGIN": {
         "AUTHENTICATING": "Autenticando...",
+        "CLOUD_SYNC": "Sincronização na nuvem",
         "CONTINUE_OFFLINE": "Usar offline",
         "EMAIL": "E-mail",
         "ERROR_MSGS": {
@@ -58,7 +61,6 @@
             "USER_NOT_FOUND": "Usuário não encontrado"
         },
         "PASSWORD": "Senha",
-        "CLOUD_SYNC": "Sincronização na nuvem",
         "SIGN_IN_BUTTON": "Entrar",
         "VALIDATION_MSGS": {
             "EMAIL_PATTERN": "E-mail inválido",

@@ -351,7 +351,25 @@ export class HomePage implements OnInit {
       backdropDismiss: false
     })
     await loading.present()
-    await firstValueFrom(this.qrscanner.start())
+    try {
+      await firstValueFrom(this.qrscanner.start())
+    } catch (error) {
+      // camera permission denial
+      const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
+      const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))
+      const alert = await this.alertController.create({
+        header,
+        message,
+        buttons: ['OK']
+      })
+      await loading.dismiss()
+      await alert.present()
+      this.manualInput = true
+      this.isScanActive = false
+    }
+    
+
+
     const devices = (await firstValueFrom(this.qrscanner.devices)).filter(device => device.kind === 'videoinput')
     console.log({devices})
     // find back camera
