@@ -35,22 +35,23 @@
         "COLOR_MODE_SYSTEM": "System",
         "EXPORT_ACCOUNTS": "Export Backup",
         "IMPORT_ACCOUNTS": "Import Backup",
-        "LOGOUT": "Sign out",
-        "LOGIN": "Sign in"
+        "LOGIN": "Sign in",
+        "LOGOUT": "Sign out"
     },
     "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
     "HOME": {
+        "CANCEL": "Cancel",
+        "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
+        "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
+        "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
         "EXPORTING_ACCOUNTS": "Exporting backup...",
         "IMPORTING_ACCOUNTS": "Importing backup...",
         "LOADING_ACCOUNTS": "Loading accounts...",
-        "LOGGING_OUT": "Signing out...",
-        "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
-        "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
-        "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
-        "CANCEL": "Cancel"
+        "LOGGING_OUT": "Signing out..."
     },
     "LOGIN": {
         "AUTHENTICATING": "Authenticating...",
+        "CLOUD_SYNC": "Cloud sync",
         "CONTINUE_OFFLINE": "Continue offline",
         "EMAIL": "E-mail",
         "ERROR_MSGS": {
@@ -60,7 +61,6 @@
             "USER_NOT_FOUND": "User not found"
         },
         "PASSWORD": "Password",
-        "CLOUD_SYNC": "Cloud sync",
         "SIGN_IN_BUTTON": "Sign in",
         "VALIDATION_MSGS": {
             "EMAIL_PATTERN": "Invalid e-mail",
