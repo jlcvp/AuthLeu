@@ -10,7 +10,7 @@ import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } f
 import { LocalStorageService } from '../services/local-storage.service';
 import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
-import { ExportAccountsModalComponent } from '../components/export-accounts-modal/export-accounts-modal.component';
+import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
 
 @Component({
   selector: 'app-home',
@@ -208,10 +208,12 @@ export class HomePage implements OnInit {
 
   async exportAccountAction() {
     const accounts = await firstValueFrom(this.accounts$)
+    const modalTitle = await firstValueFrom(this.translateService.get('HOME.EXPORT_ACCOUNTS_MODAL_TITLE'))
     const modal = await this.modalController.create({
-      component: ExportAccountsModalComponent,
+      component: AccountSelectModalComponent,
       componentProps: {
-        accounts
+        accounts,
+        title: modalTitle
       },
     })
     modal.present()

@@ -4,6 +4,14 @@
         "SECONDS_SHORT": "s",
         "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar..."
     },
+    "ACCOUNT_SELECT_MODAL": {
+        "CANCEL": "Cancelar",
+        "DEFAULT_TITLE": "Selecionar Contas",
+        "DESELECT_ALL": "Limpar Seleção",
+        "EXPORT": "Exportar",
+        "SELECTION_COUNTER": "{{selected}} de {{total}} selecionada(s)",
+        "SELECT_ALL": "Selecionar Tudo"
+    },
     "ADD_ACCOUNT_MODAL": {
         "ADDING_ACCOUNT": "Adicionando conta...",
         "ERROR_MSGS": {
@@ -39,19 +47,12 @@
         "LOGOUT": "Sair"
     },
     "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
-    "EXPORT_ACCOUNT_MODAL": {
-        "CANCEL": "Cancelar",
-        "DESELECT_ALL": "Limpar Seleção",
-        "EXPORT": "Exportar",
-        "LIST_HEADER": "{{selected}} de {{total}} selecionada(s)",
-        "SELECT_ALL": "Selecionar Tudo",
-        "TITLE": "Exportar Contas"
-    },
     "HOME": {
         "CANCEL": "Cancelar",
         "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
         "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
         "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
+        "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
         "EXPORTING_ACCOUNTS": "Exportando backup...",
         "IMPORTING_ACCOUNTS": "Importando backup...",
         "LOADING_ACCOUNTS": "Carregando contas...",

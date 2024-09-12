@@ -3,13 +3,13 @@ import { Config, ModalController } from '@ionic/angular';
 import { Account2FA } from 'src/app/models/account2FA.model';
 
 @Component({
-  selector: 'app-export-accounts-modal',
-  templateUrl: './export-accounts-modal.component.html',
-  styleUrls: ['./export-accounts-modal.component.scss'],
+  selector: 'app-account-select-modal',
+  templateUrl: './account-select-modal.component.html',
+  styleUrls: ['./account-select-modal.component.scss'],
 })
-export class ExportAccountsModalComponent implements OnInit {
+export class AccountSelectModalComponent implements OnInit {
   @Input() accounts: Account2FA[] = []
-
+  @Input() title: string = ''
   selection: {account: Account2FA, selected: boolean}[] = []
   isMD: boolean
   constructor(private modalController: ModalController, config: Config) {
@@ -28,10 +28,10 @@ export class ExportAccountsModalComponent implements OnInit {
 
   get selectAllLabelKey(): string {
     const allSelected = this.selection.every((item) => item.selected)
-    return allSelected ? 'EXPORT_ACCOUNT_MODAL.DESELECT_ALL' : 'EXPORT_ACCOUNT_MODAL.SELECT_ALL'
+    return allSelected ? 'ACCOUNT_SELECT_MODAL.DESELECT_ALL' : 'ACCOUNT_SELECT_MODAL.SELECT_ALL'
   }
 
-  get headerParams() {
+  get selectionCountParams() {
     return {
       total: this.selection.length,
       selected: this.selectedAccountsCount

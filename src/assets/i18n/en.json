@@ -4,6 +4,14 @@
         "SECONDS_SHORT": "s",
         "SELECT_ACCOUNT_HINT": "Select an account to start..."
     },
+    "ACCOUNT_SELECT_MODAL": {
+        "CANCEL": "Cancel",
+        "DEFAULT_TITLE": "Select Accounts",
+        "DESELECT_ALL": "Deselect All",
+        "EXPORT": "Export",
+        "SELECTION_COUNTER": "{{selected}}/{{total}} selected",
+        "SELECT_ALL": "Select All"
+    },
     "ADD_ACCOUNT_MODAL": {
         "ADDING_ACCOUNT": "Adding account...",
         "ERROR_MSGS": {
@@ -39,19 +47,12 @@
         "LOGOUT": "Sign out"
     },
     "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
-    "EXPORT_ACCOUNT_MODAL": {
-        "CANCEL": "Cancel",
-        "DESELECT_ALL": "Deselect All",
-        "EXPORT": "Export",
-        "LIST_HEADER": "{{selected}}/{{total}} selected",
-        "SELECT_ALL": "Select All",
-        "TITLE": "Export Accounts"
-    },
     "HOME": {
         "CANCEL": "Cancel",
         "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
         "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
         "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
+        "EXPORT_ACCOUNTS_MODAL_TITLE": "Export Accounts",
         "EXPORTING_ACCOUNTS": "Exporting backup...",
         "IMPORTING_ACCOUNTS": "Importing backup...",
         "LOADING_ACCOUNTS": "Loading accounts...",
