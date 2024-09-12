@@ -8,7 +8,7 @@
         "CANCEL": "Cancelar",
         "DEFAULT_TITLE": "Selecionar Contas",
         "DESELECT_ALL": "Limpar Seleção",
-        "EXPORT": "Exportar",
+        "CONFIRM_SELECTION": "Confirmar",
         "SELECTION_COUNTER": "{{selected}} de {{total}} selecionada(s)",
         "SELECT_ALL": "Selecionar Tudo"
     },
@@ -53,11 +53,17 @@
         "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
         "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
         "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
+        "EXPORT_ACCOUNTS_MODAL_ACTION": "Exportar",
+        "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas",
+        "IMPORT_ACCOUNTS_MODAL_ACTION": "Importar",
         "EXPORTING_ACCOUNTS": "Exportando backup...",
         "IMPORTING_ACCOUNTS": "Importando backup...",
         "LOADING_ACCOUNTS": "Carregando contas...",
         "LOGGING_OUT": "Saindo...",
-        "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar"
+        "ERROR": {
+            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar",
+            "INVALID_BACKUP_FILE": "O arquivo selecionado não contém dados de backup válidos"
+        }
     },
     "LOGIN": {
         "AUTHENTICATING": "Autenticando...",

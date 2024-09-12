@@ -209,11 +209,13 @@ export class HomePage implements OnInit {
   async exportAccountAction() {
     const accounts = await firstValueFrom(this.accounts$)
     const modalTitle = await firstValueFrom(this.translateService.get('HOME.EXPORT_ACCOUNTS_MODAL_TITLE'))
+    const confirmText = await firstValueFrom(this.translateService.get('HOME.EXPORT_ACCOUNTS_MODAL_ACTION'))
     const modal = await this.modalController.create({
       component: AccountSelectModalComponent,
       componentProps: {
         accounts,
-        title: modalTitle
+        title: modalTitle,
+        confirmText 
       },
     })
     modal.present()
@@ -248,11 +250,42 @@ export class HomePage implements OnInit {
           message,
           backdropDismiss: false
         })
-        await loading.present()
-        await this.accountsService.importAccounts(file)
-        await loading.dismiss()
+        try {
+          await loading.present()
+          const accounts = await this.accountsService.readAccountsFromFile(file)
+          input.remove()
+          const title = await firstValueFrom(this.translateService.get('HOME.IMPORT_ACCOUNTS_MODAL_TITLE'))
+          const confirmText = await firstValueFrom(this.translateService.get('HOME.IMPORT_ACCOUNTS_MODAL_ACTION'))
+          const modal = await this.modalController.create({
+            component: AccountSelectModalComponent,
+            componentProps: {
+              accounts,
+              title,
+              confirmText
+            },
+          })
+          await loading.dismiss()
+          modal.present()
+          const { data } = await modal.onWillDismiss();
+          await loading.present()
+          const selectedAccounts = data ? data as Account2FA[] : undefined
+          if (selectedAccounts && selectedAccounts.length > 0) {
+            await this.accountsService.importAccounts(selectedAccounts)
+          } else {
+            console.log("No accounts selected")
+          }
+          await loading.dismiss()
+        } catch (error) {
+          const message = await firstValueFrom(this.translateService.get('HOME.ERROR.INVALID_BACKUP_FILE'))
+          const toast = await this.toastController.create({
+            message,
+            duration: 2000,
+            color: 'danger'
+          })
+          await loading.dismiss()
+          await toast.present()
+        }
       }
-      input.remove()
     }
   }
 

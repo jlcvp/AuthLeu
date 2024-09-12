@@ -51,7 +51,17 @@ export class Account2FA implements IAccount2FA {
         this.salt = salt;
     }
 
-    static fromDictionary(data: IAccount2FA): Account2FA {
+    static fromDictionary(dict: any): Account2FA {
+        if(!dict || typeof dict !== 'object') {
+            throw new Error('Invalid dictionary');
+        }
+
+        // check if dict contains all required fields
+        if(!dict.id || !dict.label || !dict.secret) {
+            throw new Error('Missing required fields');
+        }
+        
+        const data = dict as IAccount2FA;
         return new Account2FA(data.id, data.label, data.secret, data.tokenLength, data.interval, data.algorithm, data.issuer, data.active, data.logo, data.encryptedSecret, data.iv, data.salt);
     }
 

@@ -10,6 +10,8 @@ import { Account2FA } from 'src/app/models/account2FA.model';
 export class AccountSelectModalComponent implements OnInit {
   @Input() accounts: Account2FA[] = []
   @Input() title: string = ''
+  @Input() confirmText: string = ''
+  
   selection: {account: Account2FA, selected: boolean}[] = []
   isMD: boolean
   constructor(private modalController: ModalController, config: Config) {

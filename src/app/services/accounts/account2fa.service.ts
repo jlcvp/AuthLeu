@@ -59,17 +59,40 @@ export class Account2faService {
     a.remove()
   }
 
-  public async importAccounts(file: File) {
-    const reader = new FileReader()
-    reader.onload = async (e) => {
-      const data = e.target?.result as string
-      const accountsDict = JSON.parse(data) as IAccount2FA[]
-      const accounts = accountsDict.map(a => Account2FA.fromDictionary(a))
-      for (const account of accounts) {
-        await this.addAccount(account)
-      }
+  public async importAccounts(accounts: Account2FA[]) {
+    for (const account of accounts) {
+      await this.addAccount(account)
     }
-    reader.readAsText(file)
+  }
+
+  public readAccountsFromFile(file: File): Promise<Account2FA[]> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const data = e.target?.result as string | undefined
+          if (!data) {
+            throw new Error('No data')
+            return
+          }
+
+          // check if file is a valid json
+          const anyArray = JSON.parse(data)
+          if (!Array.isArray(anyArray)) {
+            throw new Error('Not an array')
+          }
+
+          const accountsDict = JSON.parse(data) as IAccount2FA[]
+          const accounts = accountsDict.map(a => Account2FA.fromDictionary(a))
+          resolve(accounts)
+        } catch (error) {
+          console.error('Error processing backup file', { error })
+          reject('INVALID_BACKUP_FILE')
+          return
+        }
+      }
+      reader.readAsText(file)
+    })
   }
 
   useLocalService() {
