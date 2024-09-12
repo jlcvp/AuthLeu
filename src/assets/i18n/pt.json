@@ -39,6 +39,14 @@
         "LOGOUT": "Sair"
     },
     "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
+    "EXPORT_ACCOUNT_MODAL": {
+        "CANCEL": "Cancelar",
+        "DESELECT_ALL": "Limpar Seleção",
+        "EXPORT": "Exportar",
+        "LIST_HEADER": "{{selected}} de {{total}} selecionada(s)",
+        "SELECT_ALL": "Selecionar Tudo",
+        "TITLE": "Exportar Contas"
+    },
     "HOME": {
         "CANCEL": "Cancelar",
         "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
@@ -47,7 +55,8 @@
         "EXPORTING_ACCOUNTS": "Exportando backup...",
         "IMPORTING_ACCOUNTS": "Importando backup...",
         "LOADING_ACCOUNTS": "Carregando contas...",
-        "LOGGING_OUT": "Saindo..."
+        "LOGGING_OUT": "Saindo...",
+        "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar"
     },
     "LOGIN": {
         "AUTHENTICATING": "Autenticando...",

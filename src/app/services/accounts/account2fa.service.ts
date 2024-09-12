@@ -48,10 +48,7 @@ export class Account2faService {
     }
   }
 
-  public async exportAccounts() {
-    const accounts$ = await this.getAccounts()
-    const accountsArray = await firstValueFrom(accounts$)
-
+  public async exportAccounts(accountsArray: Account2FA[]) {
     const data = JSON.stringify(accountsArray, null, 2)
     const blob = new Blob([data], { type: 'application/json' })
     const url = URL.createObjectURL(blob)

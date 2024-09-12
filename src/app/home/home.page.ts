@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
-import { AlertController, IonModal, LoadingController, NavController, ToastController } from '@ionic/angular';
+import { AlertController, IonModal, LoadingController, ModalController, NavController, ToastController } from '@ionic/angular';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
@@ -10,6 +10,7 @@ import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } f
 import { LocalStorageService } from '../services/local-storage.service';
 import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
+import { ExportAccountsModalComponent } from '../components/export-accounts-modal/export-accounts-modal.component';
 
 @Component({
   selector: 'app-home',
@@ -20,7 +21,7 @@ export class HomePage implements OnInit {
   @ViewChild('popover') popover: any;
   @ViewChild(IonModal) modal!: IonModal;
   @ViewChild('qrscanner') qrscanner!: NgxScannerQrcodeComponent;
-  
+
   @HostListener('window:resize', ['$event'])
   onWindowResize() {
     this.isLandscape = window.innerWidth > window.innerHeight
@@ -69,11 +70,12 @@ export class HomePage implements OnInit {
   private currentDarkModePref: string = '';
 
   constructor(
-    private authService: AuthenticationService, 
+    private authService: AuthenticationService,
     private accountsService: Account2faService,
     private loadingController: LoadingController,
     private toastController: ToastController,
     private alertController: AlertController,
+    private modalController: ModalController,
     private logoService: LogoService,
     private storageService: LocalStorageService,
     private translateService: TranslateService,
@@ -121,7 +123,7 @@ export class HomePage implements OnInit {
         return 'CONFIG_MENU.COLOR_MODE_SYSTEM'
     }
   }
-  
+
   async ngOnInit() {
     this.onWindowResize()
     this.setupPalette()
@@ -134,10 +136,10 @@ export class HomePage implements OnInit {
     await loading.present()
     this.accounts$ = await this.accountsService.getAccounts()
     const lastSelectedAccountId: string | undefined = await this.storageService.get('lastSelectedAccountId')
-    if(lastSelectedAccountId) {
+    if (lastSelectedAccountId) {
       const accounts = await firstValueFrom(this.accounts$)
       const lastSelectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
-      if(lastSelectedAccount) {
+      if (lastSelectedAccount) {
         this.selectAccount(lastSelectedAccount)
       }
     }
@@ -146,7 +148,7 @@ export class HomePage implements OnInit {
 
   async logout() {
     const confirm = await this.confirmLogout()
-    if(!confirm) {
+    if (!confirm) {
       return
     }
 
@@ -168,31 +170,31 @@ export class HomePage implements OnInit {
 
   selectAccount(account: any) {
     this.selectedAccount = account
-    if(account && account.id) {
+    if (account && account.id) {
       this.storageService.set('lastSelectedAccountId', account.id)
     }
   }
 
   handleSearch(evt: any) {
     const searchTerm = evt?.detail?.value
-    console.log({evt, searchTerm})
+    console.log({ evt, searchTerm })
     this.searchTxt = searchTerm
   }
 
   async handleSearchLogo(evt: any) {
     const searchTerm = evt?.detail?.value
-    console.log({evt, searchTerm})
-    if(!searchTerm) {
+    console.log({ evt, searchTerm })
+    if (!searchTerm) {
       this.draftLogoURL = ''
       this.searchLogoResults = []
       return
     }
     const brandInfo = await this.logoService.searchServiceInfo(searchTerm)
-    if(brandInfo && brandInfo.length > 0) {
+    if (brandInfo && brandInfo.length > 0) {
       this.draftLogoURL = brandInfo[0].logo
       this.searchLogoResults = brandInfo.map(brand => brand.logo)
     }
-    console.log({brandInfo, draftLogoURL: this.draftLogoURL, searchTerm: this.draftLogoSearchTxt, results: this.searchLogoResults})
+    console.log({ brandInfo, draftLogoURL: this.draftLogoURL, searchTerm: this.draftLogoSearchTxt, results: this.searchLogoResults })
   }
 
   selectLogo(logoURL: string) {
@@ -205,24 +207,40 @@ export class HomePage implements OnInit {
   }
 
   async exportAccountAction() {
-    const message = await firstValueFrom(this.translateService.get('HOME.EXPORTING_ACCOUNTS'))
-    const loading = await this.loadingController.create({
-      message,
-      backdropDismiss: false
+    const accounts = await firstValueFrom(this.accounts$)
+    const modal = await this.modalController.create({
+      component: ExportAccountsModalComponent,
+      componentProps: {
+        accounts
+      },
     })
-    await loading.present()
-    await this.accountsService.exportAccounts()
-    await loading.dismiss()
+    modal.present()
+    const { data } = await modal.onWillDismiss();
+
+    const selectedAccounts = data ? data as Account2FA[] : undefined
+    if (selectedAccounts && selectedAccounts.length > 0) {
+      console.log("Selected accounts to export", { selectedAccounts })
+      const message = await firstValueFrom(this.translateService.get('HOME.EXPORTING_ACCOUNTS'))
+      const loading = await this.loadingController.create({
+        message,
+        backdropDismiss: false
+      })
+      await loading.present()
+      await this.accountsService.exportAccounts(selectedAccounts)
+      await loading.dismiss()
+    } else {
+
+    }
   }
 
-  async importAccountAction() {    
+  async importAccountAction() {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'application/json'
     input.click()
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
-      if(file) {
+      if (file) {
         const message = await firstValueFrom(this.translateService.get('HOME.IMPORTING_ACCOUNTS'))
         const loading = await this.loadingController.create({
           message,
@@ -250,7 +268,7 @@ export class HomePage implements OnInit {
     this.manualInput = false
     this.isAddAccountModalOpen = false
     this.isScanActive = false
-    if(this.qrscanner) {
+    if (this.qrscanner) {
       this.qrscanner.stop()
     }
     // clear form
@@ -262,7 +280,7 @@ export class HomePage implements OnInit {
 
   onWillDismissModal(e: Event) {
     console.log("Will dismiss modal", e)
-    if(this.qrscanner) {
+    if (this.qrscanner) {
       console.log("STOP QR")
       this.qrscanner.stop()
     }
@@ -273,12 +291,12 @@ export class HomePage implements OnInit {
   }
 
   async createAccount(formValues: any) {
-    console.log({formValues})
+    console.log({ formValues })
     const logo = this.draftLogoURL
     await this.closeAddAccountModal()
-    const newAccountDict = Object.assign(formValues, {logo, active: true })
+    const newAccountDict = Object.assign(formValues, { logo, active: true })
     const account = Account2FA.fromDictionary(newAccountDict)
-    console.log({account2fa: account})
+    console.log({ account2fa: account })
     const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ADDING_ACCOUNT'))
     const loading = await this.loadingController.create({
       message,
@@ -311,13 +329,13 @@ export class HomePage implements OnInit {
 
   private async setupPalette() {
     this.systemPrefersDark.addEventListener('change', (mediaQuery) => {
-      if(this.currentDarkModePref !== 'system') {
+      if (this.currentDarkModePref !== 'system') {
         return
       }
       this.useDarkPalette(mediaQuery.matches)
     });
-    const darkPalettePref = await this.storageService.get<string|undefined>('darkPalette')
-    console.log({darkPalettePref})
+    const darkPalettePref = await this.storageService.get<string | undefined>('darkPalette')
+    console.log({ darkPalettePref })
     this.currentDarkModePref = darkPalettePref || 'system'
     this.handleDarkPaletteChange()
   }
@@ -336,7 +354,7 @@ export class HomePage implements OnInit {
         break;
     }
   }
-  
+
   // Add or remove the "ion-palette-dark" class on the html element
   private useDarkPalette(isDark: boolean) {
     document.documentElement.classList.toggle('ion-palette-dark', isDark);
@@ -368,28 +386,26 @@ export class HomePage implements OnInit {
       this.isScanActive = false
       return
     }
-    
-
 
     const devices = (await firstValueFrom(this.qrscanner.devices)).filter(device => device.kind === 'videoinput')
-    console.log({devices})
+    console.log({ devices })
     // find back camera
     let backCamera = devices.find(device => device.label.toLowerCase().includes('back camera'))
-    if(!backCamera) {
+    if (!backCamera) {
       backCamera = devices.find(device => device.label.toLowerCase().match(/.*back.*camera.*/))
     }
 
-    if(backCamera && backCamera.deviceId) {
-      console.log("using device", {backCamera})
+    if (backCamera && backCamera.deviceId) {
+      console.log("using device", { backCamera })
       await this.qrscanner.playDevice(backCamera.deviceId)
     }
     await loading.dismiss()
   }
 
   async onQRCodeScanned(evt: ScannerQRCodeResult[], qrscanner: NgxScannerQrcodeComponent) {
-    try { 
+    try {
       await qrscanner.stop()
-      await this.qrscanner.stop() 
+      await this.qrscanner.stop()
     } catch (error) {
       console.error("Error stopping scanner", error)
     }
@@ -403,21 +419,21 @@ export class HomePage implements OnInit {
   async cycleCamera() {
     console.log("cycle camera")
     const current = this.qrscanner.deviceIndexActive
-    console.log({current})
+    console.log({ current })
     const devices = await firstValueFrom(this.qrscanner.devices)
-    console.log({devices})
+    console.log({ devices })
     const next = (current + 1) % devices.length
     const nextDevice = devices[next]
     this.qrscanner.playDevice(nextDevice.deviceId)
   }
 
   manualInputAction() {
-    if(this.qrscanner) {
+    if (this.qrscanner) {
       console.log("STOP QR Reading")
       this.qrscanner.stop()
     }
-    this.isScanActive=false;
-    this.manualInput=true
+    this.isScanActive = false;
+    this.manualInput = true
   }
 
   private async processQRCode(evt: string) {
@@ -425,15 +441,15 @@ export class HomePage implements OnInit {
     // otpauth://totp/ACME%20Co:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30
     try {
       const account = Account2FA.fromOTPAuthURL(evt)
-      console.log({account})
-  
+      console.log({ account })
+
       this.validations_form.controls['label'].setValue(account.label)
       this.validations_form.controls['secret'].setValue(account.secret)
       this.validations_form.controls['tokenLength'].setValue(account.tokenLength)
       this.validations_form.controls['interval'].setValue(account.interval)
       // service name inferred from issuer or label
       const serviceName = account.issuer || account.label.split(':')[0]
-      const event = {detail: {value: serviceName}}
+      const event = { detail: { value: serviceName } }
       this.handleSearchLogo(event)
     } catch (error) {
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_QR_CODE'))

@@ -39,6 +39,14 @@
         "LOGOUT": "Sign out"
     },
     "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
+    "EXPORT_ACCOUNT_MODAL": {
+        "CANCEL": "Cancel",
+        "DESELECT_ALL": "Deselect All",
+        "EXPORT": "Export",
+        "LIST_HEADER": "{{selected}}/{{total}} selected",
+        "SELECT_ALL": "Select All",
+        "TITLE": "Export Accounts"
+    },
     "HOME": {
         "CANCEL": "Cancel",
         "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
@@ -47,7 +55,8 @@
         "EXPORTING_ACCOUNTS": "Exporting backup...",
         "IMPORTING_ACCOUNTS": "Importing backup...",
         "LOADING_ACCOUNTS": "Loading accounts...",
-        "LOGGING_OUT": "Signing out..."
+        "LOGGING_OUT": "Signing out...",
+        "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export"
     },
     "LOGIN": {
         "AUTHENTICATING": "Authenticating...",

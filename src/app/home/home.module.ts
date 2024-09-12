@@ -11,6 +11,7 @@ import { AccountListComponent } from '../components/account-list/account-list.co
 import { AccountDetailComponent } from '../components/account-detail/account-detail.component';
 import { CountdownTimerComponent } from '../components/countdown-timer/countdown-timer.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { ExportAccountsModalComponent } from '../components/export-accounts-modal/export-accounts-modal.component';
 
 
 @NgModule({
@@ -24,6 +25,6 @@ import { TranslateModule } from '@ngx-translate/core';
     NgxScannerQrcodeModule,
     TranslateModule.forChild()
   ],
-  declarations: [HomePage, AccountListComponent, AccountDetailComponent, CountdownTimerComponent]
+  declarations: [HomePage, AccountListComponent, AccountDetailComponent, CountdownTimerComponent, ExportAccountsModalComponent]
 })
 export class HomePageModule {}
