@@ -26,15 +26,8 @@ export class AccountDetailComponent {
   @HostListener('window:focus', ['$event'])
   onFocus(event: FocusEvent): void {
     // resume timer
-    console.log("Window focused")
     this.updateCode()
     this.updateTokenCountdown()
-  }
-
-  @HostListener('window:blur', ['$event'])
-  onBlur(event: FocusEvent): void {
-    // stop timer, camera, etc
-    console.log("Window blurred")
   }
 
   get account(): Account2FA | undefined {

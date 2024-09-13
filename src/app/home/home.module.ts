@@ -10,8 +10,8 @@ import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 import { AccountListComponent } from '../components/account-list/account-list.component';
 import { AccountDetailComponent } from '../components/account-detail/account-detail.component';
 import { CountdownTimerComponent } from '../components/countdown-timer/countdown-timer.component';
-import { TranslateModule } from '@ngx-translate/core';
-
+import { TranslateModule } from '@ngx-translate/core'
+import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
 
 @NgModule({
   imports: [
@@ -24,6 +24,6 @@ import { TranslateModule } from '@ngx-translate/core';
     NgxScannerQrcodeModule,
     TranslateModule.forChild()
   ],
-  declarations: [HomePage, AccountListComponent, AccountDetailComponent, CountdownTimerComponent]
+  declarations: [HomePage, AccountListComponent, AccountDetailComponent, CountdownTimerComponent, AccountSelectModalComponent]
 })
 export class HomePageModule {}

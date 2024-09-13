@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="closeModal()">
+        <ion-icon *ngIf="isMD" slot="icon-only" name="close-outline"></ion-icon>
+        <ion-label *ngIf="!isMD">{{ "ACCOUNT_SELECT_MODAL.CANCEL" | translate }}</ion-label>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ title || ("ACCOUNT_SELECT_MODAL.DEFAULT_TITLE" | translate) }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onConfirm()" [disabled]="selectedAccountsCount<1">
+        <ion-label>{{ confirmText || ("CONFIRM_SELECTION.EXPORT" | translate) }}</ion-label>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <ion-list lines="full">
+    <ion-item>
+      <ion-label>{{ "ACCOUNT_SELECT_MODAL.SELECTION_COUNTER" | translate:selectionCountParams }}</ion-label>
+      <ion-button (click)="onSelectAllClick()">{{ selectAllLabelKey | translate }}</ion-button>
+    </ion-item>
+    <ion-item *ngFor="let item of selection; let i = index" button (click)="onItemClick(i)" detail="false" [color]="item.selected ? 'light' : ''">
+      <ion-thumbnail class="thumb" slot="start">
+        <img class="thumb-img" [src]="item.account.getLogo()" />
+      </ion-thumbnail>
+      <ion-checkbox labelPlacement="start" [checked]="item.selected">
+        {{item.account.label}}
+      </ion-checkbox>
+    </ion-item>
+  </ion-list>
+</ion-content>
