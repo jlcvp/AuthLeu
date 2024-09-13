@@ -29,15 +29,13 @@ export class HomePage implements OnInit {
 
   @HostListener('window:focus', ['$event'])
   onFocus(event: FocusEvent): void {
-    // resume timer
-    console.log("Window focused")
+    // TODO: resume timer
     this.isWindowFocused = true
   }
 
   @HostListener('window:blur', ['$event'])
   onBlur(event: FocusEvent): void {
-    // stop timer, camera, etc
-    console.log("Window blurred")
+    // TODO: stop timer, camera, etc
     this.isWindowFocused = false
   }
 
@@ -208,8 +206,8 @@ export class HomePage implements OnInit {
 
   async exportAccountAction() {
     const accounts = await firstValueFrom(this.accounts$)
-    const modalTitle = await firstValueFrom(this.translateService.get('HOME.EXPORT_ACCOUNTS_MODAL_TITLE'))
-    const confirmText = await firstValueFrom(this.translateService.get('HOME.EXPORT_ACCOUNTS_MODAL_ACTION'))
+    const modalTitle = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORT_ACCOUNTS_MODAL_TITLE'))
+    const confirmText = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORT_ACCOUNTS_MODAL_ACTION'))
     const modal = await this.modalController.create({
       component: AccountSelectModalComponent,
       componentProps: {
@@ -219,12 +217,15 @@ export class HomePage implements OnInit {
       },
     })
     modal.present()
-    const { data } = await modal.onWillDismiss();
+    const { data, role } = await modal.onWillDismiss();
+    if (role === 'cancel') {
+      return
+    }
 
     const selectedAccounts = data ? data as Account2FA[] : undefined
     if (selectedAccounts && selectedAccounts.length > 0) {
       console.log("Selected accounts to export", { selectedAccounts })
-      const message = await firstValueFrom(this.translateService.get('HOME.EXPORTING_ACCOUNTS'))
+      const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORTING_ACCOUNTS'))
       const loading = await this.loadingController.create({
         message,
         backdropDismiss: false
@@ -233,7 +234,13 @@ export class HomePage implements OnInit {
       await this.accountsService.exportAccounts(selectedAccounts)
       await loading.dismiss()
     } else {
-
+      console.log("No accounts selected to export")
+      const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_EXPORT'))
+      const alert = await this.alertController.create({
+        message,
+        buttons: ['OK']
+      })
+      await alert.present()
     }
   }
 
@@ -254,8 +261,8 @@ export class HomePage implements OnInit {
           await loading.present()
           const accounts = await this.accountsService.readAccountsFromFile(file)
           input.remove()
-          const title = await firstValueFrom(this.translateService.get('HOME.IMPORT_ACCOUNTS_MODAL_TITLE'))
-          const confirmText = await firstValueFrom(this.translateService.get('HOME.IMPORT_ACCOUNTS_MODAL_ACTION'))
+          const title = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORT_ACCOUNTS_MODAL_TITLE'))
+          const confirmText = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORT_ACCOUNTS_MODAL_ACTION'))
           const modal = await this.modalController.create({
             component: AccountSelectModalComponent,
             componentProps: {
@@ -266,29 +273,36 @@ export class HomePage implements OnInit {
           })
           await loading.dismiss()
           modal.present()
-          const { data } = await modal.onWillDismiss();
-          message = await firstValueFrom(this.translateService.get('HOME.IMPORTING_ACCOUNTS'))
+          const { data, role } = await modal.onWillDismiss();
+          if (role === 'cancel') {
+            return
+          }
+          message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORTING_ACCOUNTS'))
           loading = await this.loadingController.create({
             message,
             backdropDismiss: false
           })
           await loading.present()
           const selectedAccounts = data ? data as Account2FA[] : undefined
+          console.log({data, selectedAccounts})
           if (selectedAccounts && selectedAccounts.length > 0) {
             await this.accountsService.importAccounts(selectedAccounts)
           } else {
-            console.log("No accounts selected")
+            throw new Error("ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_IMPORT")
           }
           await loading.dismiss()
-        } catch (error) {
-          const message = await firstValueFrom(this.translateService.get('HOME.ERROR.INVALID_BACKUP_FILE'))
-          const toast = await this.toastController.create({
+        } catch (error: any) {
+          let errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
+          const message = await firstValueFrom(this.translateService.get(errorKey))
+          const header = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.IMPORT_ERROR_TITLE'))
+          const alert = await this.alertController.create({
+            header,
             message,
-            duration: 2000,
-            color: 'danger'
+            backdropDismiss: false,
+            buttons: ['OK']
           })
           await loading.dismiss()
-          await toast.present()
+          await alert.present()
         }
       }
     }

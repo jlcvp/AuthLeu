@@ -12,6 +12,22 @@
         "SELECTION_COUNTER": "{{selected}}/{{total}} selected",
         "SELECT_ALL": "Select All"
     },
+    "ACCOUNT_SYNC": {
+        "ERROR": {
+            "CORRUPT_BACKUP_FILE": "Corrupted backup file",
+            "EMPTY_FILE": "The file is empty",
+            "GENERIC_IMPORT_ERROR": "Unknown error while importing accounts from backup",
+            "IMPORT_ERROR_TITLE": "Error importing accounts",
+            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export",
+            "NO_ACCOUNTS_SELECTED_TO_IMPORT": "No accounts selected to import"
+        },
+        "EXPORTING_ACCOUNTS": "Exporting backup...",
+        "EXPORT_ACCOUNTS_MODAL_ACTION": "Export",
+        "EXPORT_ACCOUNTS_MODAL_TITLE": "Export Accounts",
+        "IMPORTING_ACCOUNTS": "Importing backup...",
+        "IMPORT_ACCOUNTS_MODAL_ACTION": "Import",
+        "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts"
+    },
     "ADD_ACCOUNT_MODAL": {
         "ADDING_ACCOUNT": "Adding account...",
         "ERROR_MSGS": {
@@ -52,16 +68,6 @@
         "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
         "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
         "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
-        "ERROR": {
-            "INVALID_BACKUP_FILE": "The selected file doesn't have valid backup data",
-            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export"
-        },
-        "EXPORTING_ACCOUNTS": "Exporting backup...",
-        "EXPORT_ACCOUNTS_MODAL_ACTION": "Export",
-        "EXPORT_ACCOUNTS_MODAL_TITLE": "Export Accounts",
-        "IMPORTING_ACCOUNTS": "Importing backup...",
-        "IMPORT_ACCOUNTS_MODAL_ACTION": "Import",
-        "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts",
         "LOADING_ACCOUNTS": "Loading accounts...",
         "LOADING_ACCOUNTS_FILE": "Loading accounts from file...",
         "LOGGING_OUT": "Signing out..."

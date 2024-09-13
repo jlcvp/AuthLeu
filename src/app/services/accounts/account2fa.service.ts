@@ -72,22 +72,25 @@ export class Account2faService {
         try {
           const data = e.target?.result as string | undefined
           if (!data) {
-            throw new Error('No data')
-            return
+            throw new Error('ACCOUNT_SYNC.ERROR.EMPTY_FILE')
           }
 
           // check if file is a valid json
-          const anyArray = JSON.parse(data)
-          if (!Array.isArray(anyArray)) {
-            throw new Error('Not an array')
+          try {
+            const anyArray = JSON.parse(data)
+            if (!Array.isArray(anyArray)) {
+              throw new Error('Not an array')
+            }
+            
+            const accountsDict = JSON.parse(data) as IAccount2FA[]
+            const accounts = accountsDict.map(a => Account2FA.fromDictionary(a))
+            resolve(accounts)
+          } catch (error) {
+            console.error('Error parsing backup file', { error })
+            throw new Error('ACCOUNT_SYNC.ERROR.CORRUPT_BACKUP_FILE')
           }
-
-          const accountsDict = JSON.parse(data) as IAccount2FA[]
-          const accounts = accountsDict.map(a => Account2FA.fromDictionary(a))
-          resolve(accounts)
         } catch (error) {
-          console.error('Error processing backup file', { error })
-          reject('INVALID_BACKUP_FILE')
+          reject(error)
           return
         }
       }

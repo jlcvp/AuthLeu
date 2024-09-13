@@ -55,7 +55,7 @@ export class AccountSelectModalComponent implements OnInit {
   }
 
   closeModal() {
-    this.modalController.dismiss()
+    this.modalController.dismiss(null, 'cancel')
   }
 
 }

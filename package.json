@@ -1,8 +1,8 @@
 {
   "name": "authleu",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Leonardo 'Leu' Pereira <jlcvp@users.noreply.github.com>",
-  "homepage": "https://ionicframework.com/",
+  "homepage": "https://github.com/jlcvp/AuthLeu",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

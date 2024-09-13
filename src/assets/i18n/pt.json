@@ -12,6 +12,22 @@
         "SELECTION_COUNTER": "{{selected}} de {{total}} selecionada(s)",
         "SELECT_ALL": "Selecionar Tudo"
     },
+    "ACCOUNT_SYNC": {
+        "ERROR": {
+            "CORRUPT_BACKUP_FILE": "Arquivo de backup corrompido",
+            "EMPTY_FILE": "O arquivo está vazio",
+            "GENERIC_IMPORT_ERROR": "Erro desconhecido ao importar contas do backup",
+            "IMPORT_ERROR_TITLE": "Erro ao importar contas",
+            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar",
+            "NO_ACCOUNTS_SELECTED_TO_IMPORT": "Nenhuma conta selecionada para importar"
+        },
+        "EXPORTING_ACCOUNTS": "Exportando backup...",
+        "EXPORT_ACCOUNTS_MODAL_ACTION": "Exportar",
+        "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
+        "IMPORTING_ACCOUNTS": "Importando backup...",
+        "IMPORT_ACCOUNTS_MODAL_ACTION": "Importar",
+        "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas"
+    },
     "ADD_ACCOUNT_MODAL": {
         "ADDING_ACCOUNT": "Adicionando conta...",
         "ERROR_MSGS": {
@@ -52,18 +68,8 @@
         "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
         "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
         "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
-        "ERROR": {
-            "INVALID_BACKUP_FILE": "O arquivo selecionado não contém dados de backup válidos",
-            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar"
-        },
-        "EXPORTING_ACCOUNTS": "Exportando backup...",
-        "EXPORT_ACCOUNTS_MODAL_ACTION": "Exportar",
-        "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
-        "IMPORTING_ACCOUNTS": "Importando backup...",
-        "IMPORT_ACCOUNTS_MODAL_ACTION": "Importar",
-        "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas",
         "LOADING_ACCOUNTS": "Carregando contas...",
-        "LOADING_ACCOUNTS_FILE" : "Carregando arquivo de contas...",
+        "LOADING_ACCOUNTS_FILE": "Carregando arquivo de contas...",
         "LOGGING_OUT": "Saindo..."
     },
     "LOGIN": {
