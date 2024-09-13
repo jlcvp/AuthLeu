@@ -245,8 +245,8 @@ export class HomePage implements OnInit {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        const message = await firstValueFrom(this.translateService.get('HOME.IMPORTING_ACCOUNTS'))
-        const loading = await this.loadingController.create({
+        let message = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS_FILE'))
+        let loading = await this.loadingController.create({
           message,
           backdropDismiss: false
         })
@@ -267,6 +267,11 @@ export class HomePage implements OnInit {
           await loading.dismiss()
           modal.present()
           const { data } = await modal.onWillDismiss();
+          message = await firstValueFrom(this.translateService.get('HOME.IMPORTING_ACCOUNTS'))
+          loading = await this.loadingController.create({
+            message,
+            backdropDismiss: false
+          })
           await loading.present()
           const selectedAccounts = data ? data as Account2FA[] : undefined
           if (selectedAccounts && selectedAccounts.length > 0) {

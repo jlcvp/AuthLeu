@@ -63,6 +63,7 @@
         "IMPORT_ACCOUNTS_MODAL_ACTION": "Import",
         "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts",
         "LOADING_ACCOUNTS": "Loading accounts...",
+        "LOADING_ACCOUNTS_FILE": "Loading accounts from file...",
         "LOGGING_OUT": "Signing out..."
     },
     "LOGIN": {
