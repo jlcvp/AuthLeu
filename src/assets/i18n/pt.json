@@ -6,9 +6,9 @@
     },
     "ACCOUNT_SELECT_MODAL": {
         "CANCEL": "Cancelar",
+        "CONFIRM_SELECTION": "Confirmar",
         "DEFAULT_TITLE": "Selecionar Contas",
         "DESELECT_ALL": "Limpar Seleção",
-        "CONFIRM_SELECTION": "Confirmar",
         "SELECTION_COUNTER": "{{selected}} de {{total}} selecionada(s)",
         "SELECT_ALL": "Selecionar Tudo"
     },
@@ -52,18 +52,18 @@
         "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
         "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
         "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
-        "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
-        "EXPORT_ACCOUNTS_MODAL_ACTION": "Exportar",
-        "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas",
-        "IMPORT_ACCOUNTS_MODAL_ACTION": "Importar",
-        "EXPORTING_ACCOUNTS": "Exportando backup...",
-        "IMPORTING_ACCOUNTS": "Importando backup...",
-        "LOADING_ACCOUNTS": "Carregando contas...",
-        "LOGGING_OUT": "Saindo...",
         "ERROR": {
-            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar",
-            "INVALID_BACKUP_FILE": "O arquivo selecionado não contém dados de backup válidos"
-        }
+            "INVALID_BACKUP_FILE": "O arquivo selecionado não contém dados de backup válidos",
+            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar"
+        },
+        "EXPORTING_ACCOUNTS": "Exportando backup...",
+        "EXPORT_ACCOUNTS_MODAL_ACTION": "Exportar",
+        "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
+        "IMPORTING_ACCOUNTS": "Importando backup...",
+        "IMPORT_ACCOUNTS_MODAL_ACTION": "Importar",
+        "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas",
+        "LOADING_ACCOUNTS": "Carregando contas...",
+        "LOGGING_OUT": "Saindo..."
     },
     "LOGIN": {
         "AUTHENTICATING": "Autenticando...",

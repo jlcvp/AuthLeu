@@ -6,9 +6,9 @@
     },
     "ACCOUNT_SELECT_MODAL": {
         "CANCEL": "Cancel",
+        "CONFIRM_SELECTION": "Confirm",
         "DEFAULT_TITLE": "Select Accounts",
         "DESELECT_ALL": "Deselect All",
-        "CONFIRM_SELECTION": "Confirm",
         "SELECTION_COUNTER": "{{selected}}/{{total}} selected",
         "SELECT_ALL": "Select All"
     },
@@ -52,18 +52,18 @@
         "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
         "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
         "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
-        "EXPORT_ACCOUNTS_MODAL_TITLE": "Export Accounts",
-        "EXPORT_ACCOUNTS_MODAL_ACTION": "Export",
-        "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts",
-        "IMPORT_ACCOUNTS_MODAL_ACTION": "Import",
-        "EXPORTING_ACCOUNTS": "Exporting backup...",
-        "IMPORTING_ACCOUNTS": "Importing backup...",
-        "LOADING_ACCOUNTS": "Loading accounts...",
-        "LOGGING_OUT": "Signing out...",
         "ERROR": {
-            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export",
-            "INVALID_BACKUP_FILE": "The selected file doesn't have valid backup data"
-        }
+            "INVALID_BACKUP_FILE": "The selected file doesn't have valid backup data",
+            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export"
+        },
+        "EXPORTING_ACCOUNTS": "Exporting backup...",
+        "EXPORT_ACCOUNTS_MODAL_ACTION": "Export",
+        "EXPORT_ACCOUNTS_MODAL_TITLE": "Export Accounts",
+        "IMPORTING_ACCOUNTS": "Importing backup...",
+        "IMPORT_ACCOUNTS_MODAL_ACTION": "Import",
+        "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts",
+        "LOADING_ACCOUNTS": "Loading accounts...",
+        "LOGGING_OUT": "Signing out..."
     },
     "LOGIN": {
         "AUTHENTICATING": "Authenticating...",
