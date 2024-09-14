@@ -13,7 +13,7 @@ All the firebase integration is optional, and we currently don't offer a SaaS op
 - [ ] Delete/disable/hide 2FA accounts.
 - [x] Sync 2FA accounts across multiple devices using Firebase Firestore.
 - [x] Import/Export 2FA accounts as a JSON file.
-    - [ ] Import/Export only selected 2FA accounts.
+    - [x] Import/Export only selected 2FA accounts.
 - [ ] Encrypt 2FA Secrets in the local storage using a master password.
 - [ ] Encrypt 2FA Secrets in the firestore using a master password. 
 - [ ] Support for other 2FA methods like HOTP.
