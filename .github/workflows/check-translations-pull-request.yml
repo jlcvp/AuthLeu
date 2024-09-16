@@ -1,0 +1,12 @@
+name: Check Translations on Pull Request
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  check-translations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run translations check
+        run: npm run translations:check

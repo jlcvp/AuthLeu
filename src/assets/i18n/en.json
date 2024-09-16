@@ -96,5 +96,8 @@
         "UPDATE_AVAILABLE_BODY": "A new version of the app is available and will be installed automatically to get the latest features and bug fixes.",
         "UPDATE_AVAILABLE_HEADER": "Update available",
         "UPDATE_NOW": "Update now"
+    },
+    "CRYPTO": {
+        "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser"
     }
 }

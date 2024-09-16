@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { LocalStorageService } from '../local-storage.service';
-import { GlobalUtils } from 'src/app/utils/global-utils';
+import { CryptoUtils } from 'src/app/utils/crypto-utils';
 
 @Injectable({
   providedIn: 'root'
@@ -66,7 +66,7 @@ export class LocalAccount2faService implements IAccount2FAProvider {
     let autoId = '';
     const targetLength = 20;
     while (autoId.length < targetLength) {
-      const bytes = GlobalUtils.randomBytes(40);
+      const bytes = CryptoUtils.randomBytes(40);
       for (let i = 0; i < bytes.length; ++i) {
         // Only accept values that are [0, maxMultiple), this ensures they can
         // be evenly mapped to indices of `chars` via a modulo operation.
