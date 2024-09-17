@@ -98,6 +98,9 @@
         "UPDATE_NOW": "Update now"
     },
     "CRYPTO": {
-        "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser"
+        "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
+        "MISSING_ENCRYPTED_DATA": "Missing encrypted data",
+        "ALREADY_ENCRYPTED": "Data is already encrypted",
+        "ALREADY_DECRYPTED": "Data is already decrypted"
     }
 }

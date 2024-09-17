@@ -51,6 +51,7 @@ export class HomePage implements OnInit {
 
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount?: Account2FA
+  lockedAccount?: Account2FA
   searchTxt: string = ''
   draftLogoSearchTxt: string = ''
   searchLogoResults: any[] = []
@@ -304,6 +305,51 @@ export class HomePage implements OnInit {
           await loading.dismiss()
           await alert.present()
         }
+      }
+    }
+  }
+
+  async lockAccountAction() {
+    const password = '1490'
+    const accountSelected = this.selectedAccount
+    console.log('account', { accountSelected })
+
+    if (accountSelected) {
+      const account = Account2FA.fromDictionary(accountSelected.typeErased()) // copy account
+      try {
+        console.log('account before', { accountSelected })
+        await account.lock(password)
+        this.lockedAccount = account
+        console.log('account locked', { account })
+        
+      } catch (error) {
+        console.error("Error locking account", error)
+        const message = await firstValueFrom(this.translateService.get('HOME.ERROR_LOCKING_ACCOUNT'))
+        const alert = await this.alertController.create({
+          message,
+          buttons: ['OK']
+        })
+        await alert.present()
+      }
+    }
+  }
+
+  async unlockAccountAction() {
+    const password = '1490'
+    const account = this.lockedAccount
+    console.log('account before', { account })
+    if(account) {
+      try {
+        await account.unlock(password)
+        console.log('account unlocked', { account })
+      } catch (error) {
+        console.error("Error unlocking account", error)
+        const message = await firstValueFrom(this.translateService.get('HOME.ERROR_UNLOCKING_ACCOUNT'))
+        const alert = await this.alertController.create({
+          message,
+          buttons: ['OK']
+        })
+        await alert.present()
       }
     }
   }

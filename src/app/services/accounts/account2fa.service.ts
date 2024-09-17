@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, map, mergeMap, Observable } from 'rxjs';
 import { RemoteAccount2faService } from './remote-account2fa.service';
 import { LocalAccount2faService } from './local-account2fa.service';
 import { AppConfigService } from '../app-config.service';
@@ -37,9 +37,39 @@ export class Account2faService {
     return this.service.addAccount(account)
   }
 
-  public async getAccounts(): Promise<Observable<Account2FA[]>> {
-    const accounts$ = await this.service.getAccounts()
-    return accounts$
+  /**
+   * Retrieves accounts, optionally decrypting them with the provided decryption key.
+   * @param decryptionKey - Optional key to decrypt account secrets.
+   * @returns An observable of the list of accounts.
+   */
+  public async getAccounts(decryptionKey?: string): Promise<Observable<Account2FA[]>> {
+    // Get the observable of accounts from the service
+    const accounts$ = await this.service.getAccounts();
+
+    // If a decryption key is provided, decrypt the accounts
+    if (decryptionKey) {
+      return accounts$.pipe(
+        mergeMap(async (accounts) => {
+          const decryptions: Promise<void>[] = [];
+
+          // Iterate over each account and decrypt if necessary
+          for (const account of accounts) {
+            if (!account.secret) {
+              decryptions.push(account.unlock(decryptionKey));
+            }
+          }
+
+          // Wait for all decryption promises to resolve
+          await Promise.all(decryptions);
+
+          // Return the decrypted accounts
+          return accounts;
+        })
+      );
+    }
+
+    // If no decryption key is provided, return the accounts as is
+    return accounts$;
   }
 
   public async clearCache() {
@@ -48,15 +78,27 @@ export class Account2faService {
     }
   }
 
+  /**
+   * Exports the given accounts to a JSON file and triggers a download.
+   * @param accountsArray - The array of accounts to export.
+   */
   public async exportAccounts(accountsArray: Account2FA[]) {
-    const data = JSON.stringify(accountsArray, null, 2)
-    const blob = new Blob([data], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'AuthLeu-accounts.json'
-    a.click()
-    a.remove()
+    // Convert the accounts array to a JSON string with indentation
+    const data = JSON.stringify(accountsArray, null, 2);
+    // Create a Blob from the JSON string
+    const blob = new Blob([data], { type: 'application/json' });
+    // Generate a URL for the Blob
+    const url = URL.createObjectURL(blob);
+    // Create a temporary anchor element to trigger the download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'AuthLeu-accounts.json';
+
+    // Trigger the download by simulating a click on the anchor element
+    a.click();
+
+    // Clean up by removing the anchor element
+    a.remove();
   }
 
   public async importAccounts(accounts: Account2FA[]) {

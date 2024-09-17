@@ -1,4 +1,5 @@
 import { Observable } from "rxjs";
+import { CryptoUtils } from "../utils/crypto-utils";
 
 export interface IAccount2FA {
     id: string;
@@ -36,10 +37,10 @@ export class Account2FA implements IAccount2FA {
     encryptedSecret?: string;
     iv?: string;
     salt?: string;
-    constructor(id: string, label: string, secret: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string, encryptedSecret?: string, iv?: string, salt?: string) {
+    constructor(id: string, label: string, secret?: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string, encryptedSecret?: string, iv?: string, salt?: string) {
         this.id = id;
         this.label = label;
-        this.secret = secret;
+        this.secret = secret || '';
         this.tokenLength = tokenLength || 6;
         this.interval = interval || 30;
         this.algorithm = algorithm || 'SHA1';
@@ -102,6 +103,35 @@ export class Account2FA implements IAccount2FA {
         const interval = params.get('period') ? parseInt(params.get('period')!) : undefined;
 
         return new Account2FA('', label, secret, tokenLength, interval, algorithm, issuer);
+    }
+
+    get isLocked(): boolean {
+        return !this.secret
+    }
+
+    async unlock(decryptionKey: string) {
+        if(!this.isLocked) {
+            throw new Error('CRYPTO.ALREADY_DECRYPTED');
+        }
+
+        if(!this.encryptedSecret || !this.iv || !this.salt) {
+            throw new Error('CRYPTO.MISSING_ENCRYPTED_DATA');
+        }
+
+        const decryptedSecret = await CryptoUtils.shared.decryptSecretKey(this.encryptedSecret, decryptionKey, this.salt, this.iv);
+        this.secret = decryptedSecret;
+    }
+
+    async lock(encryptionKey: string) {
+        if(this.isLocked) {
+            throw new Error('CRYPTO.ALREADY_ENCRYPTED');
+        }
+
+        const {encryptedKey, iv, salt} = await CryptoUtils.shared.encryptSecretKey(this.secret, encryptionKey);
+        this.encryptedSecret = encryptedKey;
+        this.iv = iv;
+        this.salt = salt;
+        this.secret = '';
     }
 
     getLogo(): string {
