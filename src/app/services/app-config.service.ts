@@ -23,7 +23,7 @@ export class AppConfigService {
     return environment.isOfflineEnv;
   }
 
-  static supportsCryptoAPI() {
-    return (crypto && crypto.subtle)
+  static supportsCryptoAPI(): boolean {
+    return !!(crypto && crypto.subtle)
   }
 }

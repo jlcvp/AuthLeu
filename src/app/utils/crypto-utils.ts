@@ -27,7 +27,7 @@ export class CryptoUtils {
     }
 
     private constructor() {
-        if (AppConfigService.supportsCryptoAPI()) {
+        if (!AppConfigService.supportsCryptoAPI()) {
             throw new Error('CRYPTO_API_NOT_SUPPORTED');
         }
     }
