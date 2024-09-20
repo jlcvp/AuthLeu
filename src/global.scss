@@ -45,3 +45,8 @@ ion-toast.width-auto {
     align-items: center;
     justify-content: center;
 }
+
+ion-popover.wider-popover {
+    --max-width: 300px;
+    --width: 300px;
+}

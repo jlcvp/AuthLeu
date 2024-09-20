@@ -12,6 +12,11 @@
         "SELECTION_COUNTER": "{{selected}} de {{total}} selecionada(s)",
         "SELECT_ALL": "Selecionar Tudo"
     },
+    "ACCOUNT_SERVICE": {
+        "ERROR": {
+            "ACCOUNT_NOT_FOUND": "Conta não encontrada"
+        }
+    },
     "ACCOUNT_SYNC": {
         "ERROR": {
             "CORRUPT_BACKUP_FILE": "Arquivo de backup corrompido",
@@ -57,10 +62,21 @@
         "COLOR_MODE_DARK": "Escuro",
         "COLOR_MODE_LIGHT": "Claro",
         "COLOR_MODE_SYSTEM": "Sistema",
+        "ENCRYPTION_ACTIVE": "Ativo",
+        "ENCRYPTION_INACTIVE": "Inativo",
+        "ENCRYPTION_OPTIONS": "Criptografia",
+        "ENCRYPT_ACCOUNTS": "Criptografar Contas",
         "EXPORT_ACCOUNTS": "Exportar Backup",
         "IMPORT_ACCOUNTS": "Importar Backup",
         "LOGIN": "Entrar",
-        "LOGOUT": "Sair"
+        "LOGOUT": "Sair",
+        "PERIODIC_CHECK": "Verificação Periódica de Senha"
+    },
+    "CRYPTO": {
+        "ALREADY_DECRYPTED": "Os dados já estão descriptografados",
+        "ALREADY_ENCRYPTED": "Os dados já estão criptografados",
+        "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
+        "MISSING_ENCRYPTED_DATA": "Dados criptografados ausentes"
     },
     "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
     "HOME": {
@@ -70,7 +86,11 @@
         "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
         "LOADING_ACCOUNTS": "Carregando contas...",
         "LOADING_ACCOUNTS_FILE": "Carregando arquivo de contas...",
-        "LOGGING_OUT": "Saindo..."
+        "LOGGING_OUT": "Saindo...",
+        "PASSWORD_PROMPT_CANCEL": "Cancelar",
+        "PASSWORD_PROMPT_CONFIRM": "Confirmar",
+        "PASSWORD_PROMPT_MESSAGE": "Para descriptografar as contas, insira a senha de criptografia",
+        "PASSWORD_PROMPT_TITLE": "Digite a senha de criptografia"
     },
     "LOGIN": {
         "AUTHENTICATING": "Autenticando...",
@@ -96,11 +116,5 @@
         "UPDATE_AVAILABLE_BODY": "Uma nova versão da aplicação está disponível e será instalada automaticamente para obter as últimas funcionalidades e correções de bugs.",
         "UPDATE_AVAILABLE_HEADER": "Atualização disponível",
         "UPDATE_NOW": "Atualizar agora"
-    },
-    "CRYPTO": {
-        "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
-        "MISSING_ENCRYPTED_DATA": "Dados criptografados ausentes",
-        "ALREADY_ENCRYPTED": "Os dados já estão criptografados",
-        "ALREADY_DECRYPTED": "Os dados já estão descriptografados"
     }
 }

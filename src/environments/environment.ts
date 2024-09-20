@@ -14,6 +14,12 @@ export const environment = {
     apiKey: "AIzaSyB0JZ7doymz8wuuEnqcyFKrZAouSjZ55bY",
     authDomain: "authleu.firebaseapp.com",
     messagingSenderId: "946698001868"
+  },
+  versionConfig: {
+    versionNumber: "%VERSION%",
+    buildDate: "%BUILD_DATE%",
+    commitHash: "%COMMIT_HASH%",
+    versionName: "%VERSION%-DEV" 
   }
 };
 

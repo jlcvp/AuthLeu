@@ -11,6 +11,8 @@ import { LocalStorageService } from '../services/local-storage.service';
 import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
 import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
+import { AppConfigService } from '../services/app-config.service';
+import { ENCRYPTION_OPTIONS_PASSWORD_KEY, EncryptionOptions } from '../models/encryption-options.model';
 
 @Component({
   selector: 'app-home',
@@ -63,6 +65,8 @@ export class HomePage implements OnInit {
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   isWindowFocused: boolean = true
+  isEncryptionActive: boolean = false
+  shouldPeriodicCheckPassword: boolean = false
 
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
   private isLandscape: boolean = false
@@ -77,6 +81,7 @@ export class HomePage implements OnInit {
     private modalController: ModalController,
     private logoService: LogoService,
     private storageService: LocalStorageService,
+    private configService: AppConfigService,
     private translateService: TranslateService,
     private navCtrl: NavController,
     formBuilder: FormBuilder
@@ -132,16 +137,12 @@ export class HomePage implements OnInit {
       backdropDismiss: false
     })
     GlobalUtils.hideSplashScreen()
-    await loading.present()
-    this.accounts$ = await this.accountsService.getAccounts()
-    const lastSelectedAccountId: string | undefined = await this.storageService.get('lastSelectedAccountId')
-    if (lastSelectedAccountId) {
-      const accounts = await firstValueFrom(this.accounts$)
-      const lastSelectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
-      if (lastSelectedAccount) {
-        this.selectAccount(lastSelectedAccount)
-      }
+    const encryptionOptions = await this.configService.getEncryptionOptions()
+    if(encryptionOptions) {
+      await this.setupEncryption(encryptionOptions)
     }
+    await loading.present()
+    await this.loadAccounts()
     await loading.dismiss()
   }
 
@@ -307,6 +308,30 @@ export class HomePage implements OnInit {
         }
       }
     }
+  }
+
+  async encryptionActiveToggle() {
+    this.isEncryptionActive = !this.isEncryptionActive
+    await this.saveEncryptionOptions()
+  }
+
+  get encryptionMenuSlotLabel(): string {
+    return this.isEncryptionActive ? 'CONFIG_MENU.ENCRYPTION_ACTIVE' : 'CONFIG_MENU.ENCRYPTION_INACTIVE'
+  }
+  
+  get encryptionMenuSlotLabelColor(): string {
+    return this.isEncryptionActive ? 'success' : 'danger'
+  }
+
+  periodicCheckToggle() {
+    this.shouldPeriodicCheckPassword = !this.shouldPeriodicCheckPassword
+  }
+
+  async saveEncryptionOptions() {
+    await this.configService.setEncryptionOptions({
+      encryptionActive: this.isEncryptionActive,
+      shouldPerformPeriodicCheck: this.shouldPeriodicCheckPassword
+    })
   }
 
   async lockAccountAction() {
@@ -591,5 +616,72 @@ export class HomePage implements OnInit {
       });
       await confirmPrompt.present()
     })
+  }
+
+  private async loadAccounts() {
+    const accounts$ = await this.accountsService.getAccounts()
+    const lastSelectedAccountId: string | undefined = await this.storageService.get('lastSelectedAccountId')
+    if (lastSelectedAccountId) {
+      const accounts = await firstValueFrom(accounts$)
+      const lastSelectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
+      if (lastSelectedAccount) {
+        this.selectAccount(lastSelectedAccount)
+      }
+    }
+    this.accounts$ = accounts$
+  }
+
+  private async setupEncryption(encryptionOptions: EncryptionOptions) {
+    // set page properties
+    this.isEncryptionActive = encryptionOptions.encryptionActive
+    this.shouldPeriodicCheckPassword = encryptionOptions.shouldPerformPeriodicCheck
+
+    if(this.isEncryptionActive) {
+      await this.setupEncryptionPassword()
+    }
+  }
+
+  private async setupEncryptionPassword() {
+    const password = await this.storageService.get<string>(ENCRYPTION_OPTIONS_PASSWORD_KEY)
+    if(!password) {
+      // show password prompt
+      const password = await this.promptPassword()
+      if(password) {
+        await this.storageService.set(ENCRYPTION_OPTIONS_PASSWORD_KEY, password)
+      }
+    }
+  }
+
+  private async promptPassword(): Promise<string> {
+    const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_MESSAGE'))
+    const cancelText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CANCEL'))
+    const okText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRM'))
+    
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      inputs: [
+        {
+          name: 'password',
+          type: 'password'
+        }
+      ],
+      buttons: [
+        {
+          text: cancelText,
+          role: 'cancel'
+        }, {
+          text: okText,
+          handler: (data) => {
+            return data.password
+          }
+        }
+      ]
+    })
+    await alert.present()
+
+    const { data } = await alert.onDidDismiss()
+    return data?.values?.password || ''
   }
 }

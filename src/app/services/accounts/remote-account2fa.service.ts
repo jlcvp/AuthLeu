@@ -40,6 +40,17 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
     return id
   }
 
+  async updateAccount(account: Account2FA): Promise<void> {
+    throw new Error('INVALID_SESSION')
+    const userId = await this.authService.getCurrentUserId()
+    if(!userId) {
+      throw new Error('INVALID_SESSION')
+    }
+    const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
+    const document = doc(accountCollection, account.id)
+    await setDoc(document, account.typeErased())
+  }
+
   public async clearCache() {
     await terminate(this.firestore)
     await clearIndexedDbPersistence(this.firestore)

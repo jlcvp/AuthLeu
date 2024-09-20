@@ -72,6 +72,16 @@ export class Account2faService {
     return accounts$;
   }
 
+  /**
+   * Updates an existing account with new information.
+   * 
+   * @param account - The account object containing updated information.
+   * @returns A promise that resolves when the account has been updated.
+   */
+  public async updateAccount(account: Account2FA) {
+    return this.service.updateAccount(account)
+  }
+
   public async clearCache() {
     if (this.service.clearCache) {
       await this.service.clearCache()
@@ -101,12 +111,21 @@ export class Account2faService {
     a.remove();
   }
 
+  /**
+   * Adds the given accounts to the account provider.
+   * @param accounts - The array of accounts to import.
+   */
   public async importAccounts(accounts: Account2FA[]) {
     for (const account of accounts) {
       await this.addAccount(account)
     }
   }
 
+  /**
+   * Reads accounts from a file and returns them as an array of Account2FA objects.
+   * @param file - The file to read accounts from.
+   * @returns A promise that resolves with the array of accounts.
+   */
   public readAccountsFromFile(file: File): Promise<Account2FA[]> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -138,13 +157,5 @@ export class Account2faService {
       }
       reader.readAsText(file)
     })
-  }
-
-  useLocalService() {
-    this._service = this.localService
-  }
-
-  useRemoteService() {
-    this._service = this.remoteService
   }
 }

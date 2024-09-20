@@ -12,6 +12,11 @@
         "SELECTION_COUNTER": "{{selected}}/{{total}} selected",
         "SELECT_ALL": "Select All"
     },
+    "ACCOUNT_SERVICE": {
+        "ERROR": {
+            "ACCOUNT_NOT_FOUND": "Account not found"
+        }
+    },
     "ACCOUNT_SYNC": {
         "ERROR": {
             "CORRUPT_BACKUP_FILE": "Corrupted backup file",
@@ -57,10 +62,21 @@
         "COLOR_MODE_DARK": "Dark",
         "COLOR_MODE_LIGHT": "Light",
         "COLOR_MODE_SYSTEM": "System",
+        "ENCRYPTION_ACTIVE": "Active",
+        "ENCRYPTION_INACTIVE": "Inactive",
+        "ENCRYPTION_OPTIONS": "Encryption",
+        "ENCRYPT_ACCOUNTS": "Encrypt Accounts",
         "EXPORT_ACCOUNTS": "Export Backup",
         "IMPORT_ACCOUNTS": "Import Backup",
         "LOGIN": "Sign in",
-        "LOGOUT": "Sign out"
+        "LOGOUT": "Sign out",
+        "PERIODIC_CHECK": "Periodic Password Check"
+    },
+    "CRYPTO": {
+        "ALREADY_DECRYPTED": "Data is already decrypted",
+        "ALREADY_ENCRYPTED": "Data is already encrypted",
+        "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
+        "MISSING_ENCRYPTED_DATA": "Missing encrypted data"
     },
     "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
     "HOME": {
@@ -70,7 +86,11 @@
         "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
         "LOADING_ACCOUNTS": "Loading accounts...",
         "LOADING_ACCOUNTS_FILE": "Loading accounts from file...",
-        "LOGGING_OUT": "Signing out..."
+        "LOGGING_OUT": "Signing out...",
+        "PASSWORD_PROMPT_CANCEL": "Cancel",
+        "PASSWORD_PROMPT_CONFIRM": "Confirm",
+        "PASSWORD_PROMPT_MESSAGE": "In order to decrypt the accounts, please enter the encryption password",
+        "PASSWORD_PROMPT_TITLE": "Enter the encryption password"
     },
     "LOGIN": {
         "AUTHENTICATING": "Authenticating...",
@@ -96,11 +116,5 @@
         "UPDATE_AVAILABLE_BODY": "A new version of the app is available and will be installed automatically to get the latest features and bug fixes.",
         "UPDATE_AVAILABLE_HEADER": "Update available",
         "UPDATE_NOW": "Update now"
-    },
-    "CRYPTO": {
-        "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
-        "MISSING_ENCRYPTED_DATA": "Missing encrypted data",
-        "ALREADY_ENCRYPTED": "Data is already encrypted",
-        "ALREADY_DECRYPTED": "Data is already decrypted"
     }
 }

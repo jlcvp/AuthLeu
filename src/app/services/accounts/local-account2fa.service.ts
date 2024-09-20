@@ -43,6 +43,22 @@ export class LocalAccount2faService implements IAccount2FAProvider {
     return id
   }
 
+  async updateAccount(account: Account2FA): Promise<void> {
+    await this.loadAccountsFromStorage()
+
+    const existing = this.accounts.find(a => a.id === account.id)
+    if (!existing) {
+      throw new Error('ACCOUNT_NOT_FOUND')
+    }
+
+    const index = this.accounts.indexOf(existing)
+    this.accounts[index] = account
+    this.sortAccounts()
+    await this.localStorage.set('local_accounts', this.accounts)
+
+    this.accountsSubject.next(this.accounts)
+  }
+
   private async loadAccountsFromStorage() {
     if (this.loaded) {
       return

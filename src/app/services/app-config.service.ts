@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from './local-storage.service';
 import { environment } from 'src/environments/environment';
+import { ENCRYPTION_OPTIONS_KEY, EncryptionOptions } from '../models/encryption-options.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,14 @@ export class AppConfigService {
 
   isOfflineEnv() {
     return environment.isOfflineEnv;
+  }
+
+  async getEncryptionOptions() {
+    return await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY);
+  }
+  
+  async setEncryptionOptions(options: EncryptionOptions) {
+    await this.localStorage.set(ENCRYPTION_OPTIONS_KEY, options);
   }
 
   static supportsCryptoAPI(): boolean {
