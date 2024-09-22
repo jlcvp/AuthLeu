@@ -48,7 +48,7 @@ export class LocalAccount2faService implements IAccount2FAProvider {
 
     const existing = this.accounts.find(a => a.id === account.id)
     if (!existing) {
-      throw new Error('ACCOUNT_NOT_FOUND')
+      throw new Error('ACCOUNT_SERVICE.ERROR.ACCOUNT_NOT_FOUND')
     }
 
     const index = this.accounts.indexOf(existing)

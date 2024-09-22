@@ -50,3 +50,7 @@ ion-popover.wider-popover {
     --max-width: 300px;
     --width: 300px;
 }
+
+ion-popover.wider-popover .version-info {
+    cursor: pointer;
+}

@@ -9,7 +9,7 @@
     <ion-title>{{ title || ("ACCOUNT_SELECT_MODAL.DEFAULT_TITLE" | translate) }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="onConfirm()" [disabled]="selectedAccountsCount<1">
-        <ion-label>{{ confirmText || ("CONFIRM_SELECTION.EXPORT" | translate) }}</ion-label>
+        <ion-label>{{ confirmText || ("ACCOUNT_SELECT_MODAL.CONFIRM_SELECTION" | translate) }}</ion-label>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>

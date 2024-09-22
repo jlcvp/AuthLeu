@@ -1,120 +1,136 @@
 {
-    "ACCOUNT_DETAIL": {
-        "CODE_COPIED": "Código copiado para a área de transferência",
-        "SECONDS_SHORT": "s",
-        "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar..."
-    },
-    "ACCOUNT_SELECT_MODAL": {
-        "CANCEL": "Cancelar",
-        "CONFIRM_SELECTION": "Confirmar",
-        "DEFAULT_TITLE": "Selecionar Contas",
-        "DESELECT_ALL": "Limpar Seleção",
-        "SELECTION_COUNTER": "{{selected}} de {{total}} selecionada(s)",
-        "SELECT_ALL": "Selecionar Tudo"
-    },
-    "ACCOUNT_SERVICE": {
-        "ERROR": {
-            "ACCOUNT_NOT_FOUND": "Conta não encontrada"
-        }
-    },
-    "ACCOUNT_SYNC": {
-        "ERROR": {
-            "CORRUPT_BACKUP_FILE": "Arquivo de backup corrompido",
-            "EMPTY_FILE": "O arquivo está vazio",
-            "GENERIC_IMPORT_ERROR": "Erro desconhecido ao importar contas do backup",
-            "IMPORT_ERROR_TITLE": "Erro ao importar contas",
-            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar",
-            "NO_ACCOUNTS_SELECTED_TO_IMPORT": "Nenhuma conta selecionada para importar"
-        },
-        "EXPORTING_ACCOUNTS": "Exportando backup...",
-        "EXPORT_ACCOUNTS_MODAL_ACTION": "Exportar",
-        "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
-        "IMPORTING_ACCOUNTS": "Importando backup...",
-        "IMPORT_ACCOUNTS_MODAL_ACTION": "Importar",
-        "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas"
-    },
-    "ADD_ACCOUNT_MODAL": {
-        "ADDING_ACCOUNT": "Adicionando conta...",
-        "ERROR_MSGS": {
-            "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
-            "ERROR_CAMERA_HEADER": "Câmera não disponível",
-            "ERROR_CAMERA_MESSAGE": "<p>O acesso à câmera é necessário para escanear QR codes, mas parece que seu dispositivo não possui uma câmera ou as permissões da câmera foram negadas.</p><p>Verifique as permissões e/ou configurações do seu dispositivo e tente novamente.</p>",
-            "INVALID_QR_CODE": "QR Code inválido",
-            "INVALID_SESSION": "Sessão inválida",
-            "UNKNOWN_ERROR": "Erro desconhecido"
-        },
-        "EXAMPLI_GRATIA_SHORT": "ex.:",
-        "LABEL": "Rótulo",
-        "LOADING_CAMERA": "Carregando câmera...",
-        "LOGO": "Logo",
-        "MANUAL_INPUT": "Inserir manualmente",
-        "NO_LOGO": "Sem Logo",
-        "SAVE": "Salvar Conta",
-        "SCAN_QR_CODE": "Escanear QR Code",
-        "SECRET_KEY": "Chave-Segredo",
-        "TITLE": "Adicionar Conta",
-        "TOKEN_INTERVAL": "Intervalo do Token (s)",
-        "TOKEN_SIZE": "Tamanho do Token"
-    },
-    "CONFIG_MENU": {
-        "ADD_ACCOUNT": "Adicionar Conta",
-        "COLOR_MODE": "Modo de Cor",
-        "COLOR_MODE_DARK": "Escuro",
-        "COLOR_MODE_LIGHT": "Claro",
-        "COLOR_MODE_SYSTEM": "Sistema",
-        "ENCRYPTION_ACTIVE": "Ativo",
-        "ENCRYPTION_INACTIVE": "Inativo",
-        "ENCRYPTION_OPTIONS": "Criptografia",
-        "ENCRYPT_ACCOUNTS": "Criptografar Contas",
-        "EXPORT_ACCOUNTS": "Exportar Backup",
-        "IMPORT_ACCOUNTS": "Importar Backup",
-        "LOGIN": "Entrar",
-        "LOGOUT": "Sair",
-        "PERIODIC_CHECK": "Verificação Periódica de Senha"
-    },
-    "CRYPTO": {
-        "ALREADY_DECRYPTED": "Os dados já estão descriptografados",
-        "ALREADY_ENCRYPTED": "Os dados já estão criptografados",
-        "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
-        "MISSING_ENCRYPTED_DATA": "Dados criptografados ausentes"
-    },
-    "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
-    "HOME": {
-        "CANCEL": "Cancelar",
-        "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
-        "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
-        "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
-        "LOADING_ACCOUNTS": "Carregando contas...",
-        "LOADING_ACCOUNTS_FILE": "Carregando arquivo de contas...",
-        "LOGGING_OUT": "Saindo...",
-        "PASSWORD_PROMPT_CANCEL": "Cancelar",
-        "PASSWORD_PROMPT_CONFIRM": "Confirmar",
-        "PASSWORD_PROMPT_MESSAGE": "Para descriptografar as contas, insira a senha de criptografia",
-        "PASSWORD_PROMPT_TITLE": "Digite a senha de criptografia"
-    },
-    "LOGIN": {
-        "AUTHENTICATING": "Autenticando...",
-        "CLOUD_SYNC": "Sincronização na nuvem",
-        "CONTINUE_OFFLINE": "Usar offline",
-        "EMAIL": "E-mail",
-        "ERROR_MSGS": {
-            "DEFAULT_ERROR": "Não foi possível fazer o login, verifique as credenciais e tente novamente",
-            "INVALID_PASSWORD": "Senha inválida",
-            "TOO_MANY_ATTEMPTS_TRY_LATER": "Muitas tentativas de login. Tente novamente após 15 minutos",
-            "USER_NOT_FOUND": "Usuário não encontrado"
-        },
-        "PASSWORD": "Senha",
-        "SIGN_IN_BUTTON": "Entrar",
-        "VALIDATION_MSGS": {
-            "EMAIL_PATTERN": "E-mail inválido",
-            "REQUIRED_EMAIL": "Obrigatório informar um e-mail",
-            "REQUIRED_PASSWORD": "Informe a senha"
-        }
-    },
-    "SEARCH": "Pesquisar",
-    "UPDATER": {
-        "UPDATE_AVAILABLE_BODY": "Uma nova versão da aplicação está disponível e será instalada automaticamente para obter as últimas funcionalidades e correções de bugs.",
-        "UPDATE_AVAILABLE_HEADER": "Atualização disponível",
-        "UPDATE_NOW": "Atualizar agora"
+  "ACCOUNT_DETAIL": {
+    "CODE_COPIED": "Código copiado para a área de transferência",
+    "SECONDS_SHORT": "s",
+    "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar..."
+  },
+  "ACCOUNT_SELECT_MODAL": {
+    "CANCEL": "Cancelar",
+    "CONFIRM_SELECTION": "Confirmar",
+    "DEFAULT_TITLE": "Selecionar Contas",
+    "DESELECT_ALL": "Limpar Seleção",
+    "SELECTION_COUNTER": "{{selected}} de {{total}} selecionada(s)",
+    "SELECT_ALL": "Selecionar Tudo"
+  },
+  "ACCOUNT_SERVICE": {
+    "ERROR": {
+      "ACCOUNT_NOT_FOUND": "Conta não encontrada"
     }
+  },
+  "ACCOUNT_SYNC": {
+    "ERROR": {
+      "CORRUPT_BACKUP_FILE": "Arquivo de backup corrompido",
+      "EMPTY_FILE": "O arquivo está vazio",
+      "GENERIC_IMPORT_ERROR": "Erro desconhecido ao importar contas do backup",
+      "IMPORT_ERROR_TITLE": "Erro ao importar contas",
+      "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar",
+      "NO_ACCOUNTS_SELECTED_TO_IMPORT": "Nenhuma conta selecionada para importar"
+    },
+    "EXPORTING_ACCOUNTS": "Exportando backup...",
+    "EXPORT_ACCOUNTS_MODAL_ACTION": "Exportar",
+    "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
+    "IMPORTING_ACCOUNTS": "Importando backup...",
+    "IMPORT_ACCOUNTS_MODAL_ACTION": "Importar",
+    "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas"
+  },
+  "ADD_ACCOUNT_MODAL": {
+    "ADDING_ACCOUNT": "Adicionando conta...",
+    "ERROR_MSGS": {
+      "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
+      "ERROR_CAMERA_HEADER": "Câmera não disponível",
+      "ERROR_CAMERA_MESSAGE": "<p>O acesso à câmera é necessário para escanear QR codes, mas parece que seu dispositivo não possui uma câmera ou as permissões da câmera foram negadas.</p><p>Verifique as permissões e/ou configurações do seu dispositivo e tente novamente.</p>",
+      "INVALID_QR_CODE": "QR Code inválido",
+      "INVALID_SESSION": "Sessão inválida"
+    },
+    "EXAMPLI_GRATIA_SHORT": "ex.:",
+    "LABEL": "Rótulo",
+    "LOADING_CAMERA": "Carregando câmera...",
+    "LOGO": "Logo",
+    "MANUAL_INPUT": "Inserir manualmente",
+    "NO_LOGO": "Sem Logo",
+    "SAVE": "Salvar Conta",
+    "SCAN_QR_CODE": "Escanear QR Code",
+    "SECRET_KEY": "Chave-Segredo",
+    "TITLE": "Adicionar Conta",
+    "TOKEN_INTERVAL": "Intervalo do Token (s)",
+    "TOKEN_SIZE": "Tamanho do Token"
+  },
+  "CONFIG_MENU": {
+    "ADD_ACCOUNT": "Adicionar Conta",
+    "COLOR_MODE": "Modo de Cor",
+    "COLOR_MODE_DARK": "Escuro",
+    "COLOR_MODE_LIGHT": "Claro",
+    "COLOR_MODE_SYSTEM": "Sistema",
+    "ENCRYPTION_ACTIVE": "Ativo",
+    "ENCRYPTION_INACTIVE": "Inativo",
+    "ENCRYPTION_OPTIONS": "Criptografia",
+    "ENCRYPT_ACCOUNTS": "Criptografar Contas",
+    "EXPORT_ACCOUNTS": "Exportar Backup",
+    "IMPORT_ACCOUNTS": "Importar Backup",
+    "LOGOUT": "Sair",
+    "PERIODIC_CHECK": "Re-checagem periódica"
+  },
+  "CRYPTO": {
+    "ALREADY_DECRYPTED": "Os dados já estão descriptografados",
+    "ALREADY_ENCRYPTED": "Os dados já estão criptografados",
+    "MISSING_ENCRYPTED_DATA": "Dados criptografados ausentes"
+  },
+  "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
+  "HOME": {
+    "CANCEL": "Cancelar",
+    "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
+    "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
+    "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
+    "LOADING_ACCOUNTS": "Carregando contas...",
+    "LOADING_ACCOUNTS_FILE": "Carregando arquivo de contas...",
+    "LOGGING_OUT": "Saindo...",
+    "PASSWORD_PROMPT_CANCEL": "Cancelar",
+    "PASSWORD_PROMPT_CONFIRM": "Confirmar",
+    "PASSWORD_PROMPT_MESSAGE": "Para usar a funcionalidade de criptografia, configure uma senha",
+    "PASSWORD_PROMPT_PLACEHOLDER": "Senha",
+    "PASSWORD_PROMPT_TITLE": "Digite a senha de criptografia",
+    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Confirmar senha",
+    "ERRORS": {
+      "PASSWORD_MISMATCH": "A senha e a confirmação não conferem",
+      "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
+      "PASSWORD_NOT_SET_TITLE": "Atenção",
+      "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Não é possível decodificar as contas sem uma senha configurada"
+    },
+    "TRY_AGAIN": "Tentar novamente",
+    "ENCRYPTION_ALERT": {
+      "TITLE": "Alerta de segurança",
+      "MESSAGE": "Para melhor proteger suas contas, é recomendável ativar a funcionalidade de criptografia de chaves.<p>Deseja configurar uma senha agora?</p>",
+      "ENABLE_ENCRYPTION": "Ativar criptografia",
+      "LATER": "Mais tarde",
+      "DONT_SHOW_AGAIN": "Não mostrar novamente"
+    }
+  },
+  "LOGIN": {
+    "AUTHENTICATING": "Autenticando...",
+    "CLOUD_SYNC": "Sincronização na nuvem",
+    "CONTINUE_OFFLINE": "Usar offline",
+    "EMAIL": "E-mail",
+    "ERROR_MSGS": {
+      "DEFAULT_ERROR": "Não foi possível fazer o login, verifique as credenciais e tente novamente",
+      "INVALID_PASSWORD": "Senha inválida",
+      "TOO_MANY_ATTEMPTS_TRY_LATER": "Muitas tentativas de login. Tente novamente após 15 minutos",
+      "USER_NOT_FOUND": "Usuário não encontrado"
+    },
+    "PASSWORD": "Senha",
+    "SIGN_IN_BUTTON": "Entrar",
+    "VALIDATION_MSGS": {
+      "EMAIL_PATTERN": "E-mail inválido",
+      "REQUIRED_EMAIL": "Obrigatório informar um e-mail",
+      "REQUIRED_PASSWORD": "Informe a senha"
+    }
+  },
+  "SEARCH": "Pesquisar",
+  "UPDATER": {
+    "UPDATE_AVAILABLE_BODY": "Uma nova versão da aplicação está disponível e será instalada automaticamente para obter as últimas funcionalidades e correções de bugs.",
+    "UPDATE_AVAILABLE_HEADER": "Atualização disponível",
+    "UPDATE_NOW": "Atualizar agora"
+  },
+  "UTILS": {
+    "ERROR_INVALID_SEMVER_FORMAT": "Formato SemVer inválido"
+  }
 }

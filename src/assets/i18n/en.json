@@ -1,120 +1,143 @@
 {
-    "ACCOUNT_DETAIL": {
-        "CODE_COPIED": "Code copied to clipboard",
-        "SECONDS_SHORT": "s",
-        "SELECT_ACCOUNT_HINT": "Select an account to start..."
-    },
-    "ACCOUNT_SELECT_MODAL": {
-        "CANCEL": "Cancel",
-        "CONFIRM_SELECTION": "Confirm",
-        "DEFAULT_TITLE": "Select Accounts",
-        "DESELECT_ALL": "Deselect All",
-        "SELECTION_COUNTER": "{{selected}}/{{total}} selected",
-        "SELECT_ALL": "Select All"
-    },
-    "ACCOUNT_SERVICE": {
-        "ERROR": {
-            "ACCOUNT_NOT_FOUND": "Account not found"
-        }
-    },
-    "ACCOUNT_SYNC": {
-        "ERROR": {
-            "CORRUPT_BACKUP_FILE": "Corrupted backup file",
-            "EMPTY_FILE": "The file is empty",
-            "GENERIC_IMPORT_ERROR": "Unknown error while importing accounts from backup",
-            "IMPORT_ERROR_TITLE": "Error importing accounts",
-            "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export",
-            "NO_ACCOUNTS_SELECTED_TO_IMPORT": "No accounts selected to import"
-        },
-        "EXPORTING_ACCOUNTS": "Exporting backup...",
-        "EXPORT_ACCOUNTS_MODAL_ACTION": "Export",
-        "EXPORT_ACCOUNTS_MODAL_TITLE": "Export Accounts",
-        "IMPORTING_ACCOUNTS": "Importing backup...",
-        "IMPORT_ACCOUNTS_MODAL_ACTION": "Import",
-        "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts"
-    },
-    "ADD_ACCOUNT_MODAL": {
-        "ADDING_ACCOUNT": "Adding account...",
-        "ERROR_MSGS": {
-            "ERROR_ADDING_ACCOUNT": "Error adding account",
-            "ERROR_CAMERA_HEADER": "Camera unavailable",
-            "ERROR_CAMERA_MESSAGE": "<p>Camera access is required to scan QR codes, but it seems your device either lacks a camera or camera permissions were denied. </p><p>Please check your device/permissions settings and try again.</p>",
-            "INVALID_QR_CODE": "Invalid QR Code",
-            "INVALID_SESSION": "Invalid session",
-            "UNKNOWN_ERROR": "Unknown error"
-        },
-        "EXAMPLI_GRATIA_SHORT": "e.g.",
-        "LABEL": "Label",
-        "LOADING_CAMERA": "Loading camera...",
-        "LOGO": "Logo",
-        "MANUAL_INPUT": "Manually input",
-        "NO_LOGO": "No Logo",
-        "SAVE": "Save Account",
-        "SCAN_QR_CODE": "Scan QR Code",
-        "SECRET_KEY": "Secret Key",
-        "TITLE": "Add Account",
-        "TOKEN_INTERVAL": "Token Interval (s)",
-        "TOKEN_SIZE": "Token Size"
-    },
-    "CONFIG_MENU": {
-        "ADD_ACCOUNT": "Add Account",
-        "COLOR_MODE": "Color Mode",
-        "COLOR_MODE_DARK": "Dark",
-        "COLOR_MODE_LIGHT": "Light",
-        "COLOR_MODE_SYSTEM": "System",
-        "ENCRYPTION_ACTIVE": "Active",
-        "ENCRYPTION_INACTIVE": "Inactive",
-        "ENCRYPTION_OPTIONS": "Encryption",
-        "ENCRYPT_ACCOUNTS": "Encrypt Accounts",
-        "EXPORT_ACCOUNTS": "Export Backup",
-        "IMPORT_ACCOUNTS": "Import Backup",
-        "LOGIN": "Sign in",
-        "LOGOUT": "Sign out",
-        "PERIODIC_CHECK": "Periodic Password Check"
-    },
-    "CRYPTO": {
-        "ALREADY_DECRYPTED": "Data is already decrypted",
-        "ALREADY_ENCRYPTED": "Data is already encrypted",
-        "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
-        "MISSING_ENCRYPTED_DATA": "Missing encrypted data"
-    },
-    "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
-    "HOME": {
-        "CANCEL": "Cancel",
-        "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
-        "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
-        "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
-        "LOADING_ACCOUNTS": "Loading accounts...",
-        "LOADING_ACCOUNTS_FILE": "Loading accounts from file...",
-        "LOGGING_OUT": "Signing out...",
-        "PASSWORD_PROMPT_CANCEL": "Cancel",
-        "PASSWORD_PROMPT_CONFIRM": "Confirm",
-        "PASSWORD_PROMPT_MESSAGE": "In order to decrypt the accounts, please enter the encryption password",
-        "PASSWORD_PROMPT_TITLE": "Enter the encryption password"
-    },
-    "LOGIN": {
-        "AUTHENTICATING": "Authenticating...",
-        "CLOUD_SYNC": "Cloud sync",
-        "CONTINUE_OFFLINE": "Continue offline",
-        "EMAIL": "E-mail",
-        "ERROR_MSGS": {
-            "DEFAULT_ERROR": "Could not sign in, check the credentials and try again",
-            "INVALID_PASSWORD": "Invalid password",
-            "TOO_MANY_ATTEMPTS_TRY_LATER": "Too many attempts. Try again after 15 minutes",
-            "USER_NOT_FOUND": "User not found"
-        },
-        "PASSWORD": "Password",
-        "SIGN_IN_BUTTON": "Sign in",
-        "VALIDATION_MSGS": {
-            "EMAIL_PATTERN": "Invalid e-mail",
-            "REQUIRED_EMAIL": "E-mail is required",
-            "REQUIRED_PASSWORD": "Password is required"
-        }
-    },
-    "SEARCH": "Search",
-    "UPDATER": {
-        "UPDATE_AVAILABLE_BODY": "A new version of the app is available and will be installed automatically to get the latest features and bug fixes.",
-        "UPDATE_AVAILABLE_HEADER": "Update available",
-        "UPDATE_NOW": "Update now"
+  "ACCOUNT_DETAIL": {
+    "CODE_COPIED": "Code copied to clipboard",
+    "SECONDS_SHORT": "s",
+    "SELECT_ACCOUNT_HINT": "Select an account to start..."
+  },
+  "ACCOUNT_SELECT_MODAL": {
+    "CANCEL": "Cancel",
+    "CONFIRM_SELECTION": "Confirm",
+    "DEFAULT_TITLE": "Select Accounts",
+    "DESELECT_ALL": "Deselect All",
+    "SELECTION_COUNTER": "{{selected}}/{{total}} selected",
+    "SELECT_ALL": "Select All"
+  },
+  "ACCOUNT_SERVICE": {
+    "ERROR": {
+      "ACCOUNT_NOT_FOUND": "Account not found"
     }
+  },
+  "ACCOUNT_SYNC": {
+    "ERROR": {
+      "CORRUPT_BACKUP_FILE": "Corrupted backup file",
+      "EMPTY_FILE": "The file is empty",
+      "GENERIC_IMPORT_ERROR": "Unknown error while importing accounts from backup",
+      "IMPORT_ERROR_TITLE": "Error importing accounts",
+      "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export",
+      "NO_ACCOUNTS_SELECTED_TO_IMPORT": "No accounts selected to import"
+    },
+    "EXPORTING_ACCOUNTS": "Exporting backup...",
+    "EXPORT_ACCOUNTS_MODAL_ACTION": "Export",
+    "EXPORT_ACCOUNTS_MODAL_TITLE": "Export Accounts",
+    "IMPORTING_ACCOUNTS": "Importing backup...",
+    "IMPORT_ACCOUNTS_MODAL_ACTION": "Import",
+    "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts"
+  },
+  "ADD_ACCOUNT_MODAL": {
+    "ADDING_ACCOUNT": "Adding account...",
+    "ERROR_MSGS": {
+      "ERROR_ADDING_ACCOUNT": "Error adding account",
+      "ERROR_CAMERA_HEADER": "Camera unavailable",
+      "ERROR_CAMERA_MESSAGE": "<p>Camera access is required to scan QR codes, but it seems your device either lacks a camera or camera permissions were denied. </p><p>Please check your device/permissions settings and try again.</p>",
+      "INVALID_QR_CODE": "Invalid QR Code",
+      "INVALID_SESSION": "Invalid session"
+    },
+    "EXAMPLI_GRATIA_SHORT": "e.g.",
+    "LABEL": "Label",
+    "LOADING_CAMERA": "Loading camera...",
+    "LOGO": "Logo",
+    "MANUAL_INPUT": "Manually input",
+    "NO_LOGO": "No Logo",
+    "SAVE": "Save Account",
+    "SCAN_QR_CODE": "Scan QR Code",
+    "SECRET_KEY": "Secret Key",
+    "TITLE": "Add Account",
+    "TOKEN_INTERVAL": "Token Interval (s)",
+    "TOKEN_SIZE": "Token Size"
+  },
+  "CONFIG_MENU": {
+    "ADD_ACCOUNT": "Add Account",
+    "COLOR_MODE": "Color Mode",
+    "COLOR_MODE_DARK": "Dark",
+    "COLOR_MODE_LIGHT": "Light",
+    "COLOR_MODE_SYSTEM": "System",
+    "ENCRYPTION_ACTIVE": "Active",
+    "ENCRYPTION_INACTIVE": "Inactive",
+    "ENCRYPTION_OPTIONS": "Encryption",
+    "ENCRYPT_ACCOUNTS": "Encrypt Accounts",
+    "EXPORT_ACCOUNTS": "Export Backup",
+    "IMPORT_ACCOUNTS": "Import Backup",
+    "LOGOUT": "Sign out",
+    "PERIODIC_CHECK": "Periodic Password Check"
+  },
+  "CRYPTO": {
+    "ALREADY_DECRYPTED": "Data is already decrypted",
+    "ALREADY_ENCRYPTED": "Data is already encrypted",
+    "MISSING_ENCRYPTED_DATA": "Missing encrypted data"
+  },
+  "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
+  "HOME": {
+    "CANCEL": "Cancel",
+    "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
+    "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
+    "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
+    "LOADING_ACCOUNTS": "Loading accounts...",
+    "LOADING_ACCOUNTS_FILE": "Loading accounts from file...",
+    "LOGGING_OUT": "Signing out...",
+    "PASSWORD_PROMPT_CANCEL": "Cancel",
+    "PASSWORD_PROMPT_CONFIRM": "Confirm",
+    "PASSWORD_PROMPT_MESSAGE": "In order to use the encryption feature, please enter a password",
+    "PASSWORD_PROMPT_PLACEHOLDER": "Password",
+    "PASSWORD_PROMPT_TITLE": "Enter the encryption password",
+    "VERSION_INFO": {
+      "GIT_HASH": "Commit hash",
+      "OK_BUTTON": "OK",
+      "VERSION_DATE": "Build date",
+      "VERSION_INFO_TITLE": "Version Info",
+      "VERSION_LABEL": "Version"
+    },
+    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Confirm Password",
+    "ERRORS": {
+      "PASSWORD_MISMATCH": "The passwords don't match",
+      "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature is inactive.</p>",
+      "PASSWORD_NOT_SET_TITLE": "Warning",
+      "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Unable to decrypt accounts as a password is not set"
+    },
+    "TRY_AGAIN": "Try again",
+    "ENCRYPTION_ALERT": {
+      "TITLE": "Security alert",
+      "MESSAGE": "Enhance the security of your accounts by using the encryption feature.<p>Do you want to configure a password?</p>",
+      "ENABLE_ENCRYPTION": "Enable encryption",
+      "LATER": "Remind me later",
+      "DONT_SHOW_AGAIN": "Do not show this again"
+    }
+  },
+  "LOGIN": {
+    "AUTHENTICATING": "Authenticating...",
+    "CLOUD_SYNC": "Cloud sync",
+    "CONTINUE_OFFLINE": "Continue offline",
+    "EMAIL": "E-mail",
+    "ERROR_MSGS": {
+      "DEFAULT_ERROR": "Could not sign in, check the credentials and try again",
+      "INVALID_PASSWORD": "Invalid password",
+      "TOO_MANY_ATTEMPTS_TRY_LATER": "Too many attempts. Try again after 15 minutes",
+      "USER_NOT_FOUND": "User not found"
+    },
+    "PASSWORD": "Password",
+    "SIGN_IN_BUTTON": "Sign in",
+    "VALIDATION_MSGS": {
+      "EMAIL_PATTERN": "Invalid e-mail",
+      "REQUIRED_EMAIL": "E-mail is required",
+      "REQUIRED_PASSWORD": "Password is required"
+    }
+  },
+  "SEARCH": "Search",
+  "UPDATER": {
+    "UPDATE_AVAILABLE_BODY": "A new version of the app is available and will be installed automatically to get the latest features and bug fixes.",
+    "UPDATE_AVAILABLE_HEADER": "Update available",
+    "UPDATE_NOW": "Update now"
+  },
+  "UTILS": {
+    "ERROR_INVALID_SEMVER_FORMAT": "Invalid SemVer format"
+  }
 }

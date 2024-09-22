@@ -16,7 +16,7 @@ export const environment = {
     messagingSenderId: "946698001868"
   },
   versionConfig: {
-    versionNumber: "%VERSION%",
+    versionNumber: "2.0.0", // set this to test migrations. On production build this will be the value from the package.json
     buildDate: "%BUILD_DATE%",
     commitHash: "%COMMIT_HASH%",
     versionName: "%VERSION%-DEV" 
