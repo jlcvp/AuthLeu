@@ -21,6 +21,7 @@ export interface IAccount2FAProvider {
     getAccounts(): Promise<Observable<Account2FA[]>>;
     addAccount(account: Account2FA): Promise<string>;
     updateAccount(account: Account2FA): Promise<void>;
+    updateAccountsBatch(accounts: Account2FA[]): Promise<void>;
     clearCache?(): Promise<void>;
 }
 

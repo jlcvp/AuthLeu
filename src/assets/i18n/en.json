@@ -101,7 +101,8 @@
       "PASSWORD_MISMATCH": "The passwords don't match",
       "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature is inactive.</p>",
       "PASSWORD_NOT_SET_TITLE": "Warning",
-      "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Unable to decrypt accounts as a password is not set"
+      "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Unable to decrypt accounts as a password is not set",
+      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Unable to encrypt the accounts without setting a password"
     },
     "TRY_AGAIN": "Try again",
     "ENCRYPTION_ALERT": {

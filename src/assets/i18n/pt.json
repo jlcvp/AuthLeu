@@ -94,7 +94,8 @@
       "PASSWORD_MISMATCH": "A senha e a confirmação não conferem",
       "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
       "PASSWORD_NOT_SET_TITLE": "Atenção",
-      "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Não é possível decodificar as contas sem uma senha configurada"
+      "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Não é possível decodificar as contas sem uma senha configurada",
+      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Não é possível criptografar as contas sem uma senha configurada"
     },
     "TRY_AGAIN": "Tentar novamente",
     "ENCRYPTION_ALERT": {
@@ -103,6 +104,13 @@
       "ENABLE_ENCRYPTION": "Ativar criptografia",
       "LATER": "Mais tarde",
       "DONT_SHOW_AGAIN": "Não mostrar novamente"
+    },
+    "VERSION_INFO": {
+      "GIT_HASH": "Hash do commit",
+      "OK_BUTTON": "OK",
+      "VERSION_DATE": "Data de build",
+      "VERSION_INFO_TITLE": "Informações de Versão",
+      "VERSION_LABEL": "Versão"
     }
   },
   "LOGIN": {

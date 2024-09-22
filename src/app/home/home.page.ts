@@ -629,39 +629,40 @@ export class HomePage implements OnInit {
   }
 
   private async loadAccounts() {
-    const accounts$ = await this.accountsService.getAccounts()
+    const password = await this.configService.getEncryptionKey()
+    const accounts$ = await this.accountsService.getAccounts(password)
     this.accounts$ = accounts$
   }
 
-  private async unlockAccounts(): Promise<void> {
-    const encryptionOptions = await this.configService.getEncryptionOptions()
-    if(!encryptionOptions || !encryptionOptions.encryptionActive) {
-      return
-    }
+  // private async unlockAccounts(): Promise<void> {
+  //   const encryptionOptions = await this.configService.getEncryptionOptions()
+  //   if(!encryptionOptions || !encryptionOptions.encryptionActive) {
+  //     return
+  //   }
 
-    const password = await this.configService.getEncryptionKey()
-    if(!password) {
-      const errormessage = await firstValueFrom(this.translateService.get('HOME.ERRORS.UNABLE_TO_DECRYPT_PASSWORD_NOT_SET'))
-      throw new Error(errormessage)
-    } else {
-      this.accounts$ = this.accounts$.pipe(concatMap(async accounts => {
-        const unlockedAccounts = []
-        for(const account of accounts) {
-          if(account.isLocked) {
-            try {
-              await account.unlock(password)
-              unlockedAccounts.push(account)
-            } catch (error) {
-              console.error("Error unlocking account", error)
-            }
-          } else {
-            unlockedAccounts.push(account)
-          }
-        }
-        return unlockedAccounts
-      }))
-    }
-  }
+  //   const password = await this.configService.getEncryptionKey()
+  //   if(!password) {
+  //     const errormessage = await firstValueFrom(this.translateService.get('HOME.ERRORS.UNABLE_TO_DECRYPT_PASSWORD_NOT_SET'))
+  //     throw new Error(errormessage)
+  //   } else {
+  //     this.accounts$ = this.accounts$.pipe(concatMap(async accounts => {
+  //       const unlockedAccounts = []
+  //       for(const account of accounts) {
+  //         if(account.isLocked) {
+  //           try {
+  //             await account.unlock(password)
+  //             unlockedAccounts.push(account)
+  //           } catch (error) {
+  //             console.error("Error unlocking account", error)
+  //           }
+  //         } else {
+  //           unlockedAccounts.push(account)
+  //         }
+  //       }
+  //       return unlockedAccounts
+  //     }))
+  //   }
+  // }
 
   private async setupEncryption(encryptionOptions: EncryptionOptions) {
     // set page properties
@@ -836,6 +837,20 @@ export class HomePage implements OnInit {
         await this.saveEncryptionOptions()
       }
     }
+  }
+
+  async encryptAccounts(): Promise<void> {
+    const password = await this.configService.getEncryptionKey()
+    if(!password) {
+      const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET'))
+      throw new Error(message)
+    }
+    const accounts = await firstValueFrom(this.accounts$)
+    const encryptedAccounts = await Promise.all(accounts.map(async account => {
+      await account.lock(password)
+      return account
+    }))
+    await this.accountsService.updateAccountsBatch(encryptedAccounts)
   }
 
   async showVersionInfo(): Promise<void> {

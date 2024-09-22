@@ -79,7 +79,25 @@ export class Account2faService {
    * @returns A promise that resolves when the account has been updated.
    */
   public async updateAccount(account: Account2FA) {
+    if(account.secret && account.encryptedSecret && account.iv && account.salt) {
+      account.secret = '' // clear decoded secret for encrypted accounts
+    }
     return this.service.updateAccount(account)
+  }
+
+  /**
+   * Updates multiple accounts with new information.
+   * 
+   * @param accounts - The array of account objects containing updated information.
+   * @returns A promise that resolves when the accounts have been updated.
+   */
+  public async updateAccountsBatch(accounts: Account2FA[]) {
+    for (const account of accounts) {
+      if(account.secret && account.encryptedSecret && account.iv && account.salt) {
+        account.secret = '' // clear decoded secret for encrypted accounts
+      }
+    }
+    return this.service.updateAccountsBatch(accounts)
   }
 
   public async clearCache() {
