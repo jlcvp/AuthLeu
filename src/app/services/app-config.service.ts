@@ -50,11 +50,11 @@ export class AppConfigService {
   }
 
   async getLastPasswordCheck() {
-    return await this.localStorage.get<number>(LAST_PASSWORD_CHECK_KEY);
+    return await this.localStorage.get<number>(LAST_PASSWORD_CHECK_KEY) || 0;
   }
 
   async setLastPasswordCheck(timestamp?: number) {
-    const lastCheck = timestamp ?? Date.now();
+    const lastCheck = timestamp || Date.now();
     await this.localStorage.set(LAST_PASSWORD_CHECK_KEY, lastCheck);
   }
 

@@ -111,6 +111,16 @@
       "ENABLE_ENCRYPTION": "Enable encryption",
       "LATER": "Remind me later",
       "DONT_SHOW_AGAIN": "Do not show this again"
+    },
+    "PERIODIC_CHECK": {
+      "TITLE": "Password Confirmation",
+      "MESSAGE": "Enter your password again for confirmation",
+      "CONFIRM": "Confirm",
+      "MISMATCH": {
+        "TITLE": "The password doesn't match",
+        "MESSAGE": "The encryption password doesn't match the entered password<p>The application will continue to work normally, but if you don't remember the password, then you'll not be able to import the encrypted accounts to another device</p>",
+        "TRY_AGAIN": "Try again"
+      }
     }
   },
   "LOGIN": {

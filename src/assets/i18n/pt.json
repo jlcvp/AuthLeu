@@ -111,6 +111,16 @@
       "VERSION_DATE": "Data de build",
       "VERSION_INFO_TITLE": "Informações de Versão",
       "VERSION_LABEL": "Versão"
+    },
+    "PERIODIC_CHECK": {
+      "TITLE": "Confirmação de Senha",
+      "MESSAGE": "Informe novamente sua senha de criptografia para re-confirmação",
+      "CONFIRM": "Confirmar",
+      "MISMATCH": {
+        "TITLE": "A senha não confere",
+        "MESSAGE": "A senha informada não bate com a senha de criptografia<p>A aplicação continuará funcionando normalmente, mas sem lembrar da senha correta, não será possível importar as contas criptografadas para outro dispositivo</p>",
+        "TRY_AGAIN": "Tentar novamente"
+      }
     }
   },
   "LOGIN": {

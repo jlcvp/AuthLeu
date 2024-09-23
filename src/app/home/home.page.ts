@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
 import { AlertController, IonModal, LoadingController, ModalController, NavController, ToastController } from '@ionic/angular';
-import { concatMap, firstValueFrom, map, Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
 import { LogoService } from '../services/logo.service';
@@ -12,7 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
 import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
 import { AppConfigService } from '../services/app-config.service';
-import { ENCRYPTION_OPTIONS_PASSWORD_KEY, EncryptionOptions } from '../models/encryption-options.model';
+import { EncryptionOptions, PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
 import { MigrationService } from '../services/migration.service';
 
 @Component({
@@ -631,44 +631,22 @@ export class HomePage implements OnInit {
   private async loadAccounts() {
     const password = await this.configService.getEncryptionKey()
     const accounts$ = await this.accountsService.getAccounts(password)
+    
+    // detect if there are locked accounts and call activate encryption flow
+    const accounts = await firstValueFrom(accounts$)
+    const lockedAccounts = accounts.filter(account => account.isLocked)
+    if(lockedAccounts.length > 0) {
+      
+    }
     this.accounts$ = accounts$
   }
-
-  // private async unlockAccounts(): Promise<void> {
-  //   const encryptionOptions = await this.configService.getEncryptionOptions()
-  //   if(!encryptionOptions || !encryptionOptions.encryptionActive) {
-  //     return
-  //   }
-
-  //   const password = await this.configService.getEncryptionKey()
-  //   if(!password) {
-  //     const errormessage = await firstValueFrom(this.translateService.get('HOME.ERRORS.UNABLE_TO_DECRYPT_PASSWORD_NOT_SET'))
-  //     throw new Error(errormessage)
-  //   } else {
-  //     this.accounts$ = this.accounts$.pipe(concatMap(async accounts => {
-  //       const unlockedAccounts = []
-  //       for(const account of accounts) {
-  //         if(account.isLocked) {
-  //           try {
-  //             await account.unlock(password)
-  //             unlockedAccounts.push(account)
-  //           } catch (error) {
-  //             console.error("Error unlocking account", error)
-  //           }
-  //         } else {
-  //           unlockedAccounts.push(account)
-  //         }
-  //       }
-  //       return unlockedAccounts
-  //     }))
-  //   }
-  // }
 
   private async setupEncryption(encryptionOptions: EncryptionOptions) {
     // set page properties
     this.isEncryptionActive = encryptionOptions.encryptionActive
     this.shouldPeriodicCheckPassword = encryptionOptions.shouldPerformPeriodicCheck
     this.shouldAlertToActivateEncryption = encryptionOptions.shouldAlertToActivateEncryption
+    console.log({ encryptionOptions })
     if(this.isEncryptionActive) {
       const passwordSetupSuccess = await this.setupEncryptionPassword()
       if(!passwordSetupSuccess) {
@@ -687,6 +665,12 @@ export class HomePage implements OnInit {
         await alert.present()
         await alert.onDidDismiss()
       }
+      // periodicCheck
+      
+      if (this.shouldPeriodicCheckPassword) {
+        console.log("Starting periodic password check")
+        await this.periodicPasswordCheck()
+      }
     } else {
       // alert to activate encryption
       if (this.shouldAlertToActivateEncryption) {
@@ -694,7 +678,7 @@ export class HomePage implements OnInit {
       }
     }
 
-    // periodicCheck
+    
   }
 
   private async setupEncryptionPassword(): Promise<boolean> {
@@ -851,6 +835,103 @@ export class HomePage implements OnInit {
       return account
     }))
     await this.accountsService.updateAccountsBatch(encryptedAccounts)
+  }
+
+  private async periodicPasswordCheck() {
+    const password = await this.configService.getEncryptionKey()
+    console.log('periodic password check', { password })
+    if(!password) {
+      return
+    }
+    
+    const lastCheck = await this.configService.getLastPasswordCheck()
+    const nextCheck = lastCheck + PASSWORD_CHECK_PERIOD
+    const now = Date.now()
+    console.log({ lastCheck, nextCheck, now })
+    if(now >= nextCheck) {
+      const checkSuccess = await this.presentPasswordCheckAlert()
+      if(checkSuccess) {
+        console.log('password check success')
+        await this.configService.setLastPasswordCheck()
+      }
+    }
+  }
+
+  private async presentPasswordCheckAlert(): Promise<boolean> {
+    const title = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MESSAGE'))
+    const confirm = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.CONFIRM'))
+    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
+    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      backdropDismiss: false,
+      inputs: [
+        {
+          type: 'password',
+          name: 'password',
+          placeholder: passwordPlaceholder
+        }
+      ],
+      buttons: [
+        {
+          text: cancelLabel,
+          role: 'cancel'
+        },
+        {
+          text: confirm,
+          role: 'confirm',
+          handler: (data) => {
+            return data.password
+          }
+        }
+      ]
+    })
+    await alert.present()
+
+    const { data, role } = await alert.onDidDismiss()
+    if (role === 'confirm') {
+      console.log('password check', { data })
+      const password = data.values.password
+      if(password !== await this.configService.getEncryptionKey()) {
+        const tryAgain = await this.presentPasswordCheckMismatchAlert()
+        if(tryAgain) {
+          return await this.presentPasswordCheckAlert()
+        }
+      } else {
+        return true
+      }
+    }
+    return false
+  }
+
+  private async presentPasswordCheckMismatchAlert(): Promise<boolean> {
+    const title = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.MESSAGE'))
+    const tryAgainLabel = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.TRY_AGAIN'))
+    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      backdropDismiss: false,
+      buttons: [
+        {
+          text: cancelLabel,
+          role: 'cancel'
+        },
+        {
+          text: tryAgainLabel,
+          role: 'try_again'
+        }
+      ]
+    })
+    await alert.present()
+    const { role } = await alert.onDidDismiss()
+    if(role === 'try_again') {
+      return true
+    }
+    return false
   }
 
   async showVersionInfo(): Promise<void> {

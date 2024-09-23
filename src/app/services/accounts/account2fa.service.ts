@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
-import { firstValueFrom, map, mergeMap, Observable } from 'rxjs';
+import { mergeMap, Observable } from 'rxjs';
 import { RemoteAccount2faService } from './remote-account2fa.service';
 import { LocalAccount2faService } from './local-account2fa.service';
 import { AppConfigService } from '../app-config.service';
