@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { CryptoUtils } from "../utils/crypto-utils";
-
+import { Secret } from 'otpauth'
 export interface IAccount2FA {
     id: string;
     label: string;
@@ -60,12 +60,13 @@ export class Account2FA implements IAccount2FA {
         }
 
         // check if dict contains all required fields
-        if(!dict.id || !dict.label || !dict.secret) {
+        if(!dict.label || !dict.secret) {
+            console.log({dict})
             throw new Error('Missing required fields');
         }
         
         const data = dict as IAccount2FA;
-        return new Account2FA(data.id, data.label, data.secret, data.tokenLength, data.interval, data.algorithm, data.issuer, data.active, data.logo, data.encryptedSecret, data.iv, data.salt);
+        return new Account2FA(data.id || '', data.label, data.secret, data.tokenLength, data.interval, data.algorithm, data.issuer, data.active, data.logo, data.encryptedSecret, data.iv, data.salt);
     }
 
     static fromOTPAuthURL(url: string): Account2FA {
@@ -108,7 +109,15 @@ export class Account2FA implements IAccount2FA {
     }
 
     get isLocked(): boolean {
-        return !this.secret
+        if(!this.secret) {
+            return true;
+        }
+        try {
+            Secret.fromBase32(this.secret); // this can be a costly operation, need to evaluate if it's worth it to check in a getter or have it computed once
+        } catch (error) {
+            return true;
+        }
+        return false;
     }
 
     async unlock(decryptionKey: string) {

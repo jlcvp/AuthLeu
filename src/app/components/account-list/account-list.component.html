@@ -10,19 +10,24 @@
             </ion-thumbnail>
             <p class="small-text ion-text-center ion-no-padding ion-padding-top">{{account.label}}</p>
           </ion-card-content>
+          <ion-footer class="ion-no-padding ion-padding-start ion-padding-end">
+            <ion-icon class="lock-icon" name="lock-closed-outline"></ion-icon>
+          </ion-footer>
         </ion-card>
       </ion-col>
     </ion-row>
   </ion-grid>
   <ng-template #listView>
     <ion-list>
-      <ion-item button *ngFor="let account of accounts; trackBy:itemTrackBy" (click)="selectAccount(account)">
+      <ion-item button *ngFor="let account of accounts; trackBy:itemTrackBy" [disabled]="account.isLocked" (click)="selectAccount(account)">
         <ion-thumbnail slot="start">
           <img class="thumb-img" [src]="account.getLogo()">
         </ion-thumbnail>
         <ion-label>
           <h2>{{account.label}}</h2>
+          <p *ngIf="account.isLocked">({{ 'ACCOUNT_LIST.LOCKED' | translate }})</p>
         </ion-label>
+        <ion-icon *ngIf="account.isLocked" slot="end" color="dark" name="lock-closed-outline"></ion-icon>
       </ion-item>
     </ion-list>
   </ng-template>

@@ -95,7 +95,9 @@
       "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
       "PASSWORD_NOT_SET_TITLE": "Atenção",
       "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Não é possível decodificar as contas sem uma senha configurada",
-      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Não é possível criptografar as contas sem uma senha configurada"
+      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Não é possível criptografar as contas sem uma senha configurada",
+      "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
+      "ACCOUNTS_LOCKED": "Algumas contas estão criptografadas. Certifique-se de que a opção de criptografia está habilitada e de que a senha correta está configurada."
     },
     "TRY_AGAIN": "Tentar novamente",
     "ENCRYPTION_ALERT": {
@@ -121,6 +123,10 @@
         "MESSAGE": "A senha informada não bate com a senha de criptografia<p>A aplicação continuará funcionando normalmente, mas sem lembrar da senha correta, não será possível importar as contas criptografadas para outro dispositivo</p>",
         "TRY_AGAIN": "Tentar novamente"
       }
+    },
+    "PASSWORD_RECOVERY_ALERT": {
+      "TITLE": "Atenção",
+      "MESSAGE": "É importante executar a verificação períodica para lembrete de senha.\nSe você esquecê-la, não será possível decodificar as contas para uso em outros dispositivos."
     }
   },
   "LOGIN": {
@@ -150,5 +156,8 @@
   },
   "UTILS": {
     "ERROR_INVALID_SEMVER_FORMAT": "Formato SemVer inválido"
+  },
+  "ACCOUNT_LIST": {
+    "LOCKED": "Criptografada"
   }
 }

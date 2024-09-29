@@ -58,9 +58,14 @@ export class Account2faService {
               decryptions.push(account.unlock(decryptionKey));
             }
           }
-
+          
           // Wait for all decryption promises to resolve
-          await Promise.all(decryptions);
+          const results = await Promise.allSettled(decryptions);
+          for(const result of results) {
+            if (result.status === 'rejected') {
+              console.error('Failed to unlock account', { reason: result.reason })
+            }
+          }   
 
           // Return the decrypted accounts
           return accounts;

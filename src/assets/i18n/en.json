@@ -99,17 +99,19 @@
     "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Confirm Password",
     "ERRORS": {
       "PASSWORD_MISMATCH": "The passwords don't match",
-      "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature is inactive.</p>",
+      "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
       "PASSWORD_NOT_SET_TITLE": "Warning",
       "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Unable to decrypt accounts as a password is not set",
-      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Unable to encrypt the accounts without setting a password"
+      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Unable to encrypt the accounts without setting a password",
+      "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
+      "ACCOUNTS_LOCKED": "Some accounts are encrypted. Make sure encryption is enabled and the correct password is set."
     },
     "TRY_AGAIN": "Try again",
     "ENCRYPTION_ALERT": {
       "TITLE": "Security alert",
       "MESSAGE": "Enhance the security of your accounts by using the encryption feature.<p>Do you want to configure a password?</p>",
       "ENABLE_ENCRYPTION": "Enable encryption",
-      "LATER": "Remind me later",
+      "LATER": "Not now",
       "DONT_SHOW_AGAIN": "Do not show this again"
     },
     "PERIODIC_CHECK": {
@@ -121,7 +123,12 @@
         "MESSAGE": "The encryption password doesn't match the entered password<p>The application will continue to work normally, but if you don't remember the password, then you'll not be able to import the encrypted accounts to another device</p>",
         "TRY_AGAIN": "Try again"
       }
-    }
+    },
+    "PASSWORD_RECOVERY_ALERT": {
+      "TITLE": "Warning",
+      "MESSAGE": "It's important to periodic check and remember your password. \nIf you forget it you'll not be able to decrypt the accounts for use in another devices."
+    },
+    "OK": "OK"
   },
   "LOGIN": {
     "AUTHENTICATING": "Authenticating...",
@@ -150,5 +157,8 @@
   },
   "UTILS": {
     "ERROR_INVALID_SEMVER_FORMAT": "Invalid SemVer format"
+  },
+  "ACCOUNT_LIST": {
+    "LOCKED": "Encrypted"
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from './local-storage.service';
 import { environment } from 'src/environments/environment';
-import { ENCRYPTION_OPTIONS_KEY, ENCRYPTION_OPTIONS_PASSWORD_KEY, EncryptionOptions, LAST_PASSWORD_CHECK_KEY } from '../models/encryption-options.model';
+import { ENCRYPTION_OPTIONS_DEFAULT, ENCRYPTION_OPTIONS_KEY, ENCRYPTION_OPTIONS_PASSWORD_KEY, EncryptionOptions, LAST_PASSWORD_CHECK_KEY } from '../models/encryption-options.model';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +30,7 @@ export class AppConfigService {
   }
 
   async getEncryptionOptions() {
-    return await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY);
+    return (await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY)) || ENCRYPTION_OPTIONS_DEFAULT;
   }
   
   async setEncryptionOptions(options: EncryptionOptions) {
