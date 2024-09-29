@@ -25,7 +25,7 @@
                       <ion-item button detail="false" (click)="encryptionActiveToggle()">
                         <ion-toggle color="success" [checked]="isEncryptionActive"> {{ "CONFIG_MENU.ENCRYPT_ACCOUNTS" | translate }} </ion-toggle>
                       </ion-item>
-                      <ion-item button detail="false" (click)="periodicCheckToggle()">
+                      <ion-item button detail="false" [disabled]="!isEncryptionActive" (click)="periodicCheckToggle()">
                         <ion-toggle [checked]="shouldPeriodicCheckPassword"> {{ "CONFIG_MENU.PERIODIC_CHECK" | translate }} </ion-toggle>
                       </ion-item>
                     </ion-list>
