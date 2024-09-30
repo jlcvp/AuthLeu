@@ -60,7 +60,7 @@ export class Account2FA implements IAccount2FA {
         }
 
         // check if dict contains all required fields
-        if(!dict.label || !dict.secret) {
+        if(!dict.label || (!dict.secret && !(dict.encryptedSecret && dict.salt && dict.iv))) {
             console.log({dict})
             throw new Error('Missing required fields');
         }
@@ -120,6 +120,10 @@ export class Account2FA implements IAccount2FA {
         return false;
     }
 
+    get isEncrypted(): boolean {
+        return !!this.encryptedSecret && !!this.iv && !!this.salt;
+    }
+
     async unlock(decryptionKey: string) {
         if(!this.isLocked) {
             throw new Error('CRYPTO.ALREADY_DECRYPTED');
@@ -130,7 +134,15 @@ export class Account2FA implements IAccount2FA {
         }
 
         const decryptedSecret = await CryptoUtils.shared.decryptSecretKey(this.encryptedSecret, decryptionKey, this.salt, this.iv);
+        try {
+            Secret.fromBase32(decryptedSecret);
+        } catch (error) {
+            throw new Error('CRYPTO.INVALID_DECRYPTION_KEY');
+        }
         this.secret = decryptedSecret;
+        delete this.encryptedSecret;
+        delete this.iv;
+        delete this.salt;
     }
 
     async lock(encryptionKey: string) {
@@ -161,5 +173,9 @@ export class Account2FA implements IAccount2FA {
             }
         }
         return typeErasedObject
+    }
+
+    copy(): Account2FA {
+        return new Account2FA(this.id, this.label, this.secret, this.tokenLength, this.interval, this.algorithm, this.issuer, this.active, this.logo, this.encryptedSecret, this.iv, this.salt);
     }
 }

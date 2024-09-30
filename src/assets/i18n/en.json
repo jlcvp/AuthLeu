@@ -14,7 +14,8 @@
   },
   "ACCOUNT_SERVICE": {
     "ERROR": {
-      "ACCOUNT_NOT_FOUND": "Account not found"
+      "ACCOUNT_NOT_FOUND": "Account not found",
+      "NO_ENCRYPTION_KEY": "No encryption Key"
     }
   },
   "ACCOUNT_SYNC": {
@@ -31,7 +32,10 @@
     "EXPORT_ACCOUNTS_MODAL_TITLE": "Export Accounts",
     "IMPORTING_ACCOUNTS": "Importing backup...",
     "IMPORT_ACCOUNTS_MODAL_ACTION": "Import",
-    "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts"
+    "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts",
+    "EXPORT_ENCRYPTED_ACCOUNTS": "Encryption is enabled, but you can choose to export the accounts either encrypted or unencrypted. <p>Would you like to export them encrypted or unencrypted?</p>",
+    "ENCRYPTED": "Encrypted",
+    "UNENCRYPTED": "Unencrypted"
   },
   "ADD_ACCOUNT_MODAL": {
     "ADDING_ACCOUNT": "Adding account...",
@@ -104,7 +108,7 @@
       "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Unable to decrypt accounts as a password is not set",
       "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Unable to encrypt the accounts without setting a password",
       "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
-      "ACCOUNTS_LOCKED": "Some accounts are encrypted. Make sure encryption is enabled and the correct password is set."
+      "ACCOUNTS_LOCKED": "The application detected encrypted accounts and will not be able to generate codes for them.\n<p>Make sure encryption is enabled and the correct password is set.</p>"
     },
     "TRY_AGAIN": "Try again",
     "ENCRYPTION_ALERT": {

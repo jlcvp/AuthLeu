@@ -1,22 +1,26 @@
 <div class="account-list-container">
+  <!-- CARD GRID -->
   <ion-grid *ngIf="isGridType; else listView">
     <ion-row>
       <ion-col *ngFor="let account of accounts; trackBy:itemTrackBy" size-xs="4" size-sm="3" size-md="2">
-        <ion-card (click)="selectAccount(account)" class="ion-no-padding ion-no-margin square fill-parent ion-activatable ripple-parent">
-          <ion-ripple-effect></ion-ripple-effect>
-          <ion-card-content class="ion-no-padding ion-padding-start ion-padding-end">
+        <ion-card button [disabled]="account.isLocked" (click)="selectAccount(account)" class="ion-no-padding ion-no-margin square fill-parent ion-activatable clickable">
+          <!-- <ion-ripple-effect></ion-ripple-effect> -->
+          <ion-card-content class="ion-no-padding ion-padding-start ion-padding-end ">
             <ion-thumbnail class="thumb ion-no-padding ion-padding-top">
               <img class="thumb-img" [src]="account.getLogo()">
             </ion-thumbnail>
             <p class="small-text ion-text-center ion-no-padding ion-padding-top">{{account.label}}</p>
           </ion-card-content>
-          <ion-footer class="ion-no-padding ion-padding-start ion-padding-end">
-            <ion-icon class="lock-icon" name="lock-closed-outline"></ion-icon>
-          </ion-footer>
+          <div class="float-bottom" *ngIf="account.isLocked">
+            <div class="lock-overlay">
+              <ion-icon slot="end" color="light" name="lock-closed-outline"></ion-icon>
+            </div>
+          </div>
         </ion-card>
       </ion-col>
     </ion-row>
   </ion-grid>
+  <!-- LIST VIEW -->
   <ng-template #listView>
     <ion-list>
       <ion-item button *ngFor="let account of accounts; trackBy:itemTrackBy" [disabled]="account.isLocked" (click)="selectAccount(account)">
@@ -27,7 +31,9 @@
           <h2>{{account.label}}</h2>
           <p *ngIf="account.isLocked">({{ 'ACCOUNT_LIST.LOCKED' | translate }})</p>
         </ion-label>
-        <ion-icon *ngIf="account.isLocked" slot="end" color="dark" name="lock-closed-outline"></ion-icon>
+        <ion-badge color="danger" slot="end">
+          <ion-icon *ngIf="account.isLocked" name="lock-closed-outline"></ion-icon>
+        </ion-badge>
       </ion-item>
     </ion-list>
   </ng-template>

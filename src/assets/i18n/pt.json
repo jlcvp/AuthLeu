@@ -14,7 +14,8 @@
   },
   "ACCOUNT_SERVICE": {
     "ERROR": {
-      "ACCOUNT_NOT_FOUND": "Conta não encontrada"
+      "ACCOUNT_NOT_FOUND": "Conta não encontrada",
+      "NO_ENCRYPTION_KEY": "Chave de criptografia inexistente"
     }
   },
   "ACCOUNT_SYNC": {
@@ -31,7 +32,10 @@
     "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
     "IMPORTING_ACCOUNTS": "Importando backup...",
     "IMPORT_ACCOUNTS_MODAL_ACTION": "Importar",
-    "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas"
+    "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas",
+    "EXPORT_ENCRYPTED_ACCOUNTS": "A criptografia está ativada, mas você pode escolher exportar as contas criptografadas ou não criptografadas. <p>Como você gostaria de exportá-las?</p>",
+    "ENCRYPTED": "Criptografada",
+    "UNENCRYPTED": "Não Criptografada"
   },
   "ADD_ACCOUNT_MODAL": {
     "ADDING_ACCOUNT": "Adicionando conta...",
@@ -97,7 +101,7 @@
       "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Não é possível decodificar as contas sem uma senha configurada",
       "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Não é possível criptografar as contas sem uma senha configurada",
       "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
-      "ACCOUNTS_LOCKED": "Algumas contas estão criptografadas. Certifique-se de que a opção de criptografia está habilitada e de que a senha correta está configurada."
+      "ACCOUNTS_LOCKED": "A aplicação detectou contas criptografadas e não será possível gerar códigos para essas contas. \n<p>Certifique-se de que a opção de criptografia está habilitada e de que a senha correta está configurada.</p>"
     },
     "TRY_AGAIN": "Tentar novamente",
     "ENCRYPTION_ALERT": {
@@ -127,7 +131,8 @@
     "PASSWORD_RECOVERY_ALERT": {
       "TITLE": "Atenção",
       "MESSAGE": "É importante executar a verificação períodica para lembrete de senha.\nSe você esquecê-la, não será possível decodificar as contas para uso em outros dispositivos."
-    }
+    },
+    "OK": "OK"
   },
   "LOGIN": {
     "AUTHENTICATING": "Autenticando...",
