@@ -4,6 +4,9 @@
     "SECONDS_SHORT": "s",
     "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar..."
   },
+  "ACCOUNT_LIST": {
+    "LOCKED": "Criptografada"
+  },
   "ACCOUNT_SELECT_MODAL": {
     "CANCEL": "Cancelar",
     "CONFIRM_SELECTION": "Confirmar",
@@ -19,24 +22,24 @@
     }
   },
   "ACCOUNT_SYNC": {
+    "ENCRYPTED": "Criptografada",
     "ERROR": {
       "CORRUPT_BACKUP_FILE": "Arquivo de backup corrompido",
       "EMPTY_FILE": "O arquivo está vazio",
       "GENERIC_IMPORT_ERROR": "Erro desconhecido ao importar contas do backup",
       "IMPORT_ERROR_TITLE": "Erro ao importar contas",
+      "INVALID_PASSWORD": "Não foi possível decodificar as contas com a senha informada. A importação de contas foi abortada.",
       "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar",
       "NO_ACCOUNTS_SELECTED_TO_IMPORT": "Nenhuma conta selecionada para importar",
-      "NO_PASSWORD_PROVIDED": "É necessário informar uma senha para desencriptar as contas",
-      "INVALID_PASSWORD": "Não foi possível decodificar as contas com a senha informada. A importação de contas foi abortada."
+      "NO_PASSWORD_PROVIDED": "É necessário informar uma senha para desencriptar as contas"
     },
     "EXPORTING_ACCOUNTS": "Exportando backup...",
     "EXPORT_ACCOUNTS_MODAL_ACTION": "Exportar",
     "EXPORT_ACCOUNTS_MODAL_TITLE": "Exportar Contas",
+    "EXPORT_ENCRYPTED_ACCOUNTS": "A criptografia está ativada, mas você pode escolher exportar as contas criptografadas ou não criptografadas. <p>Como você gostaria de exportá-las?</p>",
     "IMPORTING_ACCOUNTS": "Importando backup...",
     "IMPORT_ACCOUNTS_MODAL_ACTION": "Importar",
     "IMPORT_ACCOUNTS_MODAL_TITLE": "Importar Contas",
-    "EXPORT_ENCRYPTED_ACCOUNTS": "A criptografia está ativada, mas você pode escolher exportar as contas criptografadas ou não criptografadas. <p>Como você gostaria de exportá-las?</p>",
-    "ENCRYPTED": "Criptografada",
     "UNENCRYPTED": "Não Criptografada"
   },
   "ADD_ACCOUNT_MODAL": {
@@ -83,62 +86,57 @@
   },
   "CRYPTO_API_NOT_SUPPORTED": "API de criptografia não suportada pelo navegador",
   "HOME": {
+    "ASK_PASSWORD": {
+      "CONFIRM": "Confirmar",
+      "MESSAGE": "As contas no arquivo estão criptografadas.<p>Digite a senha de descriptografia.</p>"
+    },
     "CANCEL": "Cancelar",
     "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
     "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
     "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
+    "ENCRYPTION_ALERT": {
+      "DONT_SHOW_AGAIN": "Não mostrar novamente",
+      "ENABLE_ENCRYPTION": "Ativar criptografia",
+      "LATER": "Mais tarde",
+      "MESSAGE": "Para melhor proteger suas contas, é recomendável ativar a funcionalidade de criptografia de chaves.<p>Deseja configurar uma senha agora?</p>",
+      "TITLE": "Alerta de segurança"
+    },
+    "ERRORS": {
+      "ACCOUNTS_LOCKED": "A aplicação detectou contas criptografadas e não será possível gerar códigos para essas contas. \n<p>Certifique-se de que a opção de criptografia está habilitada e de que a senha correta está configurada.</p>",
+      "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
+      "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
+      "PASSWORD_NOT_SET_TITLE": "Atenção",
+      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Não é possível criptografar as contas sem uma senha configurada"
+    },
     "LOADING_ACCOUNTS": "Carregando contas...",
     "LOADING_ACCOUNTS_FILE": "Carregando arquivo de contas...",
     "LOGGING_OUT": "Saindo...",
+    "OK": "OK",
     "PASSWORD_PROMPT_CANCEL": "Cancelar",
     "PASSWORD_PROMPT_CONFIRM": "Confirmar",
+    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Senha para descriptografia",
     "PASSWORD_PROMPT_MESSAGE": "Para usar a funcionalidade de criptografia, configure uma senha",
     "PASSWORD_PROMPT_PLACEHOLDER": "Senha",
     "PASSWORD_PROMPT_TITLE": "Digite a senha de criptografia",
-    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Senha para descriptografia",
-    "ERRORS": {
-      "PASSWORD_MISMATCH": "A senha e a confirmação não conferem",
-      "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
-      "PASSWORD_NOT_SET_TITLE": "Atenção",
-      "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Não é possível decodificar as contas sem uma senha configurada",
-      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Não é possível criptografar as contas sem uma senha configurada",
-      "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
-      "ACCOUNTS_LOCKED": "A aplicação detectou contas criptografadas e não será possível gerar códigos para essas contas. \n<p>Certifique-se de que a opção de criptografia está habilitada e de que a senha correta está configurada.</p>"
+    "PASSWORD_RECOVERY_ALERT": {
+      "MESSAGE": "É importante executar a verificação períodica para lembrete de senha.\nSe você esquecê-la, não será possível decodificar as contas para uso em outros dispositivos.",
+      "TITLE": "Atenção"
     },
-    "TRY_AGAIN": "Tentar novamente",
-    "ENCRYPTION_ALERT": {
-      "TITLE": "Alerta de segurança",
-      "MESSAGE": "Para melhor proteger suas contas, é recomendável ativar a funcionalidade de criptografia de chaves.<p>Deseja configurar uma senha agora?</p>",
-      "ENABLE_ENCRYPTION": "Ativar criptografia",
-      "LATER": "Mais tarde",
-      "DONT_SHOW_AGAIN": "Não mostrar novamente"
+    "PERIODIC_CHECK": {
+      "CONFIRM": "Confirmar",
+      "MESSAGE": "Informe novamente sua senha de criptografia para re-confirmação",
+      "MISMATCH": {
+        "MESSAGE": "A senha informada não bate com a senha de criptografia<p>A aplicação continuará funcionando normalmente, mas sem lembrar da senha correta, não será possível importar as contas criptografadas para outro dispositivo</p>",
+        "TITLE": "A senha não confere",
+        "TRY_AGAIN": "Tentar novamente"
+      },
+      "TITLE": "Confirmação de Senha"
     },
     "VERSION_INFO": {
       "GIT_HASH": "Hash do commit",
-      "OK_BUTTON": "OK",
       "VERSION_DATE": "Data de build",
       "VERSION_INFO_TITLE": "Informações de Versão",
       "VERSION_LABEL": "Versão"
-    },
-    "PERIODIC_CHECK": {
-      "TITLE": "Confirmação de Senha",
-      "MESSAGE": "Informe novamente sua senha de criptografia para re-confirmação",
-      "CONFIRM": "Confirmar",
-      "MISMATCH": {
-        "TITLE": "A senha não confere",
-        "MESSAGE": "A senha informada não bate com a senha de criptografia<p>A aplicação continuará funcionando normalmente, mas sem lembrar da senha correta, não será possível importar as contas criptografadas para outro dispositivo</p>",
-        "TRY_AGAIN": "Tentar novamente"
-      }
-    },
-    "PASSWORD_RECOVERY_ALERT": {
-      "TITLE": "Atenção",
-      "MESSAGE": "É importante executar a verificação períodica para lembrete de senha.\nSe você esquecê-la, não será possível decodificar as contas para uso em outros dispositivos."
-    },
-    "OK": "OK",
-    "ERROR_TITLE": "Erro",
-    "ASK_PASSWORD": {
-      "MESSAGE": "As contas no arquivo estão criptografadas.<p>Digite a senha de descriptografia.</p>",
-      "CONFIRM": "Confirmar"
     }
   },
   "LOGIN": {
@@ -168,8 +166,5 @@
   },
   "UTILS": {
     "ERROR_INVALID_SEMVER_FORMAT": "Formato SemVer inválido"
-  },
-  "ACCOUNT_LIST": {
-    "LOCKED": "Criptografada"
   }
 }

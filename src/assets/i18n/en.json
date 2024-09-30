@@ -4,6 +4,9 @@
     "SECONDS_SHORT": "s",
     "SELECT_ACCOUNT_HINT": "Select an account to start..."
   },
+  "ACCOUNT_LIST": {
+    "LOCKED": "Encrypted"
+  },
   "ACCOUNT_SELECT_MODAL": {
     "CANCEL": "Cancel",
     "CONFIRM_SELECTION": "Confirm",
@@ -19,24 +22,24 @@
     }
   },
   "ACCOUNT_SYNC": {
+    "ENCRYPTED": "Encrypted",
     "ERROR": {
       "CORRUPT_BACKUP_FILE": "Corrupted backup file",
       "EMPTY_FILE": "The file is empty",
       "GENERIC_IMPORT_ERROR": "Unknown error while importing accounts from backup",
       "IMPORT_ERROR_TITLE": "Error importing accounts",
+      "INVALID_PASSWORD": "The provided password could not decrypt the accounts. The import was unsuccessful.",
       "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export",
       "NO_ACCOUNTS_SELECTED_TO_IMPORT": "No accounts selected to import",
-      "NO_PASSWORD_PROVIDED": "A password is required to decrypt the accounts",
-      "INVALID_PASSWORD": "The provided password could not decrypt the accounts. The import was unsuccessful."
+      "NO_PASSWORD_PROVIDED": "A password is required to decrypt the accounts"
     },
     "EXPORTING_ACCOUNTS": "Exporting backup...",
     "EXPORT_ACCOUNTS_MODAL_ACTION": "Export",
     "EXPORT_ACCOUNTS_MODAL_TITLE": "Export Accounts",
+    "EXPORT_ENCRYPTED_ACCOUNTS": "Encryption is enabled, but you can choose to export the accounts either encrypted or unencrypted. <p>Would you like to export them encrypted or unencrypted?</p>",
     "IMPORTING_ACCOUNTS": "Importing backup...",
     "IMPORT_ACCOUNTS_MODAL_ACTION": "Import",
     "IMPORT_ACCOUNTS_MODAL_TITLE": "Import Accounts",
-    "EXPORT_ENCRYPTED_ACCOUNTS": "Encryption is enabled, but you can choose to export the accounts either encrypted or unencrypted. <p>Would you like to export them encrypted or unencrypted?</p>",
-    "ENCRYPTED": "Encrypted",
     "UNENCRYPTED": "Unencrypted"
   },
   "ADD_ACCOUNT_MODAL": {
@@ -83,63 +86,57 @@
   },
   "CRYPTO_API_NOT_SUPPORTED": "Crypto API not supported by the browser",
   "HOME": {
+    "ASK_PASSWORD": {
+      "CONFIRM": "Confirm",
+      "MESSAGE": "The accounts in the file are encrypted.<p>Please enter the decryption password.</p>"
+    },
     "CANCEL": "Cancel",
     "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
     "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
     "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
+    "ENCRYPTION_ALERT": {
+      "DONT_SHOW_AGAIN": "Do not show this again",
+      "ENABLE_ENCRYPTION": "Enable encryption",
+      "LATER": "Not now",
+      "MESSAGE": "Enhance the security of your accounts by using the encryption feature.<p>Do you want to configure a password?</p>",
+      "TITLE": "Security alert"
+    },
+    "ERRORS": {
+      "ACCOUNTS_LOCKED": "The application detected encrypted accounts and will not be able to generate codes for them.\n<p>Make sure encryption is enabled and the correct password is set.</p>",
+      "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
+      "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
+      "PASSWORD_NOT_SET_TITLE": "Warning",
+      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Unable to encrypt the accounts without setting a password"
+    },
     "LOADING_ACCOUNTS": "Loading accounts...",
     "LOADING_ACCOUNTS_FILE": "Loading accounts from file...",
     "LOGGING_OUT": "Signing out...",
+    "OK": "OK",
     "PASSWORD_PROMPT_CANCEL": "Cancel",
     "PASSWORD_PROMPT_CONFIRM": "Confirm",
+    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Decryption password",
     "PASSWORD_PROMPT_MESSAGE": "In order to use the encryption feature, please enter a password",
     "PASSWORD_PROMPT_PLACEHOLDER": "Password",
     "PASSWORD_PROMPT_TITLE": "Enter the encryption password",
+    "PASSWORD_RECOVERY_ALERT": {
+      "MESSAGE": "It's important to periodic check and remember your password. \nIf you forget it you'll not be able to decrypt the accounts for use in another devices.",
+      "TITLE": "Warning"
+    },
+    "PERIODIC_CHECK": {
+      "CONFIRM": "Confirm",
+      "MESSAGE": "Enter your password again for confirmation",
+      "MISMATCH": {
+        "MESSAGE": "The encryption password doesn't match the entered password<p>The application will continue to work normally, but if you don't remember the password, then you'll not be able to import the encrypted accounts to another device</p>",
+        "TITLE": "The password doesn't match",
+        "TRY_AGAIN": "Try again"
+      },
+      "TITLE": "Password Confirmation"
+    },
     "VERSION_INFO": {
       "GIT_HASH": "Commit hash",
-      "OK_BUTTON": "OK",
       "VERSION_DATE": "Build date",
       "VERSION_INFO_TITLE": "Version Info",
       "VERSION_LABEL": "Version"
-    },
-    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Decryption password",
-    "ERRORS": {
-      "PASSWORD_MISMATCH": "The passwords don't match",
-      "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
-      "PASSWORD_NOT_SET_TITLE": "Warning",
-      "UNABLE_TO_DECRYPT_PASSWORD_NOT_SET": "Unable to decrypt accounts as a password is not set",
-      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Unable to encrypt the accounts without setting a password",
-      "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
-      "ACCOUNTS_LOCKED": "The application detected encrypted accounts and will not be able to generate codes for them.\n<p>Make sure encryption is enabled and the correct password is set.</p>"
-    },
-    "TRY_AGAIN": "Try again",
-    "ENCRYPTION_ALERT": {
-      "TITLE": "Security alert",
-      "MESSAGE": "Enhance the security of your accounts by using the encryption feature.<p>Do you want to configure a password?</p>",
-      "ENABLE_ENCRYPTION": "Enable encryption",
-      "LATER": "Not now",
-      "DONT_SHOW_AGAIN": "Do not show this again"
-    },
-    "PERIODIC_CHECK": {
-      "TITLE": "Password Confirmation",
-      "MESSAGE": "Enter your password again for confirmation",
-      "CONFIRM": "Confirm",
-      "MISMATCH": {
-        "TITLE": "The password doesn't match",
-        "MESSAGE": "The encryption password doesn't match the entered password<p>The application will continue to work normally, but if you don't remember the password, then you'll not be able to import the encrypted accounts to another device</p>",
-        "TRY_AGAIN": "Try again"
-      }
-    },
-    "PASSWORD_RECOVERY_ALERT": {
-      "TITLE": "Warning",
-      "MESSAGE": "It's important to periodic check and remember your password. \nIf you forget it you'll not be able to decrypt the accounts for use in another devices."
-    },
-    "OK": "OK",
-    "ERROR_TITLE": "Error",
-    "ASK_PASSWORD": {
-      "TITLE": "",
-      "MESSAGE": "The accounts in the file are encrypted.<p>Please enter the decryption password.</p>",
-      "CONFIRM": "Confirm"
     }
   },
   "LOGIN": {
@@ -169,8 +166,5 @@
   },
   "UTILS": {
     "ERROR_INVALID_SEMVER_FORMAT": "Invalid SemVer format"
-  },
-  "ACCOUNT_LIST": {
-    "LOCKED": "Encrypted"
   }
 }
