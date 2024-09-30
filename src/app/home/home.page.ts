@@ -263,12 +263,7 @@ export class HomePage implements OnInit {
     } else {
       console.log("No accounts selected to export")
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_EXPORT'))
-      const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
-      const alert = await this.alertController.create({
-        message,
-        buttons: [okLabel]
-      })
-      await alert.present()
+      await this.showError(message)
     }
   }
 
@@ -528,14 +523,8 @@ export class HomePage implements OnInit {
       // camera permission denial
       const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))
-      const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
-      const alert = await this.alertController.create({
-        header,
-        message,
-        buttons: [okLabel]
-      })
       await loading.dismiss()
-      await alert.present()
+      await this.showError(message, header)
       this.manualInput = true
       this.isScanActive = false
       return
@@ -662,17 +651,11 @@ export class HomePage implements OnInit {
     const hasLockedAccounts = accounts.some(account => account.isLocked)
     await loading.dismiss()
     if(hasLockedAccounts) { 
-      const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED_TITLE'))
+      const header = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED_TITLE'))
       const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED'))
-      const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
-      const alert = await this.alertController.create({
-        header: title,
-        message,
-        buttons: [okLabel]
-      })
-      await alert.present()
-      await alert.onDidDismiss()
+      await this.showError(message, header)
     }
+      
     this.accounts$ = accounts$
   }
 
@@ -765,15 +748,7 @@ export class HomePage implements OnInit {
   private async showFailedPasswordSetupAlert() {
     const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET_TITLE'))
     const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET'))
-    const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
-    const alert = await this.alertController.create({
-      header: title,
-      backdropDismiss: false,
-      message,
-      buttons: [okLabel]
-    })
-    await alert.present()
-    await alert.onDidDismiss()
+    this.showError(message, title)
   }
 
   private async setupNewPassword(): Promise<boolean> {
@@ -910,15 +885,7 @@ export class HomePage implements OnInit {
   private async alertUserAboutInabilityToRecoverPassword() {
     const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.TITLE'))
     const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.MESSAGE'))
-    const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
-    const alert = await this.alertController.create({
-      header: title,
-      backdropDismiss: false,
-      message,
-      buttons: [okLabel]
-    })
-    await alert.present()
-    await alert.onDidDismiss()
+    await this.showError(message, title)
   }
 
   private async presentPasswordCheckAlert(): Promise<boolean> {
@@ -1041,22 +1008,16 @@ export class HomePage implements OnInit {
     const versionLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_LABEL'))
     const buildDateLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_DATE'))
     const gitHashLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.GIT_HASH'))
-    const buttonLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.OK_BUTTON'))
     const message = `
     <p>${versionLabel}: ${versionInfo.versionName}</p>
     <p>${buildDateLabel}: ${versionInfo.buildDate}</p>
     <p>${gitHashLabel}: ${versionInfo.commitHash}</p>`
 
-    const alert = await this.alertController.create({
-      header: title,
-      message,
-      buttons: [buttonLabel]
-    })
-    await alert.present()
+    await this.showError(message, title)
   }
 
   private async showError(message: string, header?: string): Promise<void> {
-    const title = header || await firstValueFrom(this.translateService.get('HOME.ERROR_TITLE'))
+    const title = header
     const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
     const alert = await this.alertController.create({
       header: title,
