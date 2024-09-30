@@ -349,7 +349,7 @@ export class HomePage implements OnInit {
               }
             }
 
-            // import backup
+            // import the accounts
             message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORTING_ACCOUNTS'))
             loading = await this.loadingController.create({
               message,
@@ -378,6 +378,7 @@ export class HomePage implements OnInit {
     } else {
       await this.activateEncryption()
     }
+    this.hidePopover()
   }
 
   get encryptionMenuSlotLabel(): string {
@@ -407,6 +408,10 @@ export class HomePage implements OnInit {
     setTimeout(() => {
       this.isPopoverOpen = true;
     }, 50);
+  }
+
+  private hidePopover() {
+    this.isPopoverOpen = false;
   }
 
   onDidDismissModal(e: Event) {
