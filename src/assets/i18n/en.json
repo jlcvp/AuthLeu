@@ -25,7 +25,9 @@
       "GENERIC_IMPORT_ERROR": "Unknown error while importing accounts from backup",
       "IMPORT_ERROR_TITLE": "Error importing accounts",
       "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export",
-      "NO_ACCOUNTS_SELECTED_TO_IMPORT": "No accounts selected to import"
+      "NO_ACCOUNTS_SELECTED_TO_IMPORT": "No accounts selected to import",
+      "NO_PASSWORD_PROVIDED": "A password is required to decrypt the accounts",
+      "INVALID_PASSWORD": "The provided password could not decrypt the accounts. The import was unsuccessful."
     },
     "EXPORTING_ACCOUNTS": "Exporting backup...",
     "EXPORT_ACCOUNTS_MODAL_ACTION": "Export",
@@ -100,7 +102,7 @@
       "VERSION_INFO_TITLE": "Version Info",
       "VERSION_LABEL": "Version"
     },
-    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Confirm Password",
+    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Decryption password",
     "ERRORS": {
       "PASSWORD_MISMATCH": "The passwords don't match",
       "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
@@ -132,7 +134,13 @@
       "TITLE": "Warning",
       "MESSAGE": "It's important to periodic check and remember your password. \nIf you forget it you'll not be able to decrypt the accounts for use in another devices."
     },
-    "OK": "OK"
+    "OK": "OK",
+    "ERROR_TITLE": "Error",
+    "ASK_PASSWORD": {
+      "TITLE": "",
+      "MESSAGE": "The accounts in the file are encrypted.<p>Please enter the decryption password.</p>",
+      "CONFIRM": "Confirm"
+    }
   },
   "LOGIN": {
     "AUTHENTICATING": "Authenticating...",

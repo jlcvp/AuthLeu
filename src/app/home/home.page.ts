@@ -305,33 +305,73 @@ export class HomePage implements OnInit {
           if (role === 'cancel') {
             return
           }
-          message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORTING_ACCOUNTS'))
-          loading = await this.loadingController.create({
-            message,
-            backdropDismiss: false
-          })
-          await loading.present()
           const selectedAccounts = data ? data as Account2FA[] : undefined
-          console.log({data, selectedAccounts})
           if (selectedAccounts && selectedAccounts.length > 0) {
+            // check if imported accounts are encrypted
+            const isEncrypted = selectedAccounts.some(account => account.isEncrypted)
+            if (isEncrypted) {
+              const password = await this.configService.getEncryptionKey()
+              let currentPasswordWorks = false;
+              if (password) {
+                // try to decrypt using current password (if available)
+                try {
+                  console.log("Trying to decrypt accounts with saved password")
+                  for (const account of selectedAccounts) {
+                    if (account.isEncrypted) {
+                      await account.unlock(password)
+                    }
+                  }
+                  currentPasswordWorks = true
+                } catch (error) {
+                  console.warn("Unable to decrypt accounts with saved password", {error})
+                }
+              }
+
+              if (!currentPasswordWorks) {
+                try {
+                  // ask for password
+                  const password = await this.askForPasswordToImportAccounts()
+                  if (!password) {
+                    const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_PASSWORD_PROVIDED'))
+                    throw new Error(message)
+                  }
+
+                  try {
+                    for (const account of selectedAccounts) {
+                      if (account.isEncrypted) {
+                        await account.unlock(password)
+                      }
+                    }
+                  } catch (error) {
+                    const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.INVALID_PASSWORD'))
+                    throw new Error(message)
+                  }
+                } catch (error: any) {
+                  const message = error && error.message || await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'))
+                  await this.showError(message)
+                  return
+                }
+              }
+            }
+
+            // import backup
+            message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORTING_ACCOUNTS'))
+            loading = await this.loadingController.create({
+              message,
+              backdropDismiss: false
+            })
+            await loading.present()
+            console.log({data, selectedAccounts})
             await this.accountsService.importAccounts(selectedAccounts)
+            await loading.dismiss()
           } else {
             throw new Error("ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_IMPORT")
           }
-          await loading.dismiss()
         } catch (error: any) {
           let errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
           const message = await firstValueFrom(this.translateService.get(errorKey))
           const header = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.IMPORT_ERROR_TITLE'))
-          const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
-          const alert = await this.alertController.create({
-            header,
-            message,
-            backdropDismiss: false,
-            buttons: [okLabel]
-          })
-          await loading.dismiss()
-          await alert.present()
+          await this.showError(message, header)
         }
       }
     }
@@ -958,6 +998,43 @@ export class HomePage implements OnInit {
     return false
   }
 
+  private async askForPasswordToImportAccounts(): Promise<string> {
+    const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.MESSAGE'))
+    const confirm = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.CONFIRM'))
+    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
+    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
+    const alert = await this.alertController.create({
+      message,
+      backdropDismiss: false,
+      inputs: [
+        {
+          type: 'password',
+          name: 'password',
+          placeholder: passwordPlaceholder
+        }
+      ],
+      buttons: [
+        {
+          text: cancelLabel,
+          role: 'cancel'
+        },
+        {
+          text: confirm,
+          role: 'confirm',
+          handler: (data) => {
+            return data.password
+          }
+        }
+      ]
+    })
+    await alert.present()
+    const { data } = await alert.onDidDismiss()
+    if(data && data.values) {
+      return data.values.password
+    }
+    return ''
+  }
+
   async showVersionInfo(): Promise<void> {
     const versionInfo = this.configService.versionInfo
     const title = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_INFO_TITLE'))
@@ -978,4 +1055,15 @@ export class HomePage implements OnInit {
     await alert.present()
   }
 
+  private async showError(message: string, header?: string): Promise<void> {
+    const title = header || await firstValueFrom(this.translateService.get('HOME.ERROR_TITLE'))
+    const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      buttons: [okLabel]
+    })
+    await alert.present()
+    await alert.onDidDismiss()
+  }
 }

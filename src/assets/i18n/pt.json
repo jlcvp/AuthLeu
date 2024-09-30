@@ -25,7 +25,9 @@
       "GENERIC_IMPORT_ERROR": "Erro desconhecido ao importar contas do backup",
       "IMPORT_ERROR_TITLE": "Erro ao importar contas",
       "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar",
-      "NO_ACCOUNTS_SELECTED_TO_IMPORT": "Nenhuma conta selecionada para importar"
+      "NO_ACCOUNTS_SELECTED_TO_IMPORT": "Nenhuma conta selecionada para importar",
+      "NO_PASSWORD_PROVIDED": "É necessário informar uma senha para desencriptar as contas",
+      "INVALID_PASSWORD": "Não foi possível decodificar as contas com a senha informada. A importação de contas foi abortada."
     },
     "EXPORTING_ACCOUNTS": "Exportando backup...",
     "EXPORT_ACCOUNTS_MODAL_ACTION": "Exportar",
@@ -93,7 +95,7 @@
     "PASSWORD_PROMPT_MESSAGE": "Para usar a funcionalidade de criptografia, configure uma senha",
     "PASSWORD_PROMPT_PLACEHOLDER": "Senha",
     "PASSWORD_PROMPT_TITLE": "Digite a senha de criptografia",
-    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Confirmar senha",
+    "PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER": "Senha para descriptografia",
     "ERRORS": {
       "PASSWORD_MISMATCH": "A senha e a confirmação não conferem",
       "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
@@ -132,7 +134,12 @@
       "TITLE": "Atenção",
       "MESSAGE": "É importante executar a verificação períodica para lembrete de senha.\nSe você esquecê-la, não será possível decodificar as contas para uso em outros dispositivos."
     },
-    "OK": "OK"
+    "OK": "OK",
+    "ERROR_TITLE": "Erro",
+    "ASK_PASSWORD": {
+      "MESSAGE": "As contas no arquivo estão criptografadas.<p>Digite a senha de descriptografia.</p>",
+      "CONFIRM": "Confirmar"
+    }
   },
   "LOGIN": {
     "AUTHENTICATING": "Autenticando...",

@@ -30,5 +30,6 @@
     "LOGIN.ERROR_MSGS.USER_NOT_FOUND",
     "ACCOUNT_SERVICE.ERROR.ACCOUNT_NOT_FOUND",
     "UTILS.ERROR_INVALID_SEMVER_FORMAT"
-  ]
+  ],
+  "i18n-ally.sourceLanguage": "en"
 }

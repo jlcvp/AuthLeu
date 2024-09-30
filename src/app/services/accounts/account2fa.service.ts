@@ -154,8 +154,14 @@ export class Account2faService {
    * @param accounts - The array of accounts to import.
    */
   public async importAccounts(accounts: Account2FA[]) {
-    for (const account of accounts) {
-      await this.addAccount(account)
+    const password = await this.appConfig.getEncryptionKey()
+    if (password) {
+      for (const account of accounts) {
+        if (account.secret) {
+          await account.lock(password)
+        }
+        await this.addAccount(account)
+      }
     }
   }
 
