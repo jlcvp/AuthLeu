@@ -65,6 +65,8 @@ export class MigrationService {
     await this.appConfigService.setEncryptionOptions(encryptionOptions)
     await this.appConfigService.setLastPasswordCheck(0)
 
+    await this.appConfigService.setFirstRun()
+
     await this.localStorage.set('data_version', '2.0.0')
   }
 }

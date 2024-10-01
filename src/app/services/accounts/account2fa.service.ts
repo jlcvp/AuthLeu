@@ -40,20 +40,19 @@ export class Account2faService {
   }
 
   /**
-   * Retrieves accounts, optionally decrypting them with the provided decryption key.
-   * @param decryptionKey - Optional key to decrypt account secrets.
+   * Retrieves accounts, automatically decrypting them if necessary.
    * @returns An observable of the list of accounts.
    */
-  public async getAccounts(decryptionKey?: string): Promise<Observable<Account2FA[]>> {
+  public async getAccounts(): Promise<Observable<Account2FA[]>> {
     // Get the observable of accounts from the service
     const accounts$ = await this.service.getAccounts();
 
     // If a decryption key is provided, decrypt the accounts
-    if (decryptionKey) {
-      return accounts$.pipe(
-        mergeMap(async (accounts) => {
+    return accounts$.pipe(
+      mergeMap(async (accounts) => {
+        const key = await this.appConfig.getEncryptionKey() // always get updated key
+        if (key) {
           const decryptions: Promise<void>[] = [];
-          const key = await this.appConfig.getEncryptionKey() // always get updated key
           // Iterate over each account and decrypt if necessary
           for (const account of accounts) {
             if (account.isLocked && key) {
@@ -68,15 +67,12 @@ export class Account2faService {
               console.error('Failed to unlock account', { reason: result.reason })
             }
           }
+        }
 
-          // Return the decrypted accounts
-          return accounts;
-        })
-      );
-    }
-
-    // If no decryption key is provided, return the accounts as is
-    return accounts$;
+        // Return the decrypted accounts
+        return accounts;
+      })
+    );
   }
 
   /**
@@ -155,13 +151,11 @@ export class Account2faService {
    */
   public async importAccounts(accounts: Account2FA[]) {
     const password = await this.appConfig.getEncryptionKey()
-    if (password) {
-      for (const account of accounts) {
-        if (account.secret) {
+    for (const account of accounts) {
+        if (password && !account.isLocked) {    
           await account.lock(password)
         }
         await this.addAccount(account)
-      }
     }
   }
 
@@ -213,7 +207,7 @@ export class Account2faService {
 
     const encryptions: Promise<void>[] = []
     for (const account of accounts) {
-      if (account.secret) {
+      if (!account.isLocked) {
         encryptions.push(account.lock(encryptionKey))
       }
     }

@@ -74,6 +74,7 @@ export class HomePage implements OnInit {
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
+  private hasEncryptedAccounts: boolean = false
 
   constructor(
     private authService: AuthenticationService,
@@ -648,19 +649,55 @@ export class HomePage implements OnInit {
       backdropDismiss: false
     })
     await loading.present()
-    const password = await this.configService.getEncryptionKey()
-    const accounts$ = await this.accountsService.getAccounts(password)
+    const accounts$ = await this.accountsService.getAccounts()
     
     // detect if there are locked accounts and call activate encryption flow
     const accounts = await firstValueFrom(accounts$)
     const hasLockedAccounts = accounts.some(account => account.isLocked)
     await loading.dismiss()
-    if(hasLockedAccounts) { 
-      const header = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED_TITLE'))
-      const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED'))
-      await this.showError(message, header)
+    if(hasLockedAccounts) {
+      this.hasEncryptedAccounts = true
+      const isFirstRun = await this.configService.isFirstRun()
+      if(isFirstRun) {
+        // ask for decryption password
+        let unlocking = true
+        let success = false
+        let password = ''
+        do {
+          password = await this.askForPasswordToImportAccounts()
+          if (!password) {
+            unlocking = false
+          } else {
+            try {
+              const lockedAccount = accounts.find(account => account.isLocked)
+              if (lockedAccount) {
+                await lockedAccount.unlock(password)
+              }
+              unlocking = false
+              success = true
+            } catch (error) {
+              console.error("Error unlocking accounts", error)
+              const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
+              await this.showError(message)
+            }
+          }  
+        } while (unlocking && !success);
+        
+        if(success) {
+          // save password
+          await this.configService.setEncryptionKey(password)
+          await this.configService.setLastPasswordCheck()
+          await this.setEncryptionActive(true)
+        }
+      } else {
+        const header = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED_TITLE'))
+        const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED'))
+        await this.showError(message, header)
+      }
+    } else {
+      this.hasEncryptedAccounts = false
     }
-      
+    await this.configService.setFirstRun(false)
     this.accounts$ = accounts$
   }
 
@@ -707,7 +744,9 @@ export class HomePage implements OnInit {
         await this.periodicPasswordCheck()
       } 
     } else { // step 2
-      if (this.shouldAlertToActivateEncryption) { // 2.1
+      const isFirstLaunch = await this.configService.isFirstRun()
+      console.log({ isFirstLaunch })
+      if (this.shouldAlertToActivateEncryption && !isFirstLaunch) { // 2.1
         const shouldEnableEncryption = await this.alertToActivateEncryption()
         if(shouldEnableEncryption) { // 2.1.1
           await this.activateEncryption()
@@ -720,22 +759,17 @@ export class HomePage implements OnInit {
   private async activateEncryption(): Promise<void> {
     const success = await this.setupNewPassword()
     if(!success) {
-      this.isEncryptionActive = false
-      await this.saveEncryptionOptions()
+      this.setEncryptionActive(false)
       return
     }
     try {
-    await this.accountsService.encryptAccounts()
+      await this.accountsService.encryptAccounts()
     } catch (error) {
       console.error("Error encrypting accounts", error)
-
       return
     }
     console.log("accounts encrypted")
-    this.isEncryptionActive = true
-    this.shouldPeriodicCheckPassword = true
-    this.shouldAlertToActivateEncryption = false
-    await this.saveEncryptionOptions()
+    this.setEncryptionActive(true)
   }
 
   private async deactivateEncryption() {
@@ -745,8 +779,14 @@ export class HomePage implements OnInit {
       console.log("accounts decrypted")
     }
     await this.configService.clearEncryptionKey()
-    this.isEncryptionActive = false
-    this.shouldAlertToActivateEncryption = true
+    this.setEncryptionActive(false)
+  }
+
+  private async setEncryptionActive(active: boolean) {
+    this.isEncryptionActive = active
+    this.shouldPeriodicCheckPassword = active
+    this.shouldAlertToActivateEncryption = !active
+
     await this.saveEncryptionOptions()
   }
 
@@ -855,20 +895,6 @@ export class HomePage implements OnInit {
     }
 
     return role === 'enable'
-  }
-
-  async encryptAccounts(): Promise<void> {
-    const password = await this.configService.getEncryptionKey()
-    if(!password) {
-      const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET'))
-      throw new Error(message)
-    }
-    const accounts = await firstValueFrom(this.accounts$)
-    const encryptedAccounts = await Promise.all(accounts.map(async account => {
-      await account.lock(password)
-      return account
-    }))
-    await this.accountsService.updateAccountsBatch(encryptedAccounts)
   }
 
   private async periodicPasswordCheck() {

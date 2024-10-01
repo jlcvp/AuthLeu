@@ -88,7 +88,7 @@
   "HOME": {
     "ASK_PASSWORD": {
       "CONFIRM": "Confirmar",
-      "MESSAGE": "As contas no arquivo estão criptografadas.<p>Digite a senha de descriptografia.</p>"
+      "MESSAGE": "As contas estão criptografadas.<p>Digite a senha de descriptografia.</p>"
     },
     "CANCEL": "Cancelar",
     "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
@@ -106,7 +106,9 @@
       "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
       "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
       "PASSWORD_NOT_SET_TITLE": "Atenção",
-      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Não é possível criptografar as contas sem uma senha configurada"
+      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Não é possível criptografar as contas sem uma senha configurada",
+      "ACCOUNTS_LOCKED_FIRST_RUN": "As contas estão criptografadas. \n<p>Insira a senha de descriptografia</p>",
+      "INVALID_PASSWORD": "Senha inválida"
     },
     "LOADING_ACCOUNTS": "Carregando contas...",
     "LOADING_ACCOUNTS_FILE": "Carregando arquivo de contas...",

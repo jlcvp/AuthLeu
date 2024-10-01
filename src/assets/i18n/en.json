@@ -88,7 +88,7 @@
   "HOME": {
     "ASK_PASSWORD": {
       "CONFIRM": "Confirm",
-      "MESSAGE": "The accounts in the file are encrypted.<p>Please enter the decryption password.</p>"
+      "MESSAGE": "The accounts are encrypted.<p>Please enter the decryption password.</p>"
     },
     "CANCEL": "Cancel",
     "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
@@ -106,7 +106,9 @@
       "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
       "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
       "PASSWORD_NOT_SET_TITLE": "Warning",
-      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Unable to encrypt the accounts without setting a password"
+      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Unable to encrypt the accounts without setting a password",
+      "ACCOUNTS_LOCKED_FIRST_RUN": "The accounts are encrypted. <p>Please enter the decryption password</p>",
+      "INVALID_PASSWORD": "Invalid password"
     },
     "LOADING_ACCOUNTS": "Loading accounts...",
     "LOADING_ACCOUNTS_FILE": "Loading accounts from file...",

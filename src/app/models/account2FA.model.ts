@@ -39,7 +39,7 @@ export class Account2FA implements IAccount2FA {
     encryptedSecret?: string;
     iv?: string;
     salt?: string;
-    constructor(id: string, label: string, secret?: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string, encryptedSecret?: string, iv?: string, salt?: string) {
+    constructor(id: string, label: string, secret?: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string, encryptedSecret?: string, iv?: string, salt?: string, added?: any) {
         this.id = id;
         this.label = label;
         this.secret = secret || '';
@@ -52,6 +52,7 @@ export class Account2FA implements IAccount2FA {
         this.encryptedSecret = encryptedSecret;
         this.iv = iv;
         this.salt = salt;
+        this.added = added;
     }
 
     static fromDictionary(dict: any): Account2FA {
@@ -60,13 +61,13 @@ export class Account2FA implements IAccount2FA {
         }
 
         // check if dict contains all required fields
-        if(!dict.label || (!dict.secret && !(dict.encryptedSecret && dict.salt && dict.iv))) {
+        if(!dict.label || (!dict.secret && !(dict.encryptedSecret && dict.salt && dict.iv) || dict.active == undefined)) {
             console.log({dict})
             throw new Error('Missing required fields');
         }
         
         const data = dict as IAccount2FA;
-        return new Account2FA(data.id || '', data.label, data.secret, data.tokenLength, data.interval, data.algorithm, data.issuer, data.active, data.logo, data.encryptedSecret, data.iv, data.salt);
+        return new Account2FA(data.id || '', data.label, data.secret, data.tokenLength, data.interval, data.algorithm, data.issuer, data.active, data.logo, data.encryptedSecret, data.iv, data.salt, data.added);
     }
 
     static fromOTPAuthURL(url: string): Account2FA {
@@ -176,6 +177,6 @@ export class Account2FA implements IAccount2FA {
     }
 
     copy(): Account2FA {
-        return new Account2FA(this.id, this.label, this.secret, this.tokenLength, this.interval, this.algorithm, this.issuer, this.active, this.logo, this.encryptedSecret, this.iv, this.salt);
+        return new Account2FA(this.id, this.label, this.secret, this.tokenLength, this.interval, this.algorithm, this.issuer, this.active, this.logo, this.encryptedSecret, this.iv, this.salt, this.added);
     }
 }

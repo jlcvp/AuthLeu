@@ -58,6 +58,14 @@ export class AppConfigService {
     await this.localStorage.set(LAST_PASSWORD_CHECK_KEY, lastCheck);
   }
 
+  async isFirstRun() {
+    return !!(await this.localStorage.get<boolean>('firstRun'));
+  }
+
+  async setFirstRun(firstRun = true) {
+    await this.localStorage.set('firstRun', firstRun);
+  }
+
   static supportsCryptoAPI(): boolean {
     return !!(crypto && crypto.subtle)
   }
