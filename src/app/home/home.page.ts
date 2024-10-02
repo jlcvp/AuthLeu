@@ -69,13 +69,12 @@ export class HomePage implements OnInit {
   isEncryptionActive: boolean = false
   shouldPeriodicCheckPassword: boolean = false
   shouldAlertToActivateEncryption: boolean = true
+  hasLockedAccounts: boolean = false
   versionInfo
 
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
-  private hasEncryptedAccounts: boolean = false
-
   constructor(
     private authService: AuthenticationService,
     private accountsService: Account2faService,
@@ -142,6 +141,8 @@ export class HomePage implements OnInit {
     GlobalUtils.hideSplashScreen()
     await this.setupEncryption()
     await this.loadAccounts()
+    await this.activateEncryptionReminder()
+    await this.configService.setFirstRun(false)
   }
 
   async logout() {
@@ -304,8 +305,8 @@ export class HomePage implements OnInit {
           const selectedAccounts = data ? data as Account2FA[] : undefined
           if (selectedAccounts && selectedAccounts.length > 0) {
             // check if imported accounts are encrypted
-            const isEncrypted = selectedAccounts.some(account => account.isEncrypted)
-            if (isEncrypted) {
+            const lockedAccount = selectedAccounts.find(account => account.isEncrypted)
+            if (lockedAccount !== undefined) {
               const password = await this.configService.getEncryptionKey()
               let currentPasswordWorks = false;
               if (password) {
@@ -326,7 +327,7 @@ export class HomePage implements OnInit {
               if (!currentPasswordWorks) {
                 try {
                   // ask for password
-                  const password = await this.askForPasswordToImportAccounts()
+                  const password = await this.promptUnlockPassword(lockedAccount)
                   if (!password) {
                     const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_PASSWORD_PROVIDED'))
                     throw new Error(message)
@@ -380,6 +381,10 @@ export class HomePage implements OnInit {
       await this.activateEncryption()
     }
     this.hidePopover()
+  }
+
+  async unlockAccountsAction() {
+    await this.loadAccounts()
   }
 
   get encryptionMenuSlotLabel(): string {
@@ -653,51 +658,22 @@ export class HomePage implements OnInit {
     
     // detect if there are locked accounts and call activate encryption flow
     const accounts = await firstValueFrom(accounts$)
-    const hasLockedAccounts = accounts.some(account => account.isLocked)
+    const lockedAccount = accounts.find(account => account.isLocked)
     await loading.dismiss()
-    if(hasLockedAccounts) {
-      this.hasEncryptedAccounts = true
-      const isFirstRun = await this.configService.isFirstRun()
-      if(isFirstRun) {
-        // ask for decryption password
-        let unlocking = true
-        let success = false
-        let password = ''
-        do {
-          password = await this.askForPasswordToImportAccounts()
-          if (!password) {
-            unlocking = false
-          } else {
-            try {
-              const lockedAccount = accounts.find(account => account.isLocked)
-              if (lockedAccount) {
-                await lockedAccount.unlock(password)
-              }
-              unlocking = false
-              success = true
-            } catch (error) {
-              console.error("Error unlocking accounts", error)
-              const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
-              await this.showError(message)
-            }
-          }  
-        } while (unlocking && !success);
-        
-        if(success) {
-          // save password
+    if(lockedAccount) {
+      this.hasLockedAccounts = true
+      if(await this.alertAccountsLocked()) { // user wants to informPassword
+        const password = await this.promptUnlockPassword(lockedAccount)
+        if(password) { // user provided the correct password
+          // save password and enable encryption
           await this.configService.setEncryptionKey(password)
           await this.configService.setLastPasswordCheck()
           await this.setEncryptionActive(true)
+          this.hasLockedAccounts = false
         }
-      } else {
-        const header = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED_TITLE'))
-        const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED'))
-        await this.showError(message, header)
       }
-    } else {
-      this.hasEncryptedAccounts = false
     }
-    await this.configService.setFirstRun(false)
+     
     this.accounts$ = accounts$
   }
 
@@ -743,17 +719,7 @@ export class HomePage implements OnInit {
         console.log("Starting periodic password check")
         await this.periodicPasswordCheck()
       } 
-    } else { // step 2
-      const isFirstLaunch = await this.configService.isFirstRun()
-      console.log({ isFirstLaunch })
-      if (this.shouldAlertToActivateEncryption && !isFirstLaunch) { // 2.1
-        const shouldEnableEncryption = await this.alertToActivateEncryption()
-        if(shouldEnableEncryption) { // 2.1.1
-          await this.activateEncryption()
-          return await this.setupEncryption()
-        }
-      }
-    }
+    } 
   }
 
   private async activateEncryption(): Promise<void> {
@@ -897,6 +863,17 @@ export class HomePage implements OnInit {
     return role === 'enable'
   }
 
+  private async activateEncryptionReminder() {
+    const isFirstLaunch = await this.configService.isFirstRun()
+    if (this.shouldAlertToActivateEncryption && !isFirstLaunch) { // 2.1
+      const shouldEnableEncryption = await this.alertToActivateEncryption()
+      if(shouldEnableEncryption) { // 2.1.1
+        await this.activateEncryption()
+        return await this.setupEncryption()
+      }
+    }
+  }
+
   private async periodicPasswordCheck() {
     const lastCheck = await this.configService.getLastPasswordCheck()
     const nextCheck = lastCheck + PASSWORD_CHECK_PERIOD
@@ -996,7 +973,34 @@ export class HomePage implements OnInit {
     return false
   }
 
-  private async askForPasswordToImportAccounts(): Promise<string> {
+  private async promptUnlockPassword(lockedAccount: Account2FA): Promise<string> {
+    if(!lockedAccount.isLocked) {
+      const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.ERROR_NOT_LOCKED'))
+      throw new Error(message)
+    }
+    
+    let success = false
+    let password = ''
+
+    do {
+      password = await this.promptForPassword()
+      if (!password) {
+        break
+      } else {
+        try {
+          await lockedAccount.unlock(password)
+          success = true
+        } catch (error) {
+          const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
+          await this.showError(message)
+        }
+      }
+    } while (!success);
+
+    return password
+  }
+
+  private async promptForPassword(): Promise<string> {
     const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.MESSAGE'))
     const confirm = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.CONFIRM'))
     const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
@@ -1031,6 +1035,33 @@ export class HomePage implements OnInit {
       return data.values.password
     }
     return ''
+  }
+
+  private async alertAccountsLocked(): Promise<boolean> {
+    const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED_TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED'))
+    const unlockLabel = await firstValueFrom(this.translateService.get('HOME.UNLOCK_ACCOUNTS'))
+    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.KEEP_LOCKED'))
+
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      backdropDismiss: false,
+      buttons: [
+        {
+          text: cancelLabel,
+          role: 'cancel'
+        },
+        {
+          text: unlockLabel,
+          role: 'unlock'
+        }
+      ]
+    })
+    await alert.present()
+    const { role } = await alert.onDidDismiss()
+    const willInputPassword = role === 'unlock'
+    return willInputPassword
   }
 
   async showVersionInfo(): Promise<void> {

@@ -55,7 +55,7 @@ export class Account2faService {
           const decryptions: Promise<void>[] = [];
           // Iterate over each account and decrypt if necessary
           for (const account of accounts) {
-            if (account.isLocked && key) {
+            if (account.isLocked) {
               decryptions.push(account.unlock(key));
             }
           }

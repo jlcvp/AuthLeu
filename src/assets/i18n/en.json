@@ -77,7 +77,8 @@
     "EXPORT_ACCOUNTS": "Export Backup",
     "IMPORT_ACCOUNTS": "Import Backup",
     "LOGOUT": "Sign out",
-    "PERIODIC_CHECK": "Periodic Password Check"
+    "PERIODIC_CHECK": "Periodic Password Check",
+    "UNLOCK_ACCOUNTS": "Decrypt accounts"
   },
   "CRYPTO": {
     "ALREADY_DECRYPTED": "Data is already decrypted",
@@ -88,7 +89,9 @@
   "HOME": {
     "ASK_PASSWORD": {
       "CONFIRM": "Confirm",
-      "MESSAGE": "The accounts are encrypted.<p>Please enter the decryption password.</p>"
+      "MESSAGE": "The accounts are encrypted.<p>Please enter the decryption password.</p>",
+      "ERROR_NOT_LOCKED": "Account is not encrypted",
+      "KEEP_LOCKED": "Do not decrypt"
     },
     "CANCEL": "Cancel",
     "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
@@ -102,12 +105,10 @@
       "TITLE": "Security alert"
     },
     "ERRORS": {
-      "ACCOUNTS_LOCKED": "The application detected encrypted accounts and will not be able to generate codes for them.\n<p>Make sure encryption is enabled and the correct password is set.</p>",
+      "ACCOUNTS_LOCKED": "Your accounts are encrypted. You won't be able to view the codes until they are decrypted using the encryption password.",
       "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
       "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
       "PASSWORD_NOT_SET_TITLE": "Warning",
-      "UNABLE_TO_ENCRYPT_PASSWORD_NOT_SET": "Unable to encrypt the accounts without setting a password",
-      "ACCOUNTS_LOCKED_FIRST_RUN": "The accounts are encrypted. <p>Please enter the decryption password</p>",
       "INVALID_PASSWORD": "Invalid password"
     },
     "LOADING_ACCOUNTS": "Loading accounts...",
@@ -139,7 +140,8 @@
       "VERSION_DATE": "Build date",
       "VERSION_INFO_TITLE": "Version Info",
       "VERSION_LABEL": "Version"
-    }
+    },
+    "UNLOCK_ACCOUNTS": "Enter Password"
   },
   "LOGIN": {
     "AUTHENTICATING": "Authenticating...",

@@ -18,16 +18,24 @@
                 <ion-label>{{ "CONFIG_MENU.ENCRYPTION_OPTIONS" | translate }}</ion-label>
                 <ion-note slot="end" [color]="encryptionMenuSlotLabelColor">{{ encryptionMenuSlotLabel | translate }}</ion-note>
               </ion-item>
-              <ion-popover trigger="encryption-menu-trigger" class="wider-popover" reference="event">
+              <ion-popover trigger="encryption-menu-trigger" [dismissOnSelect]="hasLockedAccounts" class="wider-popover" reference="event">
                 <ng-template>
                   <ion-content>
                     <ion-list>
-                      <ion-item button detail="false" (click)="encryptionActiveToggle()">
+                      <ng-container *ngIf="!hasLockedAccounts;else unlockAccountsItem">
+                      <ion-item button detail="false" [disabled]="hasLockedAccounts" (click)="encryptionActiveToggle()">
                         <ion-toggle color="success" [checked]="isEncryptionActive"> {{ "CONFIG_MENU.ENCRYPT_ACCOUNTS" | translate }} </ion-toggle>
                       </ion-item>
                       <ion-item button detail="false" [disabled]="!isEncryptionActive" (click)="periodicCheckToggle()">
                         <ion-toggle [checked]="shouldPeriodicCheckPassword"> {{ "CONFIG_MENU.PERIODIC_CHECK" | translate }} </ion-toggle>
                       </ion-item>
+                      </ng-container>
+                      <ng-template #unlockAccountsItem>
+                        <ion-item button detail="false" (click)="unlockAccountsAction()">
+                          <ion-icon slot="start" name="key-outline"></ion-icon>
+                          <ion-label>{{ "CONFIG_MENU.UNLOCK_ACCOUNTS" | translate }}</ion-label>
+                        </ion-item>
+                      </ng-template>
                     </ion-list>
                   </ion-content>
                 </ng-template>
