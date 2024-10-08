@@ -39,9 +39,11 @@ export class MigrationService {
     switch(version) {
       case AppVersion.V1_0_0:
         await this.migrateToV1_0_0()
+        await this.localStorage.set('data_version', AppVersion.V1_0_0)
         break
       case AppVersion.V2_0_0:
         await this.migrateToV2_0_0()
+        await this.localStorage.set('data_version', AppVersion.V2_0_0)
         break
       default:
         console.error('Migration not implemented for version:', version)
@@ -50,7 +52,6 @@ export class MigrationService {
 
   private async migrateToV1_0_0() {
     console.log('Migrating to v1.0.0')
-    await this.localStorage.set('data_version', '1.0.0')
   }
 
   private async migrateToV2_0_0() {
@@ -65,8 +66,6 @@ export class MigrationService {
     await this.appConfigService.setEncryptionOptions(encryptionOptions)
     await this.appConfigService.setLastPasswordCheck(0)
 
-    await this.appConfigService.setFirstRun()
-
-    await this.localStorage.set('data_version', '2.0.0')
+    await this.appConfigService.setFirstRun() // reset first run
   }
 }

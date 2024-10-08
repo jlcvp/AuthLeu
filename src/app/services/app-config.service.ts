@@ -29,7 +29,7 @@ export class AppConfigService {
     return environment.isOfflineEnv;
   }
 
-  async getEncryptionOptions() {
+  async getEncryptionOptions(): Promise<EncryptionOptions> {
     return (await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY)) || ENCRYPTION_OPTIONS_DEFAULT;
   }
   

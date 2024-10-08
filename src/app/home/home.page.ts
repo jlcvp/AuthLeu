@@ -12,7 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
 import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
 import { AppConfigService } from '../services/app-config.service';
-import { EncryptionOptions, PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
+import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions, PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
 import { MigrationService } from '../services/migration.service';
 
 @Component({
@@ -66,12 +66,10 @@ export class HomePage implements OnInit {
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   isWindowFocused: boolean = true
-  isEncryptionActive: boolean = false
-  shouldPeriodicCheckPassword: boolean = false
-  shouldAlertToActivateEncryption: boolean = true
   hasLockedAccounts: boolean = false
   versionInfo
 
+  private encryptionOptions: EncryptionOptions = ENCRYPTION_OPTIONS_DEFAULT
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
@@ -134,6 +132,19 @@ export class HomePage implements OnInit {
     }
   }
 
+  // Encryption UI properties
+  get isEncryptionActive() {
+    return this.encryptionOptions.encryptionActive
+  }
+
+  get shouldPeriodicCheckPassword() {
+    return this.encryptionOptions.shouldPerformPeriodicCheck
+  }
+
+  get shouldAlertToActivateEncryption() {
+    return this.encryptionOptions.shouldAlertToActivateEncryption
+  }
+
   async ngOnInit() {
     await this.migrationService.migrate()
     this.onWindowResize()
@@ -141,7 +152,7 @@ export class HomePage implements OnInit {
     GlobalUtils.hideSplashScreen()
     await this.setupEncryption()
     await this.loadAccounts()
-    await this.activateEncryptionReminder()
+    await this.handleEncryptionReminder()
     await this.configService.setFirstRun(false)
   }
 
@@ -395,16 +406,13 @@ export class HomePage implements OnInit {
     return this.isEncryptionActive ? 'success' : 'danger'
   }
 
-  periodicCheckToggle() {
-    this.shouldPeriodicCheckPassword = !this.shouldPeriodicCheckPassword
+  async periodicCheckToggle() {
+    this.encryptionOptions.shouldPerformPeriodicCheck = !this.shouldPeriodicCheckPassword
+    await this.saveEncryptionOptions()
   }
 
   async saveEncryptionOptions() {
-    await this.configService.setEncryptionOptions({
-      encryptionActive: this.isEncryptionActive,
-      shouldPerformPeriodicCheck: this.shouldPeriodicCheckPassword,
-      shouldAlertToActivateEncryption: this.shouldAlertToActivateEncryption
-    })
+    await this.configService.setEncryptionOptions(this.encryptionOptions)
   }
 
   showPopover(e: Event) {
@@ -695,12 +703,9 @@ export class HomePage implements OnInit {
      *    2.1.2 If user chooses to enable encryption later, check if it selected to not show the alert again and save the preference
      */
 
-    const encryptionOptions = await this.configService.getEncryptionOptions() // step 0
+    this.encryptionOptions = await this.configService.getEncryptionOptions() // step 0
     // set page properties
-    this.isEncryptionActive = encryptionOptions.encryptionActive
-    this.shouldPeriodicCheckPassword = encryptionOptions.shouldPerformPeriodicCheck
-    this.shouldAlertToActivateEncryption = encryptionOptions.shouldAlertToActivateEncryption
-    console.log({ encryptionOptions })
+    console.log("Encryption Options:",{ encryptionOptions: this.encryptionOptions })
     if(this.isEncryptionActive) { // step 1
       const password = await this.configService.getEncryptionKey()
       if(!password) { // 1.1
@@ -749,10 +754,9 @@ export class HomePage implements OnInit {
   }
 
   private async setEncryptionActive(active: boolean) {
-    this.isEncryptionActive = active
-    this.shouldPeriodicCheckPassword = active
-    this.shouldAlertToActivateEncryption = !active
-
+    this.encryptionOptions.encryptionActive = active
+    this.encryptionOptions.shouldPerformPeriodicCheck = active
+    this.encryptionOptions.shouldAlertToActivateEncryption = !active
     await this.saveEncryptionOptions()
   }
 
@@ -856,14 +860,14 @@ export class HomePage implements OnInit {
     console.log('alert result', { data, role })
 
     if(data && data.dontShowAgain) { // 2.1.2
-      this.shouldAlertToActivateEncryption = false
+      this.encryptionOptions.shouldAlertToActivateEncryption = false
       await this.saveEncryptionOptions()
     }
 
     return role === 'enable'
   }
 
-  private async activateEncryptionReminder() {
+  private async handleEncryptionReminder() {
     const isFirstLaunch = await this.configService.isFirstRun()
     if (this.shouldAlertToActivateEncryption && !isFirstLaunch) { // 2.1
       const shouldEnableEncryption = await this.alertToActivateEncryption()
