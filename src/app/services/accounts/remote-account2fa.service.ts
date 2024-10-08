@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
 import { map, Observable } from 'rxjs';
 import { AuthenticationService } from '../authentication.service';
-import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, orderBy, query, serverTimestamp, setDoc, terminate, where } from '@angular/fire/firestore';
+import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, orderBy, query, runTransaction, serverTimestamp, setDoc, terminate, Timestamp, where, writeBatch } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -35,9 +35,27 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
 
     const timestamp = serverTimestamp()
     account.added = timestamp
-
     await setDoc(document, account.typeErased())
     return id
+  }
+
+  async updateAccount(account: Account2FA): Promise<void> {
+    this.updateAccountsBatch([account])
+  }
+
+  public async updateAccountsBatch(accounts: Account2FA[]): Promise<void> {
+    const userId = await this.authService.getCurrentUserId()
+    if(!userId) {
+      throw new Error('INVALID_SESSION')
+    }
+    const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
+    await runTransaction(this.firestore, async transaction => {
+      console.log("Updating accounts batch", {accounts})
+      for(const account of accounts) {
+        const document = doc(accountCollection, account.id)
+        transaction.set(document, account.typeErased())
+      }
+    })
   }
 
   public async clearCache() {

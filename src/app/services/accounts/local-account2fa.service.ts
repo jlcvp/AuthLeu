@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { LocalStorageService } from '../local-storage.service';
-import { GlobalUtils } from 'src/app/utils/global-utils';
+import { CryptoUtils } from 'src/app/utils/crypto-utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocalAccount2faService implements IAccount2FAProvider {
-  private loaded = false
   private accountsSubject: BehaviorSubject<Account2FA[]>
   private accounts: Account2FA[] = []
 
@@ -21,6 +20,7 @@ export class LocalAccount2faService implements IAccount2FAProvider {
     await this.loadAccountsFromStorage()
     this.sortAccounts()
     setTimeout(() => {
+      console.log("getAccounts", this.accounts)
       this.accountsSubject.next(this.accounts)
     }, 100);
     return this.accountsSubject.asObservable()
@@ -43,20 +43,44 @@ export class LocalAccount2faService implements IAccount2FAProvider {
     return id
   }
 
-  private async loadAccountsFromStorage() {
-    if (this.loaded) {
-      return
+  async updateAccount(account: Account2FA): Promise<void> {
+    return this.updateAccountsBatch([account])
+  }
+
+  async updateAccountsBatch(accounts: Account2FA[]): Promise<void> {
+    await this.loadAccountsFromStorage()
+    for (const account of accounts) {
+      this.updateAccountData(account)
+    }
+    this.persistAccounts()
+    this.accountsSubject.next(this.accounts)
+  }
+
+  private updateAccountData(account: Account2FA): void {
+    console.log("updateAccountData", {account})
+    console.log("this.accounts", this.accounts)
+    const index = this.accounts.findIndex(a => a.id === account.id)
+    if (index < 0) {
+      throw new Error('ACCOUNT_SERVICE.ERROR.ACCOUNT_NOT_FOUND')
     }
 
+    this.accounts[index] = account
+  }
+
+  private async persistAccounts() {
+    this.sortAccounts()
+    await this.localStorage.set('local_accounts', this.accounts)
+  }
+
+  private async loadAccountsFromStorage() {
     const accounts = (await this.localStorage.get<IAccount2FA[]>('local_accounts')) || []
     this.accounts = accounts.map(account => Account2FA.fromDictionary(account))
     this.sortAccounts()
-    this.loaded = true
     this.accountsSubject.next(this.accounts)
   }
 
   private createId(): string {
-    // Copied from firebase sdk implementation
+    // Copied from firebase sdk implementation (MIT License)
     // Alphanumeric characters
     const chars =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -66,7 +90,7 @@ export class LocalAccount2faService implements IAccount2FAProvider {
     let autoId = '';
     const targetLength = 20;
     while (autoId.length < targetLength) {
-      const bytes = GlobalUtils.randomBytes(40);
+      const bytes = CryptoUtils.randomBytes(40);
       for (let i = 0; i < bytes.length; ++i) {
         // Only accept values that are [0, maxMultiple), this ensures they can
         // be evenly mapped to indices of `chars` via a modulo operation.

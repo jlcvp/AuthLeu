@@ -1,6 +1,9 @@
 {
   "root": true,
   "ignorePatterns": ["projects/**/*"],
+  "env": {
+    "es6": true
+  },
   "overrides": [
     {
       "files": ["*.ts"],

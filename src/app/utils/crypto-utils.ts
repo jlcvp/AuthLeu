@@ -1,3 +1,5 @@
+import { AppConfigService } from "../services/app-config.service";
+
 export class CryptoUtils {
     private static _shared: CryptoUtils;
     
@@ -8,8 +10,24 @@ export class CryptoUtils {
         return this._shared;
     }
 
+    static randomBytes(length: number): Uint8Array {
+        if (length <= 0 || length > 65536) {
+            throw new Error('Invalid length');
+        }
+
+        let buffer = new Uint8Array(length)
+        if (window.crypto) {
+            window.crypto.getRandomValues(buffer); // better random
+        } else { // fallback to Math.random
+            for (let i = 0; i < length; i++) {
+                buffer[i] = Math.floor(Math.random() * 255)
+            }
+        }
+        return buffer;
+    }
+
     private constructor() {
-        if (!window.crypto) {
+        if (!AppConfigService.supportsCryptoAPI()) {
             throw new Error('CRYPTO_API_NOT_SUPPORTED');
         }
     }

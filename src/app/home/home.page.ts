@@ -11,6 +11,9 @@ import { LocalStorageService } from '../services/local-storage.service';
 import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
 import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
+import { AppConfigService } from '../services/app-config.service';
+import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions, PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
+import { MigrationService } from '../services/migration.service';
 
 @Component({
   selector: 'app-home',
@@ -51,6 +54,7 @@ export class HomePage implements OnInit {
 
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount?: Account2FA
+  lockedAccount?: Account2FA
   searchTxt: string = ''
   draftLogoSearchTxt: string = ''
   searchLogoResults: any[] = []
@@ -62,11 +66,13 @@ export class HomePage implements OnInit {
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   isWindowFocused: boolean = true
+  hasLockedAccounts: boolean = false
+  versionInfo
 
+  private encryptionOptions: EncryptionOptions = ENCRYPTION_OPTIONS_DEFAULT
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
-
   constructor(
     private authService: AuthenticationService,
     private accountsService: Account2faService,
@@ -76,6 +82,8 @@ export class HomePage implements OnInit {
     private modalController: ModalController,
     private logoService: LogoService,
     private storageService: LocalStorageService,
+    private configService: AppConfigService,
+    private migrationService: MigrationService,
     private translateService: TranslateService,
     private navCtrl: NavController,
     formBuilder: FormBuilder
@@ -98,6 +106,8 @@ export class HomePage implements OnInit {
         Validators.pattern('^[1-9]+[0-9]*$')
       ])),
     });
+
+    this.versionInfo = this.configService.versionInfo
   }
 
   get accountListType() {
@@ -122,26 +132,28 @@ export class HomePage implements OnInit {
     }
   }
 
+  // Encryption UI properties
+  get isEncryptionActive() {
+    return this.encryptionOptions.encryptionActive
+  }
+
+  get shouldPeriodicCheckPassword() {
+    return this.encryptionOptions.shouldPerformPeriodicCheck
+  }
+
+  get shouldAlertToActivateEncryption() {
+    return this.encryptionOptions.shouldAlertToActivateEncryption
+  }
+
   async ngOnInit() {
+    await this.migrationService.migrate()
     this.onWindowResize()
     this.setupPalette()
-    const loadingMsg = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS'))
-    const loading = await this.loadingController.create({
-      message: loadingMsg,
-      backdropDismiss: false
-    })
     GlobalUtils.hideSplashScreen()
-    await loading.present()
-    this.accounts$ = await this.accountsService.getAccounts()
-    const lastSelectedAccountId: string | undefined = await this.storageService.get('lastSelectedAccountId')
-    if (lastSelectedAccountId) {
-      const accounts = await firstValueFrom(this.accounts$)
-      const lastSelectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
-      if (lastSelectedAccount) {
-        this.selectAccount(lastSelectedAccount)
-      }
-    }
-    await loading.dismiss()
+    await this.setupEncryption()
+    await this.loadAccounts()
+    await this.handleEncryptionReminder()
+    await this.configService.setFirstRun(false)
   }
 
   async logout() {
@@ -159,6 +171,7 @@ export class HomePage implements OnInit {
     await loading.present()
     await this.accountsService.clearCache()
     await this.authService.logout()
+    await this.storageService.clearStorage()
     //reload window
     await loading.dismiss()
     await this.navCtrl.navigateRoot('/').then(() => {
@@ -206,6 +219,33 @@ export class HomePage implements OnInit {
 
   async exportAccountAction() {
     const accounts = await firstValueFrom(this.accounts$)
+    let exportWithEncryption = false
+    if(this.isEncryptionActive) {
+      // present alert to ask the user if they want to export accounts encrypted or not
+      const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORT_ENCRYPTED_ACCOUNTS'))
+      const encryptedLabel = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ENCRYPTED'))
+      const unencryptedLabel = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.UNENCRYPTED'))
+
+      const alert = await this.alertController.create({
+        message,
+        buttons: [
+          {
+            text: encryptedLabel,
+            role: 'encrypted'
+          },
+          {
+            text: unencryptedLabel,
+            role: 'cancel'
+          }
+        ]
+      })
+      await alert.present()
+      const { role } = await alert.onDidDismiss()
+      if(role == 'encrypted') {
+        exportWithEncryption = true
+      } 
+    }
+
     const modalTitle = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORT_ACCOUNTS_MODAL_TITLE'))
     const confirmText = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORT_ACCOUNTS_MODAL_ACTION'))
     const modal = await this.modalController.create({
@@ -231,16 +271,12 @@ export class HomePage implements OnInit {
         backdropDismiss: false
       })
       await loading.present()
-      await this.accountsService.exportAccounts(selectedAccounts)
+      await this.accountsService.exportAccounts(selectedAccounts, exportWithEncryption)
       await loading.dismiss()
     } else {
       console.log("No accounts selected to export")
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_EXPORT'))
-      const alert = await this.alertController.create({
-        message,
-        buttons: ['OK']
-      })
-      await alert.present()
+      await this.showError(message)
     }
   }
 
@@ -277,35 +313,106 @@ export class HomePage implements OnInit {
           if (role === 'cancel') {
             return
           }
-          message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORTING_ACCOUNTS'))
-          loading = await this.loadingController.create({
-            message,
-            backdropDismiss: false
-          })
-          await loading.present()
           const selectedAccounts = data ? data as Account2FA[] : undefined
-          console.log({data, selectedAccounts})
           if (selectedAccounts && selectedAccounts.length > 0) {
+            // check if imported accounts are encrypted
+            const lockedAccount = selectedAccounts.find(account => account.isEncrypted)
+            if (lockedAccount !== undefined) {
+              const password = await this.configService.getEncryptionKey()
+              let currentPasswordWorks = false;
+              if (password) {
+                // try to decrypt using current password (if available)
+                try {
+                  console.log("Trying to decrypt accounts with saved password")
+                  for (const account of selectedAccounts) {
+                    if (account.isEncrypted) {
+                      await account.unlock(password)
+                    }
+                  }
+                  currentPasswordWorks = true
+                } catch (error) {
+                  console.warn("Unable to decrypt accounts with saved password", {error})
+                }
+              }
+
+              if (!currentPasswordWorks) {
+                try {
+                  // ask for password
+                  const password = await this.promptUnlockPassword(lockedAccount)
+                  if (!password) {
+                    const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_PASSWORD_PROVIDED'))
+                    throw new Error(message)
+                  }
+
+                  try {
+                    for (const account of selectedAccounts) {
+                      if (account.isEncrypted) {
+                        await account.unlock(password)
+                      }
+                    }
+                  } catch (error) {
+                    const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.INVALID_PASSWORD'))
+                    throw new Error(message)
+                  }
+                } catch (error: any) {
+                  const message = error && error.message || await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'))
+                  await this.showError(message)
+                  return
+                }
+              }
+            }
+
+            // import the accounts
+            message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORTING_ACCOUNTS'))
+            loading = await this.loadingController.create({
+              message,
+              backdropDismiss: false
+            })
+            await loading.present()
+            console.log({data, selectedAccounts})
             await this.accountsService.importAccounts(selectedAccounts)
+            await loading.dismiss()
           } else {
             throw new Error("ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_IMPORT")
           }
-          await loading.dismiss()
         } catch (error: any) {
           let errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
           const message = await firstValueFrom(this.translateService.get(errorKey))
           const header = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.IMPORT_ERROR_TITLE'))
-          const alert = await this.alertController.create({
-            header,
-            message,
-            backdropDismiss: false,
-            buttons: ['OK']
-          })
-          await loading.dismiss()
-          await alert.present()
+          await this.showError(message, header)
         }
       }
     }
+  }
+
+  async encryptionActiveToggle() {
+    if (this.isEncryptionActive) {
+      await this.deactivateEncryption()
+    } else {
+      await this.activateEncryption()
+    }
+    this.hidePopover()
+  }
+
+  async unlockAccountsAction() {
+    await this.loadAccounts()
+  }
+
+  get encryptionMenuSlotLabel(): string {
+    return this.isEncryptionActive ? 'CONFIG_MENU.ENCRYPTION_ACTIVE' : 'CONFIG_MENU.ENCRYPTION_INACTIVE'
+  }
+  
+  get encryptionMenuSlotLabelColor(): string {
+    return this.isEncryptionActive ? 'success' : 'danger'
+  }
+
+  async periodicCheckToggle() {
+    this.encryptionOptions.shouldPerformPeriodicCheck = !this.shouldPeriodicCheckPassword
+    await this.saveEncryptionOptions()
+  }
+
+  async saveEncryptionOptions() {
+    await this.configService.setEncryptionOptions(this.encryptionOptions)
   }
 
   showPopover(e: Event) {
@@ -315,6 +422,10 @@ export class HomePage implements OnInit {
     setTimeout(() => {
       this.isPopoverOpen = true;
     }, 50);
+  }
+
+  private hidePopover() {
+    this.isPopoverOpen = false;
   }
 
   onDidDismissModal(e: Event) {
@@ -364,7 +475,9 @@ export class HomePage implements OnInit {
       this.selectAccount(account)
     } catch (error: any) {
       await loading.dismiss()
-      const messageKey = error.message === 'INVALID_SESSION' ? 'ADD_ACCOUNT_MODAL.ERROR_INVALID_SESSION' : 'ADD_ACCOUNT_MODAL.ERROR_ADDING_ACCOUNT'
+      const messageKey = error.message === 'INVALID_SESSION' ? 
+        await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_SESSION')) : 
+        await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_ADDING_ACCOUNT'))
       const message = await firstValueFrom(this.translateService.get(messageKey))
       const toast = await this.toastController.create({
         message: message,
@@ -429,13 +542,8 @@ export class HomePage implements OnInit {
       // camera permission denial
       const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))
-      const alert = await this.alertController.create({
-        header,
-        message,
-        buttons: ['OK']
-      })
       await loading.dismiss()
-      await alert.present()
+      await this.showError(message, header)
       this.manualInput = true
       this.isScanActive = false
       return
@@ -545,5 +653,444 @@ export class HomePage implements OnInit {
       });
       await confirmPrompt.present()
     })
+  }
+
+  private async loadAccounts() {
+    const loadingMsg = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS'))
+    const loading = await this.loadingController.create({
+      message: loadingMsg,
+      backdropDismiss: false
+    })
+    await loading.present()
+    const accounts$ = await this.accountsService.getAccounts()
+    
+    // detect if there are locked accounts and call activate encryption flow
+    const accounts = await firstValueFrom(accounts$)
+    const lockedAccount = accounts.find(account => account.isLocked)
+    await loading.dismiss()
+    if(lockedAccount) {
+      this.hasLockedAccounts = true
+      if(await this.alertAccountsLocked()) { // user wants to informPassword
+        const password = await this.promptUnlockPassword(lockedAccount)
+        if(password) { // user provided the correct password
+          // save password and enable encryption
+          await this.configService.setEncryptionKey(password)
+          await this.configService.setLastPasswordCheck()
+          await this.setEncryptionActive(true)
+          this.hasLockedAccounts = false
+        }
+      }
+    }
+     
+    this.accounts$ = accounts$
+  }
+
+  private async setupEncryption(): Promise<void> {
+    /**
+     * While setting up the encryption, app will follow the flow below:
+     * 0. Load encryption options
+     * 1. If encryption is active, check saved password
+     *  1.1 If password is not set, show password setup prompt
+     *    1.1.1 If password setup is cancelled or failed, show error message, deactivate encryption and exit setup flow
+     *    1.1.2 If password setup is successful, update last password check timestamp and proceed to 1.2
+     *  1.2 If password is set:
+     *    1.2.1 If periodic password check is enabled, and it is time to perform a check:
+     *      1.2.1.1 If the check succeeds, update the last password check timestamp
+     *      1.2.1.2 If the check fails, alert user about the inability of decrypt accounts on other devices if password is lost
+     * 2. If encryption is not active, check if alert to activate encryption is enabled
+     *  2.1 If alert is enabled, show alert to activate encryption
+     *    2.1.1 If user chooses to enable encryption, go to 1.1
+     *    2.1.2 If user chooses to enable encryption later, check if it selected to not show the alert again and save the preference
+     */
+
+    this.encryptionOptions = await this.configService.getEncryptionOptions() // step 0
+    // set page properties
+    console.log("Encryption Options:",{ encryptionOptions: this.encryptionOptions })
+    if(this.isEncryptionActive) { // step 1
+      const password = await this.configService.getEncryptionKey()
+      if(!password) { // 1.1
+        const success = await this.setupNewPassword() // 1.1
+        if(!success) { // 1.1.1
+          // Deactivate encryption
+          await this.deactivateEncryption()
+          // Show failed password setup message
+          await this.showFailedPasswordSetupAlert()
+          return // exit encryption setup flow
+        }
+      }
+
+      // 1.2
+      if (this.shouldPeriodicCheckPassword) { // 1.2.1
+        console.log("Starting periodic password check")
+        await this.periodicPasswordCheck()
+      } 
+    } 
+  }
+
+  private async activateEncryption(): Promise<void> {
+    const success = await this.setupNewPassword()
+    if(!success) {
+      this.setEncryptionActive(false)
+      return
+    }
+    try {
+      await this.accountsService.encryptAccounts()
+    } catch (error) {
+      console.error("Error encrypting accounts", error)
+      return
+    }
+    console.log("accounts encrypted")
+    this.setEncryptionActive(true)
+  }
+
+  private async deactivateEncryption() {
+    const password = await this.configService.getEncryptionKey()
+    if(password) {
+      await this.accountsService.decryptAccounts()
+      console.log("accounts decrypted")
+    }
+    await this.configService.clearEncryptionKey()
+    this.setEncryptionActive(false)
+  }
+
+  private async setEncryptionActive(active: boolean) {
+    this.encryptionOptions.encryptionActive = active
+    this.encryptionOptions.shouldPerformPeriodicCheck = active
+    this.encryptionOptions.shouldAlertToActivateEncryption = !active
+    await this.saveEncryptionOptions()
+  }
+
+  private async showFailedPasswordSetupAlert() {
+    const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET_TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET'))
+    this.showError(message, title)
+  }
+
+  private async setupNewPassword(): Promise<boolean> {
+    const passwordData = await this.promptPassword()
+    if(passwordData && passwordData.password && passwordData.password === passwordData.passwordConfirmation) {
+      await this.configService.setEncryptionKey(passwordData.password)
+      await this.configService.setLastPasswordCheck()
+      return true // 1.1.2
+    }
+    return false // 1.1.1
+  }
+
+  private async promptPassword(): Promise<{password: string, passwordConfirmation: string}> {
+    const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_MESSAGE'))
+    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_PLACEHOLDER'))
+    const passwordConfirmationPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
+    const cancelText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CANCEL'))
+    const okText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRM'))
+    
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      backdropDismiss: false,
+      inputs: [
+        {
+          name: 'password',
+          type: 'password',
+          placeholder: passwordPlaceholder
+        },
+        {
+          name: 'passwordConfirmation',
+          type: 'password',
+          placeholder: passwordConfirmationPlaceholder
+        }
+      ],
+      buttons: [
+        {
+          text: cancelText,
+          role: 'cancel'
+        }, {
+          text: okText,
+          handler: (data) => {
+            return { password: data.password, passwordConfirmation: data.passwordConfirmation }
+          }
+        }
+      ]
+    })
+    await alert.present()
+
+    const { data } = await alert.onDidDismiss()
+    if(!data) {
+      return { password: '', passwordConfirmation: '' }
+    }
+    return data.values
+  }
+
+  private async alertToActivateEncryption(): Promise<boolean> {
+    const title = await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.MESSAGE'))
+    const enableLabel = await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.ENABLE_ENCRYPTION'))
+    const laterLabel = await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.LATER'))
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      backdropDismiss: false,
+      inputs: [
+        {
+          type: 'checkbox',
+          value: 'dontShowAgain',
+          label: await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.DONT_SHOW_AGAIN'))
+        }
+      ],
+      buttons: [
+        {
+          text: laterLabel,
+          role: 'later',
+          handler: (data) => {
+            if(data && data[0] == 'dontShowAgain') {
+              return { dontShowAgain: true }
+            }
+            return { dontShowAgain: false }
+          }
+        },
+        {
+          text: enableLabel,
+          role: 'enable'
+        }
+      ]
+    })
+    await alert.present()
+
+    const { data, role } = await alert.onDidDismiss()
+    console.log('alert result', { data, role })
+
+    if(data && data.dontShowAgain) { // 2.1.2
+      this.encryptionOptions.shouldAlertToActivateEncryption = false
+      await this.saveEncryptionOptions()
+    }
+
+    return role === 'enable'
+  }
+
+  private async handleEncryptionReminder() {
+    const isFirstLaunch = await this.configService.isFirstRun()
+    if (this.shouldAlertToActivateEncryption && !isFirstLaunch) { // 2.1
+      const shouldEnableEncryption = await this.alertToActivateEncryption()
+      if(shouldEnableEncryption) { // 2.1.1
+        await this.activateEncryption()
+        return await this.setupEncryption()
+      }
+    }
+  }
+
+  private async periodicPasswordCheck() {
+    const lastCheck = await this.configService.getLastPasswordCheck()
+    const nextCheck = lastCheck + PASSWORD_CHECK_PERIOD
+    const now = Date.now()
+    console.log({ lastCheck, nextCheck, now })
+    if(now >= nextCheck) { // 1.2.1
+      const checkSuccess = await this.presentPasswordCheckAlert()
+      if(checkSuccess) { // 1.2.1.1
+        console.log('password check success')
+        await this.configService.setLastPasswordCheck()
+      } else { // 1.2.1.2
+        await this.alertUserAboutInabilityToRecoverPassword()
+      }
+    }
+  }
+
+  private async alertUserAboutInabilityToRecoverPassword() {
+    const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.MESSAGE'))
+    await this.showError(message, title)
+  }
+
+  private async presentPasswordCheckAlert(): Promise<boolean> {
+    const title = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MESSAGE'))
+    const confirm = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.CONFIRM'))
+    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
+    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      backdropDismiss: false,
+      inputs: [
+        {
+          type: 'password',
+          name: 'password',
+          placeholder: passwordPlaceholder
+        }
+      ],
+      buttons: [
+        {
+          text: cancelLabel,
+          role: 'cancel'
+        },
+        {
+          text: confirm,
+          role: 'confirm',
+          handler: (data) => {
+            return data.password
+          }
+        }
+      ]
+    })
+    await alert.present()
+
+    const { data, role } = await alert.onDidDismiss()
+    if (role === 'confirm') {
+      console.log('password check', { data })
+      const password = data.values.password
+      if(password !== await this.configService.getEncryptionKey()) {
+        const tryAgain = await this.presentPasswordCheckMismatchAlert()
+        if(tryAgain) {
+          return await this.presentPasswordCheckAlert()
+        }
+      } else {
+        return true
+      }
+    }
+    return false
+  }
+
+  private async presentPasswordCheckMismatchAlert(): Promise<boolean> {
+    const title = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.MESSAGE'))
+    const tryAgainLabel = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.TRY_AGAIN'))
+    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      backdropDismiss: false,
+      buttons: [
+        {
+          text: cancelLabel,
+          role: 'cancel'
+        },
+        {
+          text: tryAgainLabel,
+          role: 'try_again'
+        }
+      ]
+    })
+    await alert.present()
+    const { role } = await alert.onDidDismiss()
+    if(role === 'try_again') {
+      return true
+    }
+    return false
+  }
+
+  private async promptUnlockPassword(lockedAccount: Account2FA): Promise<string> {
+    if(!lockedAccount.isLocked) {
+      const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.ERROR_NOT_LOCKED'))
+      throw new Error(message)
+    }
+    
+    let success = false
+    let password = ''
+
+    do {
+      password = await this.promptForPassword()
+      if (!password) {
+        break
+      } else {
+        try {
+          await lockedAccount.unlock(password)
+          success = true
+        } catch (error) {
+          const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
+          await this.showError(message)
+        }
+      }
+    } while (!success);
+
+    return password
+  }
+
+  private async promptForPassword(): Promise<string> {
+    const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.MESSAGE'))
+    const confirm = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.CONFIRM'))
+    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
+    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
+    const alert = await this.alertController.create({
+      message,
+      backdropDismiss: false,
+      inputs: [
+        {
+          type: 'password',
+          name: 'password',
+          placeholder: passwordPlaceholder
+        }
+      ],
+      buttons: [
+        {
+          text: cancelLabel,
+          role: 'cancel'
+        },
+        {
+          text: confirm,
+          role: 'confirm',
+          handler: (data) => {
+            return data.password
+          }
+        }
+      ]
+    })
+    await alert.present()
+    const { data } = await alert.onDidDismiss()
+    if(data && data.values) {
+      return data.values.password
+    }
+    return ''
+  }
+
+  private async alertAccountsLocked(): Promise<boolean> {
+    const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED_TITLE'))
+    const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ACCOUNTS_LOCKED'))
+    const unlockLabel = await firstValueFrom(this.translateService.get('HOME.UNLOCK_ACCOUNTS'))
+    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.KEEP_LOCKED'))
+
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      backdropDismiss: false,
+      buttons: [
+        {
+          text: cancelLabel,
+          role: 'cancel'
+        },
+        {
+          text: unlockLabel,
+          role: 'unlock'
+        }
+      ]
+    })
+    await alert.present()
+    const { role } = await alert.onDidDismiss()
+    const willInputPassword = role === 'unlock'
+    return willInputPassword
+  }
+
+  async showVersionInfo(): Promise<void> {
+    const versionInfo = this.configService.versionInfo
+    const title = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_INFO_TITLE'))
+    const versionLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_LABEL'))
+    const buildDateLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_DATE'))
+    const gitHashLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.GIT_HASH'))
+    const message = `
+    <p>${versionLabel}: ${versionInfo.versionName}</p>
+    <p>${buildDateLabel}: ${versionInfo.buildDate}</p>
+    <p>${gitHashLabel}: ${versionInfo.commitHash}</p>`
+
+    await this.showError(message, title)
+  }
+
+  private async showError(message: string, header?: string): Promise<void> {
+    const title = header
+    const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
+    const alert = await this.alertController.create({
+      header: title,
+      message,
+      buttons: [okLabel]
+    })
+    await alert.present()
+    await alert.onDidDismiss()
   }
 }

@@ -1,19 +1,23 @@
 {
   "name": "authleu",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "author": "Leonardo 'Leu' Pereira <jlcvp@users.noreply.github.com>",
   "homepage": "https://github.com/jlcvp/AuthLeu",
+  "description": "Open source authenticator and 2fa code generator to use across multiple devices and platforms",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prebuild": "npm run version:config",
     "build": "ng build",
     "build:githubpages": "ng build --configuration githubpages --base-href ./",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
+    "translations:check": "node ./resources/scripts/translations_complete_check.js",
     "firebase:deploy:firestore:indexes": "firebase deploy --only firestore:indexes",
     "firebase:deploy:hosting": "ng build --prod && firebase deploy --only hosting",
-    "firebase:deploy:all": "ng build --prod && firebase deploy"
+    "firebase:deploy:all": "ng build --prod && firebase deploy",
+    "version:config": "node ./resources/scripts/version-config.js"
   },
   "private": true,
   "dependencies": {
@@ -70,7 +74,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "replace-in-file": "^6.3.5",
     "typescript": "~5.4.0"
-  },
-  "description": "An Ionic project"
+  }
 }

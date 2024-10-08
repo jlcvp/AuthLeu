@@ -1,3 +1,35 @@
 {
-  "typescript.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular/standalone"]
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "@ionic/angular/common",
+    "@ionic/angular/standalone"
+  ],
+  "i18n-ally.localesPaths": [
+    "src/assets/i18n",
+  ],
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.keysInUse": [
+    "CRYPTO_API_NOT_SUPPORTED",
+    "ACCOUNT_SELECT_MODAL.DESELECT_ALL",
+    "ACCOUNT_SELECT_MODAL.SELECT_ALL",
+    "ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_SESSION",
+    "ACCOUNT_SYNC.ERROR.CORRUPT_BACKUP_FILE",
+    "ACCOUNT_SYNC.ERROR.EMPTY_FILE",
+    "ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR",
+    "ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_IMPORT",
+    "CONFIG_MENU.ENCRYPTION_ACTIVE",
+    "CONFIG_MENU.ENCRYPTION_INACTIVE",
+    "CRYPTO.ALREADY_DECRYPTED",
+    "CRYPTO.ALREADY_ENCRYPTED",
+    "CRYPTO.MISSING_ENCRYPTED_DATA",
+    "LOGIN.VALIDATION_MSGS.EMAIL_PATTERN",
+    "LOGIN.VALIDATION_MSGS.REQUIRED_EMAIL",
+    "LOGIN.VALIDATION_MSGS.REQUIRED_PASSWORD",
+    "LOGIN.ERROR_MSGS.DEFAULT_ERROR",
+    "LOGIN.ERROR_MSGS.INVALID_PASSWORD",
+    "LOGIN.ERROR_MSGS.TOO_MANY_ATTEMPTS_TRY_LATER",
+    "LOGIN.ERROR_MSGS.USER_NOT_FOUND",
+    "ACCOUNT_SERVICE.ERROR.ACCOUNT_NOT_FOUND",
+    "UTILS.ERROR_INVALID_SEMVER_FORMAT"
+  ],
+  "i18n-ally.sourceLanguage": "en"
 }

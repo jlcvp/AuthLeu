@@ -14,6 +14,12 @@ export const environment = {
     apiKey: "AIzaSyB0JZ7doymz8wuuEnqcyFKrZAouSjZ55bY",
     authDomain: "authleu.firebaseapp.com",
     messagingSenderId: "946698001868"
+  },
+  versionConfig: {
+    versionNumber: "2.0.0", // set this to test migrations. On production build this will be the value from the package.json
+    buildDate: "%BUILD_DATE%",
+    commitHash: "%COMMIT_HASH%",
+    versionName: "%VERSION%-DEV" 
   }
 };
 

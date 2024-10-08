@@ -5,7 +5,7 @@
       <ion-button (click)="showPopover($event)">
         <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
       </ion-button>
-      <ion-popover #popover [isOpen]="isPopoverOpen" triggerAction="click" [dismissOnSelect]="true">
+      <ion-popover #popover [isOpen]="isPopoverOpen" triggerAction="click" [dismissOnSelect]="true" class="wider-popover">
         <ng-template>
           <ion-content>
             <ion-list class="ion-no-padding">
@@ -13,6 +13,33 @@
                 <ion-icon slot="start" name="add-outline"></ion-icon>
                 <ion-label>{{ "CONFIG_MENU.ADD_ACCOUNT" | translate }}</ion-label>
               </ion-item>
+              <ion-item button detail="true" id="encryption-menu-trigger">
+                <ion-icon slot="start" name="document-lock-outline"></ion-icon>
+                <ion-label>{{ "CONFIG_MENU.ENCRYPTION_OPTIONS" | translate }}</ion-label>
+                <ion-note slot="end" [color]="encryptionMenuSlotLabelColor">{{ encryptionMenuSlotLabel | translate }}</ion-note>
+              </ion-item>
+              <ion-popover trigger="encryption-menu-trigger" [dismissOnSelect]="hasLockedAccounts" class="wider-popover" reference="event">
+                <ng-template>
+                  <ion-content>
+                    <ion-list>
+                      <ng-container *ngIf="!hasLockedAccounts;else unlockAccountsItem">
+                      <ion-item button detail="false" [disabled]="hasLockedAccounts" (click)="encryptionActiveToggle()">
+                        <ion-toggle color="success" [checked]="isEncryptionActive"> {{ "CONFIG_MENU.ENCRYPT_ACCOUNTS" | translate }} </ion-toggle>
+                      </ion-item>
+                      <ion-item button detail="false" [disabled]="!isEncryptionActive" (click)="periodicCheckToggle()">
+                        <ion-toggle [checked]="shouldPeriodicCheckPassword"> {{ "CONFIG_MENU.PERIODIC_CHECK" | translate }} </ion-toggle>
+                      </ion-item>
+                      </ng-container>
+                      <ng-template #unlockAccountsItem>
+                        <ion-item button detail="false" (click)="unlockAccountsAction()">
+                          <ion-icon slot="start" name="key-outline"></ion-icon>
+                          <ion-label>{{ "CONFIG_MENU.UNLOCK_ACCOUNTS" | translate }}</ion-label>
+                        </ion-item>
+                      </ng-template>
+                    </ion-list>
+                  </ion-content>
+                </ng-template>
+              </ion-popover>
               <ion-item button detail="false" (click)="exportAccountAction()">
                 <ion-icon slot="start" name="share-outline"></ion-icon>
                 <ion-label>{{ "CONFIG_MENU.EXPORT_ACCOUNTS" | translate }}</ion-label>
@@ -21,12 +48,12 @@
                 <ion-icon slot="start" name="download-outline"></ion-icon>
                 <ion-label>{{ "CONFIG_MENU.IMPORT_ACCOUNTS" | translate }}</ion-label>
               </ion-item>
-              <ion-item button id="dark-mode-trigger">
+              <ion-item button detail="true" id="dark-mode-trigger">
                 <ion-icon slot="start" name="invert-mode-outline"></ion-icon>
                 <ion-label> {{ "CONFIG_MENU.COLOR_MODE" | translate }} </ion-label>
                 <ion-note slot="end">{{ darkModeLabel | translate }}</ion-note>
               </ion-item>
-              <ion-popover trigger="dark-mode-trigger" [dismissOnSelect]="true" side="end">
+              <ion-popover trigger="dark-mode-trigger" [dismissOnSelect]="true" reference="event">
                 <ng-template>
                   <ion-content>
                     <ion-list>
@@ -50,9 +77,12 @@
                 <ion-icon slot="start" name="log-out-outline"></ion-icon>
                 <ion-label>{{ "CONFIG_MENU.LOGOUT" | translate }}</ion-label>
               </ion-item>
-
             </ion-list>
           </ion-content>
+          <ion-footer class="ion-no-padding ion-no-margin ion-text-center ion-activatable ripple-parent version-info" (click)="showVersionInfo()">
+            <ion-ripple-effect></ion-ripple-effect>
+            <ion-note class="ion-no-padding ion-no-margin">{{ versionInfo.versionName }}</ion-note>
+          </ion-footer>
         </ng-template>
       </ion-popover>
     </ion-buttons>
