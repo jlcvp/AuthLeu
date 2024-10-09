@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
-import { map, Observable } from 'rxjs';
+import { BehaviorSubject, debounceTime, firstValueFrom, map, Observable, throttleTime } from 'rxjs';
 import { AuthenticationService } from '../authentication.service';
 import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, orderBy, query, runTransaction, serverTimestamp, setDoc, terminate, Timestamp, where, writeBatch } from '@angular/fire/firestore';
+import { LocalAccount2faService } from './local-account2fa.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,15 +11,20 @@ import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, 
 export class RemoteAccount2faService implements IAccount2FAProvider {
   private loaded = false
   private firestore: Firestore = inject(Firestore)
-  private accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
+  private remoteAccounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
+  private localAccounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
+  private accountsSubject: BehaviorSubject<Account2FA[]> = new BehaviorSubject<Account2FA[]>([]);
+  private accounts$: Observable<Account2FA[]>
 
-  constructor(private authService: AuthenticationService) { }
+  constructor(private authService: AuthenticationService, private localAccountService: LocalAccount2faService) {
+    this.accounts$ = this.accountsSubject.asObservable().pipe(throttleTime(1000))
+  }
 
   async getAccounts(): Promise<Observable<Account2FA[]>> {
     if(!this.loaded) {
       await this.loadAccounts()
     }
-    return this.accounts$.pipe(map(accounts => accounts.map(account => Account2FA.fromDictionary(account))))
+    return this.accounts$
   }
 
   async addAccount(account: Account2FA): Promise<string> {
@@ -64,6 +70,34 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
   }
 
   private async loadAccounts() {
+    try {
+      this.localAccounts$ = await this.localAccountService.getAccounts()
+      
+      // all updates will go through the local service, 
+      // but let's wait a bit before exitting this function to give a chance for the remote service to have a value before emitting the first value
+      this.localAccounts$.subscribe(accounts => {
+        // forward to the main accountsSubject
+        console.log("emmiting:", {accounts})
+        this.accountsSubject.next(accounts)
+      })
+      // start a timeout to give a chance for the remote service to load
+      const timeoutPromise = new Promise<'timeout'>((resolve, _) => { setTimeout(resolve, 2500, "timeout")});
+      
+      const remoteLoadPromise = this.loadRemoteAccounts() // load remote accounts
+      // race the two promises
+      const race = await Promise.race([remoteLoadPromise, timeoutPromise])
+      console.log("Race won by: ", race || 'remoteLoadPromise')
+
+    } catch (error) {
+      console.error('Failed to load remote accounts', {error})
+    }
+    // delay a little bit more before resolving to let the local service settle the first value
+    await new Promise((resolve, _) => { setTimeout(resolve, 500)});
+    console.log("Loaded accounts")
+    this.loaded = true
+  }
+
+  private async loadRemoteAccounts() {
     const userId = await this.authService.getCurrentUserId()
     if(!userId) {
       throw new Error('INVALID_SESSION')
@@ -73,10 +107,14 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
 
     // by default, order by added date
     const q = query(accountCollection, orderBy('added', 'asc'), where('active', '==', true))
-    this.accounts$ = collectionData(q).pipe(map(accounts => {
+    this.remoteAccounts$ = collectionData(q).pipe(map(accounts => {
         return accounts.map(account => Account2FA.fromDictionary(account as IAccount2FA)) 
     }))
-    this.loaded = true
+
+    // router all updates to the local service, replacing existing accounts
+    this.remoteAccounts$.subscribe(accounts => {
+      this.localAccountService.updateAccountsBatch(accounts, true)
+    })
   }
 
   private createId(): string {

@@ -47,10 +47,14 @@ export class LocalAccount2faService implements IAccount2FAProvider {
     return this.updateAccountsBatch([account])
   }
 
-  async updateAccountsBatch(accounts: Account2FA[]): Promise<void> {
-    await this.loadAccountsFromStorage()
-    for (const account of accounts) {
-      this.updateAccountData(account)
+  async updateAccountsBatch(accounts: Account2FA[], replaceExisting: boolean = false): Promise<void> {
+    if(replaceExisting) {
+      this.accounts = accounts
+    } else {
+      await this.loadAccountsFromStorage()
+      for (const account of accounts) {
+        this.updateAccountData(account)
+      }
     }
     this.persistAccounts()
     this.accountsSubject.next(this.accounts)
@@ -76,7 +80,6 @@ export class LocalAccount2faService implements IAccount2FAProvider {
     const accounts = (await this.localStorage.get<IAccount2FA[]>('local_accounts')) || []
     this.accounts = accounts.map(account => Account2FA.fromDictionary(account))
     this.sortAccounts()
-    this.accountsSubject.next(this.accounts)
   }
 
   private createId(): string {
