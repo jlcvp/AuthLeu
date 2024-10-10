@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
 import { AlertController, IonModal, LoadingController, ModalController, NavController, ToastController } from '@ionic/angular';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, tap } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
 import { LogoService } from '../services/logo.service';
@@ -54,7 +54,6 @@ export class HomePage implements OnInit {
 
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount?: Account2FA
-  lockedAccount?: Account2FA
   searchTxt: string = ''
   draftLogoSearchTxt: string = ''
   searchLogoResults: any[] = []
@@ -66,13 +65,14 @@ export class HomePage implements OnInit {
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   isWindowFocused: boolean = true
-  hasLockedAccounts: boolean = false
-  versionInfo
+  hasLockedAccounts: boolean = true
+  versionInfo: any
 
   private encryptionOptions: EncryptionOptions = ENCRYPTION_OPTIONS_DEFAULT
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
+  private shouldAlertAboutLockedAccounts: boolean = true
   constructor(
     private authService: AuthenticationService,
     private accountsService: Account2faService,
@@ -141,10 +141,6 @@ export class HomePage implements OnInit {
     return this.encryptionOptions.shouldPerformPeriodicCheck
   }
 
-  get shouldAlertToActivateEncryption() {
-    return this.encryptionOptions.shouldAlertToActivateEncryption
-  }
-
   async ngOnInit() {
     await this.migrationService.migrate()
     this.onWindowResize()
@@ -152,7 +148,6 @@ export class HomePage implements OnInit {
     GlobalUtils.hideSplashScreen()
     await this.setupEncryption()
     await this.loadAccounts()
-    await this.handleEncryptionReminder()
     await this.configService.setFirstRun(false)
   }
 
@@ -316,8 +311,8 @@ export class HomePage implements OnInit {
           const selectedAccounts = data ? data as Account2FA[] : undefined
           if (selectedAccounts && selectedAccounts.length > 0) {
             // check if imported accounts are encrypted
-            const lockedAccount = selectedAccounts.find(account => account.isEncrypted)
-            if (lockedAccount !== undefined) {
+            const lockedAccounts = selectedAccounts.filter(account => account.isEncrypted)
+            if (lockedAccounts.length > 0) {
               const password = await this.configService.getEncryptionKey()
               let currentPasswordWorks = false;
               if (password) {
@@ -338,7 +333,7 @@ export class HomePage implements OnInit {
               if (!currentPasswordWorks) {
                 try {
                   // ask for password
-                  const password = await this.promptUnlockPassword(lockedAccount)
+                  const password = await this.promptUnlockPassword(lockedAccounts)
                   if (!password) {
                     const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_PASSWORD_PROVIDED'))
                     throw new Error(message)
@@ -395,6 +390,7 @@ export class HomePage implements OnInit {
   }
 
   async unlockAccountsAction() {
+    this.shouldAlertAboutLockedAccounts = true
     await this.loadAccounts()
   }
 
@@ -662,25 +658,19 @@ export class HomePage implements OnInit {
       backdropDismiss: false
     })
     await loading.present()
-    const accounts$ = await this.accountsService.getAccounts()
     
-    // detect if there are locked accounts and call activate encryption flow
-    const accounts = await firstValueFrom(accounts$)
-    const lockedAccount = accounts.find(account => account.isLocked)
-    await loading.dismiss()
-    if(lockedAccount) {
-      this.hasLockedAccounts = true
-      if(await this.alertAccountsLocked()) { // user wants to informPassword
-        const password = await this.promptUnlockPassword(lockedAccount)
-        if(password) { // user provided the correct password
-          // save password and enable encryption
-          await this.configService.setEncryptionKey(password)
-          await this.configService.setLastPasswordCheck()
-          await this.setEncryptionActive(true)
-          this.hasLockedAccounts = false
-        }
+    const accounts$ = (await this.accountsService.getAccounts()).pipe(tap(accounts => {
+      const lockedAccounts = accounts.filter(account => account.isLocked)
+      this.hasLockedAccounts = lockedAccounts.length > 0
+      if(this.shouldAlertAboutLockedAccounts && this.hasLockedAccounts) {
+        this.shouldAlertAboutLockedAccounts = false
+        this.handleAccountsLocked(lockedAccounts)
       }
-    }
+      this.handleAccountSelection(accounts)
+      console.log("Accounts tapped", { accounts })
+    }))
+    
+    await loading.dismiss()
      
     this.accounts$ = accounts$
   }
@@ -756,7 +746,6 @@ export class HomePage implements OnInit {
   private async setEncryptionActive(active: boolean) {
     this.encryptionOptions.encryptionActive = active
     this.encryptionOptions.shouldPerformPeriodicCheck = active
-    this.encryptionOptions.shouldAlertToActivateEncryption = !active
     await this.saveEncryptionOptions()
   }
 
@@ -819,63 +808,6 @@ export class HomePage implements OnInit {
       return { password: '', passwordConfirmation: '' }
     }
     return data.values
-  }
-
-  private async alertToActivateEncryption(): Promise<boolean> {
-    const title = await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.MESSAGE'))
-    const enableLabel = await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.ENABLE_ENCRYPTION'))
-    const laterLabel = await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.LATER'))
-    const alert = await this.alertController.create({
-      header: title,
-      message,
-      backdropDismiss: false,
-      inputs: [
-        {
-          type: 'checkbox',
-          value: 'dontShowAgain',
-          label: await firstValueFrom(this.translateService.get('HOME.ENCRYPTION_ALERT.DONT_SHOW_AGAIN'))
-        }
-      ],
-      buttons: [
-        {
-          text: laterLabel,
-          role: 'later',
-          handler: (data) => {
-            if(data && data[0] == 'dontShowAgain') {
-              return { dontShowAgain: true }
-            }
-            return { dontShowAgain: false }
-          }
-        },
-        {
-          text: enableLabel,
-          role: 'enable'
-        }
-      ]
-    })
-    await alert.present()
-
-    const { data, role } = await alert.onDidDismiss()
-    console.log('alert result', { data, role })
-
-    if(data && data.dontShowAgain) { // 2.1.2
-      this.encryptionOptions.shouldAlertToActivateEncryption = false
-      await this.saveEncryptionOptions()
-    }
-
-    return role === 'enable'
-  }
-
-  private async handleEncryptionReminder() {
-    const isFirstLaunch = await this.configService.isFirstRun()
-    if (this.shouldAlertToActivateEncryption && !isFirstLaunch) { // 2.1
-      const shouldEnableEncryption = await this.alertToActivateEncryption()
-      if(shouldEnableEncryption) { // 2.1.1
-        await this.activateEncryption()
-        return await this.setupEncryption()
-      }
-    }
   }
 
   private async periodicPasswordCheck() {
@@ -977,8 +909,8 @@ export class HomePage implements OnInit {
     return false
   }
 
-  private async promptUnlockPassword(lockedAccount: Account2FA): Promise<string> {
-    if(!lockedAccount.isLocked) {
+  private async promptUnlockPassword(lockedAccounts: Account2FA[]): Promise<string> {
+    if(!lockedAccounts.some(account => account.isLocked)) {
       const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.ERROR_NOT_LOCKED'))
       throw new Error(message)
     }
@@ -992,7 +924,9 @@ export class HomePage implements OnInit {
         break
       } else {
         try {
-          await lockedAccount.unlock(password)
+          for(const lockedAccount of lockedAccounts) {
+            await lockedAccount.unlock(password)
+          }
           success = true
         } catch (error) {
           const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
@@ -1039,6 +973,29 @@ export class HomePage implements OnInit {
       return data.values.password
     }
     return ''
+  }
+
+  private async handleAccountsLocked(lockedAccounts: Account2FA[]): Promise<void> {
+    if(await this.alertAccountsLocked()) { // user wants to informPassword
+      const password = await this.promptUnlockPassword(lockedAccounts)
+      if(password) { // user provided the correct password
+        // save password and enable encryption
+        await this.configService.setEncryptionKey(password)
+        await this.configService.setLastPasswordCheck()
+        await this.setEncryptionActive(true)
+        this.hasLockedAccounts = false
+      }
+    }
+  }
+
+  private async handleAccountSelection(accounts: Account2FA[]): Promise<void> {
+    const lastSelectedAccountId = await this.storageService.get<string>('lastSelectedAccountId')
+    if (lastSelectedAccountId) {
+      const selectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
+      if (selectedAccount) {
+        this.selectAccount(selectedAccount)
+      }
+    }
   }
 
   private async alertAccountsLocked(): Promise<boolean> {

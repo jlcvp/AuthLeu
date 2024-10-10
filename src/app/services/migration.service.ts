@@ -5,6 +5,7 @@ import { AppVersion } from '../models/app-version.enum';
 import { VersionUtils } from '../utils/version-utils';
 import { AppConfigService } from './app-config.service';
 import { EncryptionOptions } from '../models/encryption-options.model';
+import { App } from '@capacitor/app';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,10 @@ export class MigrationService {
     const appVersion = environment.versionConfig.versionNumber
     console.log('App version:', appVersion )
     const migrationsToRun = Object.values(AppVersion)
-      .filter(version => version > dataVersion && version <= appVersion)
+      .filter(version => { 
+        console.log('Checking version:', {version, dataVersion, appVersion})
+        return version > dataVersion && version <= appVersion && version != AppVersion.UNKNOWN
+      })
       .map(versionString => VersionUtils.appVersionFromVersionString(versionString))
       .sort(VersionUtils.appVersionCompare)
 
@@ -45,6 +49,10 @@ export class MigrationService {
         await this.migrateToV2_0_0()
         await this.localStorage.set('data_version', AppVersion.V2_0_0)
         break
+      case AppVersion.V2_1_0:
+        await this.migrateToV2_1_0()
+        await this.localStorage.set('data_version', AppVersion.V2_1_0)
+        break
       default:
         console.error('Migration not implemented for version:', version)
     }
@@ -60,12 +68,22 @@ export class MigrationService {
     // Initial encryption options
     const encryptionOptions: EncryptionOptions = {
       encryptionActive: false,
-      shouldPerformPeriodicCheck: false,
-      shouldAlertToActivateEncryption: true
+      shouldPerformPeriodicCheck: false
     }
     await this.appConfigService.setEncryptionOptions(encryptionOptions)
     await this.appConfigService.setLastPasswordCheck(0)
 
     await this.appConfigService.setFirstRun() // reset first run
+  }
+
+  private async migrateToV2_1_0() {
+    console.log('Migrating to v2.1.0')
+
+    // remove 'shouldAlertToActivateEncryption' from encryption options
+    const encryptionOptions = await this.appConfigService.getEncryptionOptions()
+    await this.appConfigService.setEncryptionOptions({
+      encryptionActive: encryptionOptions.encryptionActive,
+      shouldPerformPeriodicCheck: encryptionOptions.shouldPerformPeriodicCheck
+    })
   }
 }

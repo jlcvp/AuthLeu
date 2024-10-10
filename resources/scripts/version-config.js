@@ -4,8 +4,8 @@ const replacer = require('replace-in-file')
 const package = require('../../package.json')
 
 const buildDate = new Date().toISOString()
-// get git commit hash from GITHUB_SHA environment variable
-const commitHash = process.env.GITHUB_SHA || 'unknown'
+// get git commit hash from LAST_COMMIT_SHA environment variable set in the prepare action
+const commitHash = process.env.LAST_COMMIT_SHA || 'unknown'
 
 const options = {
     files: 'src/environments/environment*.ts',
