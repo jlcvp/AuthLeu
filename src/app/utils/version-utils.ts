@@ -8,14 +8,17 @@ export class VersionUtils {
      * @returns {AppVersion} The corresponding AppVersion enum value.
      */
     static appVersionFromVersionString(version: string): AppVersion {
-        switch (version) {
-            case '1.0.0':
-                return AppVersion.V1_0_0
-            case '2.0.0':
-                return AppVersion.V2_0_0
-            default:
-                return AppVersion.UNKNOWN
-        }
+        // switch (version) {
+        //     case '1.0.0':
+        //         return AppVersion.V1_0_0
+        //     case '2.0.0':
+        //         return AppVersion.V2_0_0
+        //     case '2.1.0':
+        //         return AppVersion.V2_1_0
+        //     default:
+        //         return AppVersion.UNKNOWN
+        // }
+        return AppVersion[version as keyof typeof AppVersion] ?? AppVersion.UNKNOWN
     }
 
     /**
