@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
 import { AlertController, IonModal, LoadingController, ModalController, NavController, ToastController } from '@ionic/angular';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, tap } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
 import { LogoService } from '../services/logo.service';
@@ -54,7 +54,6 @@ export class HomePage implements OnInit {
 
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount?: Account2FA
-  lockedAccount?: Account2FA
   searchTxt: string = ''
   draftLogoSearchTxt: string = ''
   searchLogoResults: any[] = []
@@ -67,12 +66,13 @@ export class HomePage implements OnInit {
   isScanActive: boolean = false
   isWindowFocused: boolean = true
   hasLockedAccounts: boolean = false
-  versionInfo
+  versionInfo: any
 
   private encryptionOptions: EncryptionOptions = ENCRYPTION_OPTIONS_DEFAULT
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
+  private shouldAlertAboutLockedAccounts: boolean = true
   constructor(
     private authService: AuthenticationService,
     private accountsService: Account2faService,
@@ -662,25 +662,19 @@ export class HomePage implements OnInit {
       backdropDismiss: false
     })
     await loading.present()
-    const accounts$ = await this.accountsService.getAccounts()
     
-    // detect if there are locked accounts and call activate encryption flow
-    const accounts = await firstValueFrom(accounts$)
-    const lockedAccount = accounts.find(account => account.isLocked)
-    await loading.dismiss()
-    if(lockedAccount) {
-      this.hasLockedAccounts = true
-      if(await this.alertAccountsLocked()) { // user wants to informPassword
-        const password = await this.promptUnlockPassword(lockedAccount)
-        if(password) { // user provided the correct password
-          // save password and enable encryption
-          await this.configService.setEncryptionKey(password)
-          await this.configService.setLastPasswordCheck()
-          await this.setEncryptionActive(true)
-          this.hasLockedAccounts = false
-        }
+    const accounts$ = (await this.accountsService.getAccounts()).pipe(tap(accounts => {
+      const lockedAccount = accounts.find(account => account.isLocked)
+      this.hasLockedAccounts = !!lockedAccount
+      if(this.shouldAlertAboutLockedAccounts && lockedAccount) {
+        this.shouldAlertAboutLockedAccounts = false
+        this.handleAccountsLocked(lockedAccount)
       }
-    }
+      this.handleAccountSelection(accounts)
+      console.log("Accounts tapped", { accounts })
+    }))
+    
+    await loading.dismiss()
      
     this.accounts$ = accounts$
   }
@@ -869,7 +863,7 @@ export class HomePage implements OnInit {
 
   private async handleEncryptionReminder() {
     const isFirstLaunch = await this.configService.isFirstRun()
-    if (this.shouldAlertToActivateEncryption && !isFirstLaunch) { // 2.1
+    if (this.shouldAlertToActivateEncryption && !isFirstLaunch && this.shouldAlertAboutLockedAccounts) { // 2.1
       const shouldEnableEncryption = await this.alertToActivateEncryption()
       if(shouldEnableEncryption) { // 2.1.1
         await this.activateEncryption()
@@ -1039,6 +1033,29 @@ export class HomePage implements OnInit {
       return data.values.password
     }
     return ''
+  }
+
+  private async handleAccountsLocked(lockedAccount: Account2FA): Promise<void> {
+    if(await this.alertAccountsLocked()) { // user wants to informPassword
+      const password = await this.promptUnlockPassword(lockedAccount)
+      if(password) { // user provided the correct password
+        // save password and enable encryption
+        await this.configService.setEncryptionKey(password)
+        await this.configService.setLastPasswordCheck()
+        await this.setEncryptionActive(true)
+        this.hasLockedAccounts = false
+      }
+    }
+  }
+
+  private async handleAccountSelection(accounts: Account2FA[]): Promise<void> {
+    const lastSelectedAccountId = await this.storageService.get<string>('lastSelectedAccountId')
+    if (lastSelectedAccountId) {
+      const selectedAccount = accounts.find(account => account.id === lastSelectedAccountId)
+      if (selectedAccount) {
+        this.selectAccount(selectedAccount)
+      }
+    }
   }
 
   private async alertAccountsLocked(): Promise<boolean> {

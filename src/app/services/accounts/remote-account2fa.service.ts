@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
-import { BehaviorSubject, debounceTime, firstValueFrom, map, Observable, throttleTime } from 'rxjs';
+import { BehaviorSubject, map, Observable, throttleTime } from 'rxjs';
 import { AuthenticationService } from '../authentication.service';
 import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, orderBy, query, runTransaction, serverTimestamp, setDoc, terminate, Timestamp, where, writeBatch } from '@angular/fire/firestore';
 import { LocalAccount2faService } from './local-account2fa.service';
@@ -17,7 +17,7 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
   private accounts$: Observable<Account2FA[]>
 
   constructor(private authService: AuthenticationService, private localAccountService: LocalAccount2faService) {
-    this.accounts$ = this.accountsSubject.asObservable().pipe(throttleTime(1000))
+    this.accounts$ = this.accountsSubject.asObservable()
   }
 
   async getAccounts(): Promise<Observable<Account2FA[]>> {
@@ -92,7 +92,7 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
       console.error('Failed to load remote accounts', {error})
     }
     // delay a little bit more before resolving to let the local service settle the first value
-    await new Promise((resolve, _) => { setTimeout(resolve, 500)});
+    // await new Promise((resolve, _) => { setTimeout(resolve, 500)});
     console.log("Loaded accounts")
     this.loaded = true
   }
