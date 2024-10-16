@@ -73,10 +73,12 @@ export class HomePage implements OnInit {
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
   private shouldAlertAboutLockedAccounts: boolean = true
+  private loading: HTMLIonLoadingElement | null = null
+
   constructor(
     private authService: AuthenticationService,
     private accountsService: Account2faService,
-    private loadingController: LoadingController,
+    private loadingCtrl: LoadingController,
     private toastController: ToastController,
     private alertController: AlertController,
     private modalController: ModalController,
@@ -158,17 +160,12 @@ export class HomePage implements OnInit {
     }
 
     const message = await firstValueFrom(this.translateService.get('HOME.LOGGING_OUT'))
-    const loading = await this.loadingController.create({
-      message,
-      spinner: "circular",
-      backdropDismiss: false
-    })
-    await loading.present()
+    await this.presentLoading(message)
     await this.accountsService.clearCache()
     await this.authService.logout()
     await this.storageService.clearStorage()
     //reload window
-    await loading.dismiss()
+    await this.dismissLoading()
     await this.navCtrl.navigateRoot('/').then(() => {
       window.location.reload()
     })
@@ -261,13 +258,9 @@ export class HomePage implements OnInit {
     if (selectedAccounts && selectedAccounts.length > 0) {
       console.log("Selected accounts to export", { selectedAccounts })
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORTING_ACCOUNTS'))
-      const loading = await this.loadingController.create({
-        message,
-        backdropDismiss: false
-      })
-      await loading.present()
+      await this.presentLoading(message)
       await this.accountsService.exportAccounts(selectedAccounts, exportWithEncryption)
-      await loading.dismiss()
+      await this.dismissLoading()
     } else {
       console.log("No accounts selected to export")
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_EXPORT'))
@@ -284,12 +277,8 @@ export class HomePage implements OnInit {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
         let message = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS_FILE'))
-        let loading = await this.loadingController.create({
-          message,
-          backdropDismiss: false
-        })
+        await this.presentLoading(message)
         try {
-          await loading.present()
           const accounts = await this.accountsService.readAccountsFromFile(file)
           input.remove()
           const title = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORT_ACCOUNTS_MODAL_TITLE'))
@@ -302,7 +291,7 @@ export class HomePage implements OnInit {
               confirmText
             },
           })
-          await loading.dismiss()
+          await this.dismissLoading()
           modal.present()
           const { data, role } = await modal.onWillDismiss();
           if (role === 'cancel') {
@@ -359,14 +348,10 @@ export class HomePage implements OnInit {
 
             // import the accounts
             message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORTING_ACCOUNTS'))
-            loading = await this.loadingController.create({
-              message,
-              backdropDismiss: false
-            })
-            await loading.present()
+            await this.presentLoading(message)
             console.log({data, selectedAccounts})
             await this.accountsService.importAccounts(selectedAccounts)
-            await loading.dismiss()
+            await this.dismissLoading()
           } else {
             throw new Error("ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_IMPORT")
           }
@@ -459,18 +444,14 @@ export class HomePage implements OnInit {
     const account = Account2FA.fromDictionary(newAccountDict)
     console.log({ account2fa: account })
     const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ADDING_ACCOUNT'))
-    const loading = await this.loadingController.create({
-      message,
-      backdropDismiss: false
-    })
-    await loading.present()
+    await this.presentLoading(message)
     try {
       await this.accountsService.addAccount(account)
-      await loading.dismiss()
+      await this.dismissLoading()
       // select new account
       this.selectAccount(account)
     } catch (error: any) {
-      await loading.dismiss()
+      await this.dismissLoading()
       const messageKey = error.message === 'INVALID_SESSION' ? 
         await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_SESSION')) : 
         await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_ADDING_ACCOUNT'))
@@ -527,18 +508,14 @@ export class HomePage implements OnInit {
     // <ngx-scanner-qrcode #action="scanner" (event)="onEvent($event, action)"></ngx-scanner-qrcode>
     this.isScanActive = true
     const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.LOADING_CAMERA'))
-    const loading = await this.loadingController.create({
-      message,
-      backdropDismiss: false
-    })
-    await loading.present()
+    await this.presentLoading(message)
     try {
       await firstValueFrom(this.qrscanner.start())
     } catch (error) {
       // camera permission denial
       const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))
-      await loading.dismiss()
+      await this.dismissLoading()
       await this.showError(message, header)
       this.manualInput = true
       this.isScanActive = false
@@ -557,7 +534,7 @@ export class HomePage implements OnInit {
       console.log("using device", { backCamera })
       await this.qrscanner.playDevice(backCamera.deviceId)
     }
-    await loading.dismiss()
+    await this.dismissLoading()
   }
 
   async onQRCodeScanned(evt: ScannerQRCodeResult[], qrscanner: NgxScannerQrcodeComponent) {
@@ -653,12 +630,7 @@ export class HomePage implements OnInit {
 
   private async loadAccounts() {
     const loadingMsg = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS'))
-    const loading = await this.loadingController.create({
-      message: loadingMsg,
-      backdropDismiss: false
-    })
-    await loading.present()
-    
+    await this.presentLoading(loadingMsg)
     const accounts$ = (await this.accountsService.getAccounts()).pipe(tap(accounts => {
       const lockedAccounts = accounts.filter(account => account.isLocked)
       this.hasLockedAccounts = lockedAccounts.length > 0
@@ -670,7 +642,7 @@ export class HomePage implements OnInit {
       console.log("Accounts tapped", { accounts })
     }))
     
-    await loading.dismiss()
+    await this.dismissLoading()
      
     this.accounts$ = accounts$
   }
@@ -1049,5 +1021,27 @@ export class HomePage implements OnInit {
     })
     await alert.present()
     await alert.onDidDismiss()
+  }
+
+  private async presentLoading(message: string): Promise<void> {
+    // if loading is already present, update message
+    if(this.loading != null) {
+      this.loading.message = message
+      return
+    }
+
+    // create new loading
+    this.loading = await this.loadingCtrl.create({
+      message,
+      backdropDismiss: false
+    })
+    await this.loading.present()
+  }
+
+  private async dismissLoading(): Promise<void> {
+    if(this.loading) {
+      await this.loading.dismiss()
+      this.loading = null
+    }
   }
 }
