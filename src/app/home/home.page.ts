@@ -14,6 +14,7 @@ import { AccountSelectModalComponent } from '../components/account-select-modal/
 import { AppConfigService } from '../services/app-config.service';
 import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions, PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
 import { MigrationService } from '../services/migration.service';
+import { LoggingService } from '../services/logging.service';
 
 @Component({
   selector: 'app-home',
@@ -67,6 +68,7 @@ export class HomePage implements OnInit {
   isWindowFocused: boolean = true
   hasLockedAccounts: boolean = true
   versionInfo: any
+  versionClickCount = 0
 
   private encryptionOptions: EncryptionOptions = ENCRYPTION_OPTIONS_DEFAULT
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -87,6 +89,7 @@ export class HomePage implements OnInit {
     private configService: AppConfigService,
     private migrationService: MigrationService,
     private translateService: TranslateService,
+    private loggingService: LoggingService,
     private navCtrl: NavController,
     formBuilder: FormBuilder
   ) {
@@ -264,7 +267,7 @@ export class HomePage implements OnInit {
     } else {
       console.log("No accounts selected to export")
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_EXPORT'))
-      await this.showError(message)
+      await this.showAlert(message)
     }
   }
 
@@ -340,7 +343,7 @@ export class HomePage implements OnInit {
                   }
                 } catch (error: any) {
                   const message = error && error.message || await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'))
-                  await this.showError(message)
+                  await this.showAlert(message)
                   return
                 }
               }
@@ -359,7 +362,7 @@ export class HomePage implements OnInit {
           let errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
           const message = await firstValueFrom(this.translateService.get(errorKey))
           const header = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.IMPORT_ERROR_TITLE'))
-          await this.showError(message, header)
+          await this.showAlert(message, header)
         }
       }
     }
@@ -516,7 +519,7 @@ export class HomePage implements OnInit {
       const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))
       await this.dismissLoading()
-      await this.showError(message, header)
+      await this.showAlert(message, header)
       this.manualInput = true
       this.isScanActive = false
       return
@@ -724,7 +727,7 @@ export class HomePage implements OnInit {
   private async showFailedPasswordSetupAlert() {
     const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET_TITLE'))
     const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET'))
-    this.showError(message, title)
+    this.showAlert(message, title)
   }
 
   private async setupNewPassword(): Promise<boolean> {
@@ -801,7 +804,7 @@ export class HomePage implements OnInit {
   private async alertUserAboutInabilityToRecoverPassword() {
     const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.TITLE'))
     const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.MESSAGE'))
-    await this.showError(message, title)
+    await this.showAlert(message, title)
   }
 
   private async presentPasswordCheckAlert(): Promise<boolean> {
@@ -902,7 +905,7 @@ export class HomePage implements OnInit {
           success = true
         } catch (error) {
           const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
-          await this.showError(message)
+          await this.showAlert(message)
         }
       }
     } while (!success);
@@ -997,7 +1000,14 @@ export class HomePage implements OnInit {
     return willInputPassword
   }
 
-  async showVersionInfo(): Promise<void> {
+  async showVersionInfoAction(): Promise<void> {
+    this.versionClickCount += 1
+    if(this.versionClickCount < 3) {
+      return
+    }
+    if(this.versionClickCount === 3) {
+      this.loggingService.enableConsole()
+    }
     const versionInfo = this.configService.versionInfo
     const title = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_INFO_TITLE'))
     const versionLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_LABEL'))
@@ -1008,10 +1018,14 @@ export class HomePage implements OnInit {
     <p>${buildDateLabel}: ${versionInfo.buildDate}</p>
     <p>${gitHashLabel}: ${versionInfo.commitHash}</p>`
 
-    await this.showError(message, title)
+    await this.showAlert(message, title)
   }
 
-  private async showError(message: string, header?: string): Promise<void> {
+  async enableLogging() {
+    await this.loggingService.enableConsole()
+  }
+
+  private async showAlert(message: string, header?: string): Promise<void> {
     const title = header
     const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
     const alert = await this.alertController.create({

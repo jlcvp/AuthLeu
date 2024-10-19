@@ -3,7 +3,7 @@
     <ion-searchbar placeholder="{{ 'SEARCH' | translate }}" [debounce]="250" (ionInput)="handleSearch($event)"></ion-searchbar>
     <ion-buttons slot="end">
       <ion-button (click)="showPopover($event)">
-        <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
+        <ion-icon slot="icon-only" name="menu-outline"></ion-icon>
       </ion-button>
       <ion-popover #popover [isOpen]="isPopoverOpen" triggerAction="click" [dismissOnSelect]="true" class="wider-popover">
         <ng-template>
@@ -79,10 +79,15 @@
               </ion-item>
             </ion-list>
           </ion-content>
-          <ion-footer class="ion-no-padding ion-no-margin ion-text-center ion-activatable ripple-parent version-info" (click)="showVersionInfo()">
+          <ion-footer *ngIf="versionClickCount < 2;else clickableVersionInfo" class="ion-no-padding ion-no-margin ion-text-center" (click)="showVersionInfoAction()">
+            <ion-note class="ion-no-padding ion-no-margin">{{ versionInfo.versionName }}</ion-note>
+          </ion-footer>
+          <ng-template #clickableVersionInfo>
+          <ion-footer class="ion-no-padding ion-no-margin ion-text-center ion-activatable ripple-parent version-info" (click)="showVersionInfoAction()">
             <ion-ripple-effect></ion-ripple-effect>
             <ion-note class="ion-no-padding ion-no-margin">{{ versionInfo.versionName }}</ion-note>
           </ion-footer>
+          </ng-template>
         </ng-template>
       </ion-popover>
     </ion-buttons>
