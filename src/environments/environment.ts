@@ -3,7 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: true,
+  production: false,
   LOGO_DEV_APIKEY: "pk_RLa24e-4TSG-aOyaPZxVIg",
   BRANDFETCH_APIKEY: "jaQ5CNpxROXg1e+IfGUMywN+fO3a+ZXDl5R2hqVmE1I=",
   isOfflineEnv: false,
@@ -16,7 +16,7 @@ export const environment = {
     messagingSenderId: "946698001868"
   },
   versionConfig: {
-    versionNumber: "2.1.0", // set this to test migrations. On production build this will be the value from the package.json
+    versionNumber: "%VERSION%", // set this to test migrations. On production build this will be the value from the package.json
     buildDate: "%BUILD_DATE%",
     commitHash: "%COMMIT_HASH%",
     versionName: "%VERSION%-DEV" 
