@@ -25,7 +25,11 @@ export class MigrationService {
         console.log('Checking version:', {version, dataVersion, appVersion})
         return version > dataVersion && version <= appVersion && version != AppVersion.UNKNOWN
       })
-      .map(versionString => VersionUtils.appVersionFromVersionString(versionString))
+      .map(versionString => { 
+        const versionMapped = VersionUtils.appVersionFromVersionString(versionString) 
+        console.log('Mapped version:', versionMapped)
+        return versionMapped
+      })
       .sort(VersionUtils.appVersionCompare)
 
     if (migrationsToRun.length === 0) {
