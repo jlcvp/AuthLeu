@@ -15,7 +15,7 @@ export class CryptoUtils {
             throw new Error('Invalid length');
         }
 
-        let buffer = new Uint8Array(length)
+        const buffer = new Uint8Array(length)
         if (window.crypto) {
             window.crypto.getRandomValues(buffer); // better random
         } else { // fallback to Math.random

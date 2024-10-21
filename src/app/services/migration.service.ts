@@ -5,7 +5,6 @@ import { AppVersion } from '../models/app-version.enum';
 import { VersionUtils } from '../utils/version-utils';
 import { AppConfigService } from './app-config.service';
 import { EncryptionOptions } from '../models/encryption-options.model';
-import { App } from '@capacitor/app';
 
 @Injectable({
   providedIn: 'root'

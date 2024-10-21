@@ -3,7 +3,7 @@ import { ToastController } from '@ionic/angular';
 import { Account2FA } from 'src/app/models/account2FA.model';
 import { OtpService } from 'src/app/services/otp.service';
 import { CountdownTimerComponent } from '../countdown-timer/countdown-timer.component';
-import { debounceTime, firstValueFrom, pipe } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -26,6 +26,7 @@ export class AccountDetailComponent {
   @HostListener('window:focus', ['$event'])
   onFocus(event: FocusEvent): void {
     // resume timer
+    console.log('focus event', event)
     this.updateCode()
     this.updateTokenCountdown()
   }
@@ -76,10 +77,11 @@ export class AccountDetailComponent {
     return this._tokenCountdown
   }
 
-  async copyCode(evt: any) {
+  async copyCode(evt: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     if(!this.account) {
       return
     }
+    console.log("copying code", {evt})
     const code = this.token.replace(/\s/g, '')
     await navigator.clipboard.writeText(code)
     console.log("code copied")

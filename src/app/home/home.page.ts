@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
-import { AlertController, IonModal, LoadingController, ModalController, NavController, ToastController } from '@ionic/angular';
+import { AlertController, IonModal, IonPopover, LoadingController, ModalController, NavController, SearchbarCustomEvent, ToastController } from '@ionic/angular';
 import { firstValueFrom, Observable, tap } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
@@ -15,6 +15,7 @@ import { AppConfigService } from '../services/app-config.service';
 import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions, PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
 import { MigrationService } from '../services/migration.service';
 import { LoggingService } from '../services/logging.service';
+import { AppVersionInfo } from '../models/app-version.enum';
 
 @Component({
   selector: 'app-home',
@@ -22,7 +23,7 @@ import { LoggingService } from '../services/logging.service';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
-  @ViewChild('popover') popover: any;
+  @ViewChild('popover') popover!: IonPopover;
   @ViewChild(IonModal) modal!: IonModal;
   @ViewChild('qrscanner') qrscanner!: NgxScannerQrcodeComponent;
 
@@ -31,17 +32,17 @@ export class HomePage implements OnInit {
     this.isLandscape = window.innerWidth > window.innerHeight
   }
 
-  @HostListener('window:focus', ['$event'])
-  onFocus(event: FocusEvent): void {
-    // TODO: resume timer
-    this.isWindowFocused = true
-  }
+  // @HostListener('window:focus', ['$event'])
+  // onFocus(event: FocusEvent): void {
+  //   // TODO: resume timer
+  //   this.isWindowFocused = true
+  // }
 
-  @HostListener('window:blur', ['$event'])
-  onBlur(event: FocusEvent): void {
-    // TODO: stop timer, camera, etc
-    this.isWindowFocused = false
-  }
+  // @HostListener('window:blur', ['$event'])
+  // onBlur(event: FocusEvent): void {
+  //   // TODO: stop timer, camera, etc
+  //   this.isWindowFocused = false
+  // }
 
   qrScannerOpts: ScannerQRCodeConfig = {
     isBeep: false,
@@ -57,7 +58,7 @@ export class HomePage implements OnInit {
   selectedAccount?: Account2FA
   searchTxt: string = ''
   draftLogoSearchTxt: string = ''
-  searchLogoResults: any[] = []
+  searchLogoResults: string[] = []
   draftLogoURL: string = ''
   validations_form: FormGroup;
 
@@ -66,7 +67,7 @@ export class HomePage implements OnInit {
   isScanActive: boolean = false
   isWindowFocused: boolean = true
   hasLockedAccounts: boolean = true
-  versionInfo: any
+  versionInfo: AppVersionInfo
   versionClickCount = 0
 
   private encryptionOptions: EncryptionOptions = ENCRYPTION_OPTIONS_DEFAULT
@@ -173,20 +174,20 @@ export class HomePage implements OnInit {
     })
   }
 
-  selectAccount(account: any) {
+  selectAccount(account: Account2FA) {
     this.selectedAccount = account
     if (account && account.id) {
       this.storageService.set('lastSelectedAccountId', account.id)
     }
   }
 
-  handleSearch(evt: any) {
+  handleSearch(evt: SearchbarCustomEvent) {
     const searchTerm = evt?.detail?.value
     console.log({ evt, searchTerm })
-    this.searchTxt = searchTerm
+    this.searchTxt = searchTerm ?? ''
   }
 
-  async handleSearchLogo(evt: any) {
+  async handleSearchLogo(evt: SearchbarCustomEvent) {
     const searchTerm = evt?.detail?.value
     console.log({ evt, searchTerm })
     if (!searchTerm) {
@@ -340,6 +341,7 @@ export class HomePage implements OnInit {
                     const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.INVALID_PASSWORD'))
                     throw new Error(message)
                   }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } catch (error: any) {
                   const message = error && error.message || await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'))
                   await this.showAlert(message)
@@ -357,8 +359,9 @@ export class HomePage implements OnInit {
           } else {
             throw new Error("ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_IMPORT")
           }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
-          let errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
+          const errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
           const message = await firstValueFrom(this.translateService.get(errorKey))
           const header = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.IMPORT_ERROR_TITLE'))
           await this.showAlert(message, header)
@@ -399,6 +402,7 @@ export class HomePage implements OnInit {
   }
 
   onDidDismissModal(e: Event) {
+    console.log("Did dismiss add account modal", {event:e})
     this.isAddAccountModalOpen = false
     this.manualInput = false
     this.isAddAccountModalOpen = false
@@ -414,7 +418,7 @@ export class HomePage implements OnInit {
   }
 
   onWillDismissModal(e: Event) {
-    console.log("Will dismiss modal", e)
+    console.log("Will dismiss add account modal", {event:e})
     if (this.qrscanner) {
       console.log("STOP QR")
       this.qrscanner.stop()
@@ -425,7 +429,7 @@ export class HomePage implements OnInit {
     await this.modal.dismiss()
   }
 
-  async createAccount(formValues: any) {
+  async createAccount(formValues: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.log({ formValues })
     const logo = this.draftLogoURL
     await this.closeAddAccountModal()
@@ -439,7 +443,7 @@ export class HomePage implements OnInit {
       await this.dismissLoading()
       // select new account
       this.selectAccount(account)
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       await this.dismissLoading()
       const messageKey = error.message === 'INVALID_SESSION' ? 
         await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_SESSION')) : 
@@ -573,7 +577,7 @@ export class HomePage implements OnInit {
       this.validations_form.controls['interval'].setValue(account.interval)
       // service name inferred from issuer or label
       const serviceName = account.issuer || account.label.split(':')[0]
-      const event = { detail: { value: serviceName } }
+      const event = new CustomEvent('search', { detail: { value: serviceName } }) as SearchbarCustomEvent
       this.handleSearchLogo(event)
     } catch (error) {
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_QR_CODE'))
@@ -589,7 +593,7 @@ export class HomePage implements OnInit {
   }
 
   private confirmLogout(): Promise<boolean> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
       const title = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_TITLE'))
       const message = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_MESSAGE'))
       const yesBtnText = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_YES'))

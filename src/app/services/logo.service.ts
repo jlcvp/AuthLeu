@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { BrandFetchSearchResultArray } from '../models/brand-fetch-search.model';
+import { BrandFetchSearchAPIResult, BrandFetchSearchResultArray } from '../models/brand-fetch-search.model';
 
 @Injectable({
   providedIn: 'root'
@@ -43,7 +43,7 @@ export class LogoService {
     })
     if(!response.ok) { throw new Error("Failed to fetch service info") }
 
-    const brands: BrandFetchSearchResultArray = (await response.json()).map((brand: any) => {
+    const brands: BrandFetchSearchResultArray = (await response.json()).map((brand: BrandFetchSearchAPIResult) => {
       return {
         brandId: brand.brandId,
         claimed: brand.claimed,

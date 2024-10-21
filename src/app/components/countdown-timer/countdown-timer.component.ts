@@ -6,7 +6,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   styleUrls: ['./countdown-timer.component.scss'],
 })
 export class CountdownTimerComponent {
-  private timerRefreshInterval: any
+  private timerRefreshInterval: any // eslint-disable-line @typescript-eslint/no-explicit-any
   private _timerStartTime = 0
   private _seconds = 0
   @Input() set seconds(value: number) {

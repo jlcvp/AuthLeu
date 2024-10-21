@@ -81,7 +81,7 @@ export class LoginPage implements OnInit {
       await this.appConfig.setOfflineMode(false)
       await loading.dismiss()
       this.navCtrl.navigateForward('/home', {skipLocationChange: true})
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       switch(error.code) {
         case 'auth/user-not-found':
           errorMessage = "LOGIN.ERROR_MSGS.USER_NOT_FOUND"
