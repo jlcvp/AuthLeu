@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
-import { BehaviorSubject, map, Observable, throttleTime } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import { AuthenticationService } from '../authentication.service';
-import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, orderBy, query, runTransaction, serverTimestamp, setDoc, terminate, Timestamp, where, writeBatch } from '@angular/fire/firestore';
+import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, orderBy, query, runTransaction, serverTimestamp, setDoc, terminate, where } from '@angular/fire/firestore';
 import { LocalAccount2faService } from './local-account2fa.service';
 
 @Injectable({
@@ -81,7 +81,7 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
         this.accountsSubject.next(accounts)
       })
       // start a timeout to give a chance for the remote service to load
-      const timeoutPromise = new Promise<'timeout'>((resolve, _) => { setTimeout(resolve, 2500, "timeout")});
+      const timeoutPromise = new Promise<'timeout'>((resolve) => { setTimeout(resolve, 2500, "timeout")});
       
       const remoteLoadPromise = this.loadRemoteAccounts() // load remote accounts
       // race the two promises

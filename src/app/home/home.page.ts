@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
-import { AlertController, IonModal, LoadingController, ModalController, NavController, ToastController } from '@ionic/angular';
+import { AlertController, IonModal, IonPopover, LoadingController, ModalController, NavController, SearchbarCustomEvent, ToastController } from '@ionic/angular';
 import { firstValueFrom, Observable, tap } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
@@ -12,8 +12,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
 import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
 import { AppConfigService } from '../services/app-config.service';
-import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions, PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
+import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions } from '../models/encryption-options.model';
 import { MigrationService } from '../services/migration.service';
+import { LoggingService } from '../services/logging.service';
+import { AppVersionInfo } from '../models/app-version.enum';
+import { PasswordService } from './password.service';
 
 @Component({
   selector: 'app-home',
@@ -21,25 +24,13 @@ import { MigrationService } from '../services/migration.service';
   styleUrls: ['home.page.scss'],
 })
 export class HomePage implements OnInit {
-  @ViewChild('popover') popover: any;
+  @ViewChild('popover') popover!: IonPopover;
   @ViewChild(IonModal) modal!: IonModal;
   @ViewChild('qrscanner') qrscanner!: NgxScannerQrcodeComponent;
 
   @HostListener('window:resize', ['$event'])
   onWindowResize() {
     this.isLandscape = window.innerWidth > window.innerHeight
-  }
-
-  @HostListener('window:focus', ['$event'])
-  onFocus(event: FocusEvent): void {
-    // TODO: resume timer
-    this.isWindowFocused = true
-  }
-
-  @HostListener('window:blur', ['$event'])
-  onBlur(event: FocusEvent): void {
-    // TODO: stop timer, camera, etc
-    this.isWindowFocused = false
   }
 
   qrScannerOpts: ScannerQRCodeConfig = {
@@ -56,27 +47,29 @@ export class HomePage implements OnInit {
   selectedAccount?: Account2FA
   searchTxt: string = ''
   draftLogoSearchTxt: string = ''
-  searchLogoResults: any[] = []
+  searchLogoResults: string[] = []
   draftLogoURL: string = ''
   validations_form: FormGroup;
 
   manualInput: boolean = false
-  isPopoverOpen: boolean = false
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   isWindowFocused: boolean = true
   hasLockedAccounts: boolean = true
-  versionInfo: any
+  versionInfo: AppVersionInfo
+  versionClickCount = 0
 
   private encryptionOptions: EncryptionOptions = ENCRYPTION_OPTIONS_DEFAULT
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
   private shouldAlertAboutLockedAccounts: boolean = true
+  private loading: HTMLIonLoadingElement | undefined = undefined
+
   constructor(
     private authService: AuthenticationService,
     private accountsService: Account2faService,
-    private loadingController: LoadingController,
+    private loadingCtrl: LoadingController,
     private toastController: ToastController,
     private alertController: AlertController,
     private modalController: ModalController,
@@ -85,6 +78,8 @@ export class HomePage implements OnInit {
     private configService: AppConfigService,
     private migrationService: MigrationService,
     private translateService: TranslateService,
+    private loggingService: LoggingService,
+    private passwordService: PasswordService,
     private navCtrl: NavController,
     formBuilder: FormBuilder
   ) {
@@ -158,36 +153,31 @@ export class HomePage implements OnInit {
     }
 
     const message = await firstValueFrom(this.translateService.get('HOME.LOGGING_OUT'))
-    const loading = await this.loadingController.create({
-      message,
-      spinner: "circular",
-      backdropDismiss: false
-    })
-    await loading.present()
+    await this.presentLoading(message)
     await this.accountsService.clearCache()
     await this.authService.logout()
     await this.storageService.clearStorage()
     //reload window
-    await loading.dismiss()
+    await this.dismissLoading()
     await this.navCtrl.navigateRoot('/').then(() => {
       window.location.reload()
     })
   }
 
-  selectAccount(account: any) {
+  selectAccount(account: Account2FA) {
     this.selectedAccount = account
     if (account && account.id) {
       this.storageService.set('lastSelectedAccountId', account.id)
     }
   }
 
-  handleSearch(evt: any) {
+  handleSearch(evt: SearchbarCustomEvent) {
     const searchTerm = evt?.detail?.value
     console.log({ evt, searchTerm })
-    this.searchTxt = searchTerm
+    this.searchTxt = searchTerm ?? ''
   }
 
-  async handleSearchLogo(evt: any) {
+  async handleSearchLogo(evt: SearchbarCustomEvent) {
     const searchTerm = evt?.detail?.value
     console.log({ evt, searchTerm })
     if (!searchTerm) {
@@ -261,17 +251,13 @@ export class HomePage implements OnInit {
     if (selectedAccounts && selectedAccounts.length > 0) {
       console.log("Selected accounts to export", { selectedAccounts })
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORTING_ACCOUNTS'))
-      const loading = await this.loadingController.create({
-        message,
-        backdropDismiss: false
-      })
-      await loading.present()
+      await this.presentLoading(message)
       await this.accountsService.exportAccounts(selectedAccounts, exportWithEncryption)
-      await loading.dismiss()
+      await this.dismissLoading()
     } else {
       console.log("No accounts selected to export")
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_EXPORT'))
-      await this.showError(message)
+      await this.showAlert(message)
     }
   }
 
@@ -284,12 +270,8 @@ export class HomePage implements OnInit {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
         let message = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS_FILE'))
-        let loading = await this.loadingController.create({
-          message,
-          backdropDismiss: false
-        })
+        await this.presentLoading(message)
         try {
-          await loading.present()
           const accounts = await this.accountsService.readAccountsFromFile(file)
           input.remove()
           const title = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORT_ACCOUNTS_MODAL_TITLE'))
@@ -302,7 +284,7 @@ export class HomePage implements OnInit {
               confirmText
             },
           })
-          await loading.dismiss()
+          await this.dismissLoading()
           modal.present()
           const { data, role } = await modal.onWillDismiss();
           if (role === 'cancel') {
@@ -349,9 +331,10 @@ export class HomePage implements OnInit {
                     const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.INVALID_PASSWORD'))
                     throw new Error(message)
                   }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } catch (error: any) {
                   const message = error && error.message || await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'))
-                  await this.showError(message)
+                  await this.showAlert(message)
                   return
                 }
               }
@@ -359,22 +342,19 @@ export class HomePage implements OnInit {
 
             // import the accounts
             message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.IMPORTING_ACCOUNTS'))
-            loading = await this.loadingController.create({
-              message,
-              backdropDismiss: false
-            })
-            await loading.present()
+            await this.presentLoading(message)
             console.log({data, selectedAccounts})
             await this.accountsService.importAccounts(selectedAccounts)
-            await loading.dismiss()
+            await this.dismissLoading()
           } else {
             throw new Error("ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_IMPORT")
           }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
-          let errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
+          const errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
           const message = await firstValueFrom(this.translateService.get(errorKey))
           const header = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.IMPORT_ERROR_TITLE'))
-          await this.showError(message, header)
+          await this.showAlert(message, header)
         }
       }
     }
@@ -386,7 +366,7 @@ export class HomePage implements OnInit {
     } else {
       await this.activateEncryption()
     }
-    this.hidePopover()
+    this.popover?.dismiss()
   }
 
   async unlockAccountsAction() {
@@ -411,20 +391,8 @@ export class HomePage implements OnInit {
     await this.configService.setEncryptionOptions(this.encryptionOptions)
   }
 
-  showPopover(e: Event) {
-    this.popover.event = null
-    this.popover.event = e;
-    this.isPopoverOpen = false;
-    setTimeout(() => {
-      this.isPopoverOpen = true;
-    }, 50);
-  }
-
-  private hidePopover() {
-    this.isPopoverOpen = false;
-  }
-
   onDidDismissModal(e: Event) {
+    console.log("Did dismiss add account modal", {event:e})
     this.isAddAccountModalOpen = false
     this.manualInput = false
     this.isAddAccountModalOpen = false
@@ -440,7 +408,7 @@ export class HomePage implements OnInit {
   }
 
   onWillDismissModal(e: Event) {
-    console.log("Will dismiss modal", e)
+    console.log("Will dismiss add account modal", {event:e})
     if (this.qrscanner) {
       console.log("STOP QR")
       this.qrscanner.stop()
@@ -451,7 +419,7 @@ export class HomePage implements OnInit {
     await this.modal.dismiss()
   }
 
-  async createAccount(formValues: any) {
+  async createAccount(formValues: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.log({ formValues })
     const logo = this.draftLogoURL
     await this.closeAddAccountModal()
@@ -459,18 +427,14 @@ export class HomePage implements OnInit {
     const account = Account2FA.fromDictionary(newAccountDict)
     console.log({ account2fa: account })
     const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ADDING_ACCOUNT'))
-    const loading = await this.loadingController.create({
-      message,
-      backdropDismiss: false
-    })
-    await loading.present()
+    await this.presentLoading(message)
     try {
       await this.accountsService.addAccount(account)
-      await loading.dismiss()
+      await this.dismissLoading()
       // select new account
       this.selectAccount(account)
-    } catch (error: any) {
-      await loading.dismiss()
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      await this.dismissLoading()
       const messageKey = error.message === 'INVALID_SESSION' ? 
         await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_SESSION')) : 
         await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_ADDING_ACCOUNT'))
@@ -527,19 +491,15 @@ export class HomePage implements OnInit {
     // <ngx-scanner-qrcode #action="scanner" (event)="onEvent($event, action)"></ngx-scanner-qrcode>
     this.isScanActive = true
     const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.LOADING_CAMERA'))
-    const loading = await this.loadingController.create({
-      message,
-      backdropDismiss: false
-    })
-    await loading.present()
+    await this.presentLoading(message)
     try {
       await firstValueFrom(this.qrscanner.start())
     } catch (error) {
       // camera permission denial
       const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))
-      await loading.dismiss()
-      await this.showError(message, header)
+      await this.dismissLoading()
+      await this.showAlert(message, header)
       this.manualInput = true
       this.isScanActive = false
       return
@@ -557,7 +517,7 @@ export class HomePage implements OnInit {
       console.log("using device", { backCamera })
       await this.qrscanner.playDevice(backCamera.deviceId)
     }
-    await loading.dismiss()
+    await this.dismissLoading()
   }
 
   async onQRCodeScanned(evt: ScannerQRCodeResult[], qrscanner: NgxScannerQrcodeComponent) {
@@ -607,7 +567,7 @@ export class HomePage implements OnInit {
       this.validations_form.controls['interval'].setValue(account.interval)
       // service name inferred from issuer or label
       const serviceName = account.issuer || account.label.split(':')[0]
-      const event = { detail: { value: serviceName } }
+      const event = new CustomEvent('search', { detail: { value: serviceName } }) as SearchbarCustomEvent
       this.handleSearchLogo(event)
     } catch (error) {
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_QR_CODE'))
@@ -623,7 +583,7 @@ export class HomePage implements OnInit {
   }
 
   private confirmLogout(): Promise<boolean> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
       const title = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_TITLE'))
       const message = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_MESSAGE'))
       const yesBtnText = await firstValueFrom(this.translateService.get('HOME.CONFIRM_LOGOUT_YES'))
@@ -653,12 +613,7 @@ export class HomePage implements OnInit {
 
   private async loadAccounts() {
     const loadingMsg = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS'))
-    const loading = await this.loadingController.create({
-      message: loadingMsg,
-      backdropDismiss: false
-    })
-    await loading.present()
-    
+    await this.presentLoading(loadingMsg)
     const accounts$ = (await this.accountsService.getAccounts()).pipe(tap(accounts => {
       const lockedAccounts = accounts.filter(account => account.isLocked)
       this.hasLockedAccounts = lockedAccounts.length > 0
@@ -670,7 +625,7 @@ export class HomePage implements OnInit {
       console.log("Accounts tapped", { accounts })
     }))
     
-    await loading.dismiss()
+    await this.dismissLoading()
      
     this.accounts$ = accounts$
   }
@@ -699,12 +654,12 @@ export class HomePage implements OnInit {
     if(this.isEncryptionActive) { // step 1
       const password = await this.configService.getEncryptionKey()
       if(!password) { // 1.1
-        const success = await this.setupNewPassword() // 1.1
+        const success = await this.passwordService.setupNewPassword() // 1.1
         if(!success) { // 1.1.1
           // Deactivate encryption
           await this.deactivateEncryption()
           // Show failed password setup message
-          await this.showFailedPasswordSetupAlert()
+          await this.passwordService.showFailedPasswordSetupAlert()
           return // exit encryption setup flow
         }
       }
@@ -712,13 +667,13 @@ export class HomePage implements OnInit {
       // 1.2
       if (this.shouldPeriodicCheckPassword) { // 1.2.1
         console.log("Starting periodic password check")
-        await this.periodicPasswordCheck()
+        await this.passwordService.periodicPasswordCheck()
       } 
     } 
   }
 
   private async activateEncryption(): Promise<void> {
-    const success = await this.setupNewPassword()
+    const success = await this.passwordService.setupNewPassword()
     if(!success) {
       this.setEncryptionActive(false)
       return
@@ -749,167 +704,7 @@ export class HomePage implements OnInit {
     await this.saveEncryptionOptions()
   }
 
-  private async showFailedPasswordSetupAlert() {
-    const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET_TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET'))
-    this.showError(message, title)
-  }
-
-  private async setupNewPassword(): Promise<boolean> {
-    const passwordData = await this.promptPassword()
-    if(passwordData && passwordData.password && passwordData.password === passwordData.passwordConfirmation) {
-      await this.configService.setEncryptionKey(passwordData.password)
-      await this.configService.setLastPasswordCheck()
-      return true // 1.1.2
-    }
-    return false // 1.1.1
-  }
-
-  private async promptPassword(): Promise<{password: string, passwordConfirmation: string}> {
-    const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_MESSAGE'))
-    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_PLACEHOLDER'))
-    const passwordConfirmationPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
-    const cancelText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CANCEL'))
-    const okText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRM'))
-    
-    const alert = await this.alertController.create({
-      header: title,
-      message,
-      backdropDismiss: false,
-      inputs: [
-        {
-          name: 'password',
-          type: 'password',
-          placeholder: passwordPlaceholder
-        },
-        {
-          name: 'passwordConfirmation',
-          type: 'password',
-          placeholder: passwordConfirmationPlaceholder
-        }
-      ],
-      buttons: [
-        {
-          text: cancelText,
-          role: 'cancel'
-        }, {
-          text: okText,
-          handler: (data) => {
-            return { password: data.password, passwordConfirmation: data.passwordConfirmation }
-          }
-        }
-      ]
-    })
-    await alert.present()
-
-    const { data } = await alert.onDidDismiss()
-    if(!data) {
-      return { password: '', passwordConfirmation: '' }
-    }
-    return data.values
-  }
-
-  private async periodicPasswordCheck() {
-    const lastCheck = await this.configService.getLastPasswordCheck()
-    const nextCheck = lastCheck + PASSWORD_CHECK_PERIOD
-    const now = Date.now()
-    console.log({ lastCheck, nextCheck, now })
-    if(now >= nextCheck) { // 1.2.1
-      const checkSuccess = await this.presentPasswordCheckAlert()
-      if(checkSuccess) { // 1.2.1.1
-        console.log('password check success')
-        await this.configService.setLastPasswordCheck()
-      } else { // 1.2.1.2
-        await this.alertUserAboutInabilityToRecoverPassword()
-      }
-    }
-  }
-
-  private async alertUserAboutInabilityToRecoverPassword() {
-    const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.MESSAGE'))
-    await this.showError(message, title)
-  }
-
-  private async presentPasswordCheckAlert(): Promise<boolean> {
-    const title = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MESSAGE'))
-    const confirm = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.CONFIRM'))
-    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
-    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
-    const alert = await this.alertController.create({
-      header: title,
-      message,
-      backdropDismiss: false,
-      inputs: [
-        {
-          type: 'password',
-          name: 'password',
-          placeholder: passwordPlaceholder
-        }
-      ],
-      buttons: [
-        {
-          text: cancelLabel,
-          role: 'cancel'
-        },
-        {
-          text: confirm,
-          role: 'confirm',
-          handler: (data) => {
-            return data.password
-          }
-        }
-      ]
-    })
-    await alert.present()
-
-    const { data, role } = await alert.onDidDismiss()
-    if (role === 'confirm') {
-      console.log('password check', { data })
-      const password = data.values.password
-      if(password !== await this.configService.getEncryptionKey()) {
-        const tryAgain = await this.presentPasswordCheckMismatchAlert()
-        if(tryAgain) {
-          return await this.presentPasswordCheckAlert()
-        }
-      } else {
-        return true
-      }
-    }
-    return false
-  }
-
-  private async presentPasswordCheckMismatchAlert(): Promise<boolean> {
-    const title = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.MESSAGE'))
-    const tryAgainLabel = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.TRY_AGAIN'))
-    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
-    const alert = await this.alertController.create({
-      header: title,
-      message,
-      backdropDismiss: false,
-      buttons: [
-        {
-          text: cancelLabel,
-          role: 'cancel'
-        },
-        {
-          text: tryAgainLabel,
-          role: 'try_again'
-        }
-      ]
-    })
-    await alert.present()
-    const { role } = await alert.onDidDismiss()
-    if(role === 'try_again') {
-      return true
-    }
-    return false
-  }
-
-  private async promptUnlockPassword(lockedAccounts: Account2FA[]): Promise<string> {
+  private async promptUnlockPassword(lockedAccounts: Account2FA[]): Promise<string> { // TODO: refactor this, and move to password service
     if(!lockedAccounts.some(account => account.isLocked)) {
       const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.ERROR_NOT_LOCKED'))
       throw new Error(message)
@@ -919,7 +714,7 @@ export class HomePage implements OnInit {
     let password = ''
 
     do {
-      password = await this.promptForPassword()
+      password = await this.passwordService.promptUnlockPassword()
       if (!password) {
         break
       } else {
@@ -930,49 +725,12 @@ export class HomePage implements OnInit {
           success = true
         } catch (error) {
           const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
-          await this.showError(message)
+          await this.showAlert(message)
         }
       }
     } while (!success);
 
     return password
-  }
-
-  private async promptForPassword(): Promise<string> {
-    const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.MESSAGE'))
-    const confirm = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.CONFIRM'))
-    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
-    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
-    const alert = await this.alertController.create({
-      message,
-      backdropDismiss: false,
-      inputs: [
-        {
-          type: 'password',
-          name: 'password',
-          placeholder: passwordPlaceholder
-        }
-      ],
-      buttons: [
-        {
-          text: cancelLabel,
-          role: 'cancel'
-        },
-        {
-          text: confirm,
-          role: 'confirm',
-          handler: (data) => {
-            return data.password
-          }
-        }
-      ]
-    })
-    await alert.present()
-    const { data } = await alert.onDidDismiss()
-    if(data && data.values) {
-      return data.values.password
-    }
-    return ''
   }
 
   private async handleAccountsLocked(lockedAccounts: Account2FA[]): Promise<void> {
@@ -1025,7 +783,14 @@ export class HomePage implements OnInit {
     return willInputPassword
   }
 
-  async showVersionInfo(): Promise<void> {
+  async showVersionInfoAction(): Promise<void> {
+    this.versionClickCount += 1
+    if(this.versionClickCount < 3) {
+      return
+    }
+    if(this.versionClickCount === 3) {
+      this.loggingService.enableConsole()
+    }
     const versionInfo = this.configService.versionInfo
     const title = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_INFO_TITLE'))
     const versionLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_LABEL'))
@@ -1036,10 +801,14 @@ export class HomePage implements OnInit {
     <p>${buildDateLabel}: ${versionInfo.buildDate}</p>
     <p>${gitHashLabel}: ${versionInfo.commitHash}</p>`
 
-    await this.showError(message, title)
+    await this.showAlert(message, title)
   }
 
-  private async showError(message: string, header?: string): Promise<void> {
+  async enableLogging() {
+    await this.loggingService.enableConsole()
+  }
+
+  private async showAlert(message: string, header?: string): Promise<void> {
     const title = header
     const okLabel = await firstValueFrom(this.translateService.get('HOME.OK'))
     const alert = await this.alertController.create({
@@ -1049,5 +818,25 @@ export class HomePage implements OnInit {
     })
     await alert.present()
     await alert.onDidDismiss()
+  }
+
+  private async presentLoading(message: string): Promise<void> {
+    // if loading is already present, update message
+    if(this.loading != undefined) {
+      this.loading.message = message
+      return
+    }
+
+    // create new loading
+    this.loading = await this.loadingCtrl.create({
+      message,
+      backdropDismiss: false
+    })
+    await this.loading.present()
+  }
+
+  private async dismissLoading(): Promise<void> {
+    await this.loading?.dismiss()
+    this.loading = undefined
   }
 }
