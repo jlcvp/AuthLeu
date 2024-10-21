@@ -10,7 +10,7 @@ import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } f
 import { LocalStorageService } from '../services/local-storage.service';
 import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
-import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
+import { AccountSelectModalComponent } from './components/account-select-modal/account-select-modal.component';
 import { AppConfigService } from '../services/app-config.service';
 import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions } from '../models/encryption-options.model';
 import { MigrationService } from '../services/migration.service';
