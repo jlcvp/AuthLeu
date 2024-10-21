@@ -62,7 +62,6 @@ export class HomePage implements OnInit {
   validations_form: FormGroup;
 
   manualInput: boolean = false
-  isPopoverOpen: boolean = false
   isAddAccountModalOpen: boolean = false
   isScanActive: boolean = false
   isWindowFocused: boolean = true
@@ -374,7 +373,7 @@ export class HomePage implements OnInit {
     } else {
       await this.activateEncryption()
     }
-    this.hidePopover()
+    this.popover?.dismiss()
   }
 
   async unlockAccountsAction() {
@@ -397,19 +396,6 @@ export class HomePage implements OnInit {
 
   async saveEncryptionOptions() {
     await this.configService.setEncryptionOptions(this.encryptionOptions)
-  }
-
-  showPopover(e: Event) {
-    this.popover.event = null
-    this.popover.event = e;
-    this.isPopoverOpen = false;
-    setTimeout(() => {
-      this.isPopoverOpen = true;
-    }, 50);
-  }
-
-  private hidePopover() {
-    this.isPopoverOpen = false;
   }
 
   onDidDismissModal(e: Event) {

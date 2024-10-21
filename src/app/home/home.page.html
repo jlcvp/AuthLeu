@@ -2,10 +2,10 @@
   <ion-toolbar>
     <ion-searchbar placeholder="{{ 'SEARCH' | translate }}" [debounce]="250" (ionInput)="handleSearch($event)"></ion-searchbar>
     <ion-buttons slot="end">
-      <ion-button (click)="showPopover($event)">
+      <ion-button id="menu-trigger">
         <ion-icon slot="icon-only" name="menu-outline"></ion-icon>
       </ion-button>
-      <ion-popover #popover [isOpen]="isPopoverOpen" triggerAction="click" [dismissOnSelect]="true" class="wider-popover">
+      <ion-popover #popover trigger="menu-trigger" triggerAction="click" [dismissOnSelect]="true" class="wider-popover">
         <ng-template>
           <ion-content>
             <ion-list class="ion-no-padding">
