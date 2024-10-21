@@ -12,10 +12,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
 import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
 import { AppConfigService } from '../services/app-config.service';
-import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions, PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
+import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions } from '../models/encryption-options.model';
 import { MigrationService } from '../services/migration.service';
 import { LoggingService } from '../services/logging.service';
 import { AppVersionInfo } from '../models/app-version.enum';
+import { PasswordService } from './password.service';
 
 @Component({
   selector: 'app-home',
@@ -75,7 +76,7 @@ export class HomePage implements OnInit {
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
   private shouldAlertAboutLockedAccounts: boolean = true
-  private loading: HTMLIonLoadingElement | null = null
+  private loading: HTMLIonLoadingElement | undefined = undefined
 
   constructor(
     private authService: AuthenticationService,
@@ -90,6 +91,7 @@ export class HomePage implements OnInit {
     private migrationService: MigrationService,
     private translateService: TranslateService,
     private loggingService: LoggingService,
+    private passwordService: PasswordService,
     private navCtrl: NavController,
     formBuilder: FormBuilder
   ) {
@@ -664,12 +666,12 @@ export class HomePage implements OnInit {
     if(this.isEncryptionActive) { // step 1
       const password = await this.configService.getEncryptionKey()
       if(!password) { // 1.1
-        const success = await this.setupNewPassword() // 1.1
+        const success = await this.passwordService.setupNewPassword() // 1.1
         if(!success) { // 1.1.1
           // Deactivate encryption
           await this.deactivateEncryption()
           // Show failed password setup message
-          await this.showFailedPasswordSetupAlert()
+          await this.passwordService.showFailedPasswordSetupAlert()
           return // exit encryption setup flow
         }
       }
@@ -677,13 +679,13 @@ export class HomePage implements OnInit {
       // 1.2
       if (this.shouldPeriodicCheckPassword) { // 1.2.1
         console.log("Starting periodic password check")
-        await this.periodicPasswordCheck()
+        await this.passwordService.periodicPasswordCheck()
       } 
     } 
   }
 
   private async activateEncryption(): Promise<void> {
-    const success = await this.setupNewPassword()
+    const success = await this.passwordService.setupNewPassword()
     if(!success) {
       this.setEncryptionActive(false)
       return
@@ -714,167 +716,7 @@ export class HomePage implements OnInit {
     await this.saveEncryptionOptions()
   }
 
-  private async showFailedPasswordSetupAlert() {
-    const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET_TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET'))
-    this.showAlert(message, title)
-  }
-
-  private async setupNewPassword(): Promise<boolean> {
-    const passwordData = await this.promptPassword()
-    if(passwordData && passwordData.password && passwordData.password === passwordData.passwordConfirmation) {
-      await this.configService.setEncryptionKey(passwordData.password)
-      await this.configService.setLastPasswordCheck()
-      return true // 1.1.2
-    }
-    return false // 1.1.1
-  }
-
-  private async promptPassword(): Promise<{password: string, passwordConfirmation: string}> {
-    const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_MESSAGE'))
-    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_PLACEHOLDER'))
-    const passwordConfirmationPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
-    const cancelText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CANCEL'))
-    const okText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRM'))
-    
-    const alert = await this.alertController.create({
-      header: title,
-      message,
-      backdropDismiss: false,
-      inputs: [
-        {
-          name: 'password',
-          type: 'password',
-          placeholder: passwordPlaceholder
-        },
-        {
-          name: 'passwordConfirmation',
-          type: 'password',
-          placeholder: passwordConfirmationPlaceholder
-        }
-      ],
-      buttons: [
-        {
-          text: cancelText,
-          role: 'cancel'
-        }, {
-          text: okText,
-          handler: (data) => {
-            return { password: data.password, passwordConfirmation: data.passwordConfirmation }
-          }
-        }
-      ]
-    })
-    await alert.present()
-
-    const { data } = await alert.onDidDismiss()
-    if(!data) {
-      return { password: '', passwordConfirmation: '' }
-    }
-    return data.values
-  }
-
-  private async periodicPasswordCheck() {
-    const lastCheck = await this.configService.getLastPasswordCheck()
-    const nextCheck = lastCheck + PASSWORD_CHECK_PERIOD
-    const now = Date.now()
-    console.log({ lastCheck, nextCheck, now })
-    if(now >= nextCheck) { // 1.2.1
-      const checkSuccess = await this.presentPasswordCheckAlert()
-      if(checkSuccess) { // 1.2.1.1
-        console.log('password check success')
-        await this.configService.setLastPasswordCheck()
-      } else { // 1.2.1.2
-        await this.alertUserAboutInabilityToRecoverPassword()
-      }
-    }
-  }
-
-  private async alertUserAboutInabilityToRecoverPassword() {
-    const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_RECOVERY_ALERT.MESSAGE'))
-    await this.showAlert(message, title)
-  }
-
-  private async presentPasswordCheckAlert(): Promise<boolean> {
-    const title = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MESSAGE'))
-    const confirm = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.CONFIRM'))
-    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
-    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
-    const alert = await this.alertController.create({
-      header: title,
-      message,
-      backdropDismiss: false,
-      inputs: [
-        {
-          type: 'password',
-          name: 'password',
-          placeholder: passwordPlaceholder
-        }
-      ],
-      buttons: [
-        {
-          text: cancelLabel,
-          role: 'cancel'
-        },
-        {
-          text: confirm,
-          role: 'confirm',
-          handler: (data) => {
-            return data.password
-          }
-        }
-      ]
-    })
-    await alert.present()
-
-    const { data, role } = await alert.onDidDismiss()
-    if (role === 'confirm') {
-      console.log('password check', { data })
-      const password = data.values.password
-      if(password !== await this.configService.getEncryptionKey()) {
-        const tryAgain = await this.presentPasswordCheckMismatchAlert()
-        if(tryAgain) {
-          return await this.presentPasswordCheckAlert()
-        }
-      } else {
-        return true
-      }
-    }
-    return false
-  }
-
-  private async presentPasswordCheckMismatchAlert(): Promise<boolean> {
-    const title = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.MESSAGE'))
-    const tryAgainLabel = await firstValueFrom(this.translateService.get('HOME.PERIODIC_CHECK.MISMATCH.TRY_AGAIN'))
-    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
-    const alert = await this.alertController.create({
-      header: title,
-      message,
-      backdropDismiss: false,
-      buttons: [
-        {
-          text: cancelLabel,
-          role: 'cancel'
-        },
-        {
-          text: tryAgainLabel,
-          role: 'try_again'
-        }
-      ]
-    })
-    await alert.present()
-    const { role } = await alert.onDidDismiss()
-    if(role === 'try_again') {
-      return true
-    }
-    return false
-  }
-
-  private async promptUnlockPassword(lockedAccounts: Account2FA[]): Promise<string> {
+  private async promptUnlockPassword(lockedAccounts: Account2FA[]): Promise<string> { // TODO: refactor this, and move to password service
     if(!lockedAccounts.some(account => account.isLocked)) {
       const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.ERROR_NOT_LOCKED'))
       throw new Error(message)
@@ -884,7 +726,7 @@ export class HomePage implements OnInit {
     let password = ''
 
     do {
-      password = await this.promptForPassword()
+      password = await this.passwordService.promptUnlockPassword()
       if (!password) {
         break
       } else {
@@ -901,43 +743,6 @@ export class HomePage implements OnInit {
     } while (!success);
 
     return password
-  }
-
-  private async promptForPassword(): Promise<string> {
-    const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.MESSAGE'))
-    const confirm = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.CONFIRM'))
-    const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
-    const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
-    const alert = await this.alertController.create({
-      message,
-      backdropDismiss: false,
-      inputs: [
-        {
-          type: 'password',
-          name: 'password',
-          placeholder: passwordPlaceholder
-        }
-      ],
-      buttons: [
-        {
-          text: cancelLabel,
-          role: 'cancel'
-        },
-        {
-          text: confirm,
-          role: 'confirm',
-          handler: (data) => {
-            return data.password
-          }
-        }
-      ]
-    })
-    await alert.present()
-    const { data } = await alert.onDidDismiss()
-    if(data && data.values) {
-      return data.values.password
-    }
-    return ''
   }
 
   private async handleAccountsLocked(lockedAccounts: Account2FA[]): Promise<void> {
@@ -1029,7 +834,7 @@ export class HomePage implements OnInit {
 
   private async presentLoading(message: string): Promise<void> {
     // if loading is already present, update message
-    if(this.loading != null) {
+    if(this.loading != undefined) {
       this.loading.message = message
       return
     }
@@ -1043,9 +848,7 @@ export class HomePage implements OnInit {
   }
 
   private async dismissLoading(): Promise<void> {
-    if(this.loading) {
-      await this.loading.dismiss()
-      this.loading = null
-    }
+    await this.loading?.dismiss()
+    this.loading = undefined
   }
 }
