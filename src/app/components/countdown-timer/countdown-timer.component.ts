@@ -1,21 +1,23 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnDestroy } from '@angular/core';
+import { interval, Subscription } from 'rxjs';
+import { takeWhile, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-countdown-timer',
   templateUrl: './countdown-timer.component.html',
   styleUrls: ['./countdown-timer.component.scss'],
 })
-export class CountdownTimerComponent {
-  private timerRefreshInterval: any // eslint-disable-line @typescript-eslint/no-explicit-any
-  private _timerStartTime = 0
-  private _seconds = 0
+export class CountdownTimerComponent implements OnDestroy {
+  private _seconds = 0;
+  private timerSubscription: Subscription | null = null;
+
   @Input() set seconds(value: number) {
-    this._seconds = value
-    this.timerLabel = value
-    this.stopTimer()
+    this._seconds = value;
+    this.timerLabel = value;
+    this.stopTimer();
   }
   get seconds(): number {
-    return this._seconds
+    return this._seconds;
   }
 
   @Output() timerEnd = new EventEmitter<void>();
@@ -25,35 +27,30 @@ export class CountdownTimerComponent {
   constructor() { }
 
   public startTimer() {
-    this.setupTimerInterval()
+    this.setupTimerInterval();
   }
 
   private stopTimer() {
-    if(this.timerRefreshInterval) {
-      clearInterval(this.timerRefreshInterval)
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
     }
   }
 
   private setupTimerInterval() {
-    if(this.timerRefreshInterval) {
-      clearInterval(this.timerRefreshInterval)
-    }
-    
-    this.timerLabel = this.seconds // reset timer label
-    this._timerStartTime = Date.now() // reset timer start time
+    this.stopTimer(); // Ensure any existing timer is stopped
 
-    this.timerRefreshInterval = setInterval(() => {
-      this.updateTimerLabel()
-      if(this.timerLabel <= 0) {
-        clearInterval(this.timerRefreshInterval)
-        this.timerEnd.emit()
-      }
-    }, 100) // for precision purposes check every 250ms
+    this.timerLabel = this.seconds; // reset timer label
+
+    this.timerSubscription = interval(1000).pipe(
+      map(elapsed => this.seconds - elapsed - 1),
+      takeWhile(remaining => remaining > 0)
+    ).subscribe({
+      next: remaining => this.timerLabel = remaining,
+      complete: () => this.timerEnd.emit()
+    });
   }
 
-  private updateTimerLabel() {
-    const elapsedTime = Math.ceil((Date.now() - this._timerStartTime)/1000)
-    this.timerLabel = this.seconds - elapsedTime
+  ngOnDestroy() {
+    this.stopTimer();
   }
-
 }

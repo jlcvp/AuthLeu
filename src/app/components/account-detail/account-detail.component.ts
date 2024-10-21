@@ -102,7 +102,7 @@ export class AccountDetailComponent {
     setTimeout(() => {
       this.updateTokenCountdown()
       this.updateCode()
-    }, 500);
+    }, 150); // using 150ms to debounce the timer end event
   }
 
   updateCode() {
