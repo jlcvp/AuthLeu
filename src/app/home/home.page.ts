@@ -33,18 +33,6 @@ export class HomePage implements OnInit {
     this.isLandscape = window.innerWidth > window.innerHeight
   }
 
-  // @HostListener('window:focus', ['$event'])
-  // onFocus(event: FocusEvent): void {
-  //   // TODO: resume timer
-  //   this.isWindowFocused = true
-  // }
-
-  // @HostListener('window:blur', ['$event'])
-  // onBlur(event: FocusEvent): void {
-  //   // TODO: stop timer, camera, etc
-  //   this.isWindowFocused = false
-  // }
-
   qrScannerOpts: ScannerQRCodeConfig = {
     isBeep: false,
     vibrate: 100,
