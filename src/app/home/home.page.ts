@@ -4,7 +4,6 @@ import { AlertController, IonPopover, LoadingController, ModalController, NavCon
 import { firstValueFrom, Observable, tap } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
-import { LogoService } from '../services/logo.service';
 import { LocalStorageService } from '../services/local-storage.service';
 import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
@@ -53,7 +52,6 @@ export class HomePage implements OnInit {
     private toastController: ToastController,
     private alertController: AlertController,
     private modalController: ModalController,
-    private logoService: LogoService,
     private storageService: LocalStorageService,
     private configService: AppConfigService,
     private migrationService: MigrationService,
