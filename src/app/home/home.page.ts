@@ -1,12 +1,10 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
-import { AlertController, IonModal, IonPopover, LoadingController, ModalController, NavController, SearchbarCustomEvent, ToastController } from '@ionic/angular';
+import { AlertController, IonPopover, LoadingController, ModalController, NavController, SearchbarCustomEvent, ToastController } from '@ionic/angular';
 import { firstValueFrom, Observable, tap } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
 import { LogoService } from '../services/logo.service';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { LocalStorageService } from '../services/local-storage.service';
 import { TranslateService } from '@ngx-translate/core';
 import { GlobalUtils } from '../utils/global-utils';
@@ -17,6 +15,7 @@ import { MigrationService } from '../services/migration.service';
 import { LoggingService } from '../services/logging.service';
 import { AppVersionInfo } from '../models/app-version.enum';
 import { PasswordService } from './password.service';
+import { AccountModalComponent } from './components/account-modal/account-modal.component';
 
 @Component({
   selector: 'app-home',
@@ -25,35 +24,16 @@ import { PasswordService } from './password.service';
 })
 export class HomePage implements OnInit {
   @ViewChild('popover') popover!: IonPopover;
-  @ViewChild(IonModal) modal!: IonModal;
-  @ViewChild('qrscanner') qrscanner!: NgxScannerQrcodeComponent;
 
   @HostListener('window:resize', ['$event'])
   onWindowResize() {
     this.isLandscape = window.innerWidth > window.innerHeight
   }
 
-  qrScannerOpts: ScannerQRCodeConfig = {
-    isBeep: false,
-    vibrate: 100,
-    constraints: {
-      video: {
-        facingMode: 'environment'
-      }
-    }
-  }
-
   accounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   selectedAccount?: Account2FA
   searchTxt: string = ''
-  draftLogoSearchTxt: string = ''
-  searchLogoResults: string[] = []
-  draftLogoURL: string = ''
-  validations_form: FormGroup;
 
-  manualInput: boolean = false
-  isAddAccountModalOpen: boolean = false
-  isScanActive: boolean = false
   isWindowFocused: boolean = true
   hasLockedAccounts: boolean = true
   versionInfo: AppVersionInfo
@@ -81,27 +61,7 @@ export class HomePage implements OnInit {
     private loggingService: LoggingService,
     private passwordService: PasswordService,
     private navCtrl: NavController,
-    formBuilder: FormBuilder
   ) {
-    this.validations_form = formBuilder.group({
-      label: new FormControl('', Validators.compose([
-        Validators.required,
-      ])),
-      secret: new FormControl('', Validators.compose([
-        Validators.required,
-        Validators.minLength(8),
-        Validators.pattern('^[A-Z2-7]+=*$')
-      ])),
-      tokenLength: new FormControl(6, Validators.compose([
-        Validators.required,
-        Validators.pattern('^[1-9]+[0-9]*$')
-      ])),
-      interval: new FormControl(30, Validators.compose([
-        Validators.required,
-        Validators.pattern('^[1-9]+[0-9]*$')
-      ])),
-    });
-
     this.versionInfo = this.configService.versionInfo
   }
 
@@ -177,29 +137,19 @@ export class HomePage implements OnInit {
     this.searchTxt = searchTerm ?? ''
   }
 
-  async handleSearchLogo(evt: SearchbarCustomEvent) {
-    const searchTerm = evt?.detail?.value
-    console.log({ evt, searchTerm })
-    if (!searchTerm) {
-      this.draftLogoURL = ''
-      this.searchLogoResults = []
-      return
-    }
-    const brandInfo = await this.logoService.searchServiceInfo(searchTerm)
-    if (brandInfo && brandInfo.length > 0) {
-      this.draftLogoURL = brandInfo[0].logo
-      this.searchLogoResults = brandInfo.map(brand => brand.logo)
-    }
-    console.log({ brandInfo, draftLogoURL: this.draftLogoURL, searchTerm: this.draftLogoSearchTxt, results: this.searchLogoResults })
-  }
-
-  selectLogo(logoURL: string) {
-    this.draftLogoURL = logoURL
-  }
-
   async addAccountAction() {
-    this.isAddAccountModalOpen = true
-    this.scanCode()
+    // show modal
+    const modal = await this.modalController.create({
+      component: AccountModalComponent,
+    })
+
+    await modal.present()
+    const { data, role } = await modal.onWillDismiss();
+
+    if (role === 'added' && data) {
+      const newAccount = data as Account2FA
+      await this.createAccount(newAccount)
+    }
   }
 
   async exportAccountAction() {
@@ -391,48 +341,14 @@ export class HomePage implements OnInit {
     await this.configService.setEncryptionOptions(this.encryptionOptions)
   }
 
-  onDidDismissModal(e: Event) {
-    console.log("Did dismiss add account modal", {event:e})
-    this.isAddAccountModalOpen = false
-    this.manualInput = false
-    this.isAddAccountModalOpen = false
-    this.isScanActive = false
-    if (this.qrscanner) {
-      this.qrscanner.stop()
-    }
-    // clear form
-    this.validations_form.reset()
-    this.draftLogoURL = ''
-    this.draftLogoSearchTxt = ''
-    this.searchLogoResults = []
-  }
-
-  onWillDismissModal(e: Event) {
-    console.log("Will dismiss add account modal", {event:e})
-    if (this.qrscanner) {
-      console.log("STOP QR")
-      this.qrscanner.stop()
-    }
-  }
-
-  async closeAddAccountModal() {
-    await this.modal.dismiss()
-  }
-
-  async createAccount(formValues: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-    console.log({ formValues })
-    const logo = this.draftLogoURL
-    await this.closeAddAccountModal()
-    const newAccountDict = Object.assign(formValues, { logo, active: true })
-    const account = Account2FA.fromDictionary(newAccountDict)
-    console.log({ account2fa: account })
+  async createAccount(newAccount: Account2FA) {
     const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ADDING_ACCOUNT'))
     await this.presentLoading(message)
     try {
-      await this.accountsService.addAccount(account)
+      await this.accountsService.addAccount(newAccount)
       await this.dismissLoading()
       // select new account
-      this.selectAccount(account)
+      this.selectAccount(newAccount)
     } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       await this.dismissLoading()
       const messageKey = error.message === 'INVALID_SESSION' ? 
@@ -485,101 +401,6 @@ export class HomePage implements OnInit {
   // Add or remove the "ion-palette-dark" class on the html element
   private useDarkPalette(isDark: boolean) {
     document.documentElement.classList.toggle('ion-palette-dark', isDark);
-  }
-
-  async scanCode() {
-    // <ngx-scanner-qrcode #action="scanner" (event)="onEvent($event, action)"></ngx-scanner-qrcode>
-    this.isScanActive = true
-    const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.LOADING_CAMERA'))
-    await this.presentLoading(message)
-    try {
-      await firstValueFrom(this.qrscanner.start())
-    } catch (error) {
-      // camera permission denial
-      const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
-      const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))
-      await this.dismissLoading()
-      await this.showAlert(message, header)
-      this.manualInput = true
-      this.isScanActive = false
-      return
-    }
-
-    const devices = (await firstValueFrom(this.qrscanner.devices)).filter(device => device.kind === 'videoinput')
-    console.log({ devices })
-    // find back camera
-    let backCamera = devices.find(device => device.label.toLowerCase().includes('back camera'))
-    if (!backCamera) {
-      backCamera = devices.find(device => device.label.toLowerCase().match(/.*back.*camera.*/))
-    }
-
-    if (backCamera && backCamera.deviceId) {
-      console.log("using device", { backCamera })
-      await this.qrscanner.playDevice(backCamera.deviceId)
-    }
-    await this.dismissLoading()
-  }
-
-  async onQRCodeScanned(evt: ScannerQRCodeResult[], qrscanner: NgxScannerQrcodeComponent) {
-    try {
-      await qrscanner.stop()
-      await this.qrscanner.stop()
-    } catch (error) {
-      console.error("Error stopping scanner", error)
-    }
-    this.processQRCode(evt && evt[0]?.value || '')
-    // give time for the scanner to stop
-    setTimeout(() => {
-      this.isScanActive = false
-    }, 200);
-  }
-
-  async cycleCamera() {
-    console.log("cycle camera")
-    const current = this.qrscanner.deviceIndexActive
-    console.log({ current })
-    const devices = await firstValueFrom(this.qrscanner.devices)
-    console.log({ devices })
-    const next = (current + 1) % devices.length
-    const nextDevice = devices[next]
-    this.qrscanner.playDevice(nextDevice.deviceId)
-  }
-
-  manualInputAction() {
-    if (this.qrscanner) {
-      console.log("STOP QR Reading")
-      this.qrscanner.stop()
-    }
-    this.isScanActive = false;
-    this.manualInput = true
-  }
-
-  private async processQRCode(evt: string) {
-    // The URI format and params is described in https://github.com/google/google-authenticator/wiki/Key-Uri-Format
-    // otpauth://totp/ACME%20Co:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30
-    try {
-      const account = Account2FA.fromOTPAuthURL(evt)
-      console.log({ account })
-
-      this.validations_form.controls['label'].setValue(account.label)
-      this.validations_form.controls['secret'].setValue(account.secret)
-      this.validations_form.controls['tokenLength'].setValue(account.tokenLength)
-      this.validations_form.controls['interval'].setValue(account.interval)
-      // service name inferred from issuer or label
-      const serviceName = account.issuer || account.label.split(':')[0]
-      const event = new CustomEvent('search', { detail: { value: serviceName } }) as SearchbarCustomEvent
-      this.handleSearchLogo(event)
-    } catch (error) {
-      const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.INVALID_QR_CODE'))
-      console.error("Error processing QR code", error)
-      const toast = await this.toastController.create({
-        message,
-        duration: 2000,
-        color: 'danger'
-      })
-      await toast.present()
-    }
-    this.manualInput = true
   }
 
   private confirmLogout(): Promise<boolean> {
