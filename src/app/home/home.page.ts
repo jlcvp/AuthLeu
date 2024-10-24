@@ -139,6 +139,7 @@ export class HomePage implements OnInit {
     // show modal
     const modal = await this.modalController.create({
       component: AccountModalComponent,
+      backdropDismiss: false
     })
 
     await modal.present()

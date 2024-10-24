@@ -16,6 +16,7 @@ export class AccountModalComponent implements OnInit {
   @ViewChild('qrscanner') qrscanner!: NgxScannerQrcodeComponent;
 
   isScanActive = false;
+  isCameraSettled = false;
   draftLogoURL = '';
   draftLogoSearchTxt = '';
   searchLogoResults: string[] = [];
@@ -69,7 +70,7 @@ export class AccountModalComponent implements OnInit {
   async onWillDismiss() {
     if (this.qrscanner) { 
       console.log("STOP QR")
-      await this.qrscanner.stop()
+      await this.stopScanner()
     }
   }
 
@@ -83,7 +84,7 @@ export class AccountModalComponent implements OnInit {
   async onQRCodeScanned(evt: ScannerQRCodeResult[], qrscanner: NgxScannerQrcodeComponent) {
     try {
       await qrscanner.stop()
-      await this.qrscanner.stop()
+      await this.stopScanner()
     } catch (error) {
       console.error("Error stopping scanner", error)
     }
@@ -95,19 +96,22 @@ export class AccountModalComponent implements OnInit {
   }
 
   async cycleCamera() {
+    this.isCameraSettled = false
     const current = this.qrscanner.deviceIndexActive
     const devices = await firstValueFrom(this.qrscanner.devices)
-    console.log({  })
     const next = (current + 1) % devices.length
     const nextDevice = devices[next]
     console.log(`cycle device [${current}] -> [${next}]`, { playDevice: nextDevice, devices })
     await this.qrscanner.playDevice(nextDevice.deviceId)
+    await this.showInfoToast(`${nextDevice.label}`, 'top')
+    await this.awaitCameraSettle()
+    this.isCameraSettled = true
   }
 
-  manualInputAction() {
+  async manualInputAction() {
     if (this.qrscanner) {
       console.log("STOP QR Reading")
-      this.qrscanner.stop()
+      await this.stopScanner()
     }
     this.isScanActive = false;
   }
@@ -119,6 +123,8 @@ export class AccountModalComponent implements OnInit {
     await this.presentLoading(message)
     try {
       await firstValueFrom(this.qrscanner.start())
+      console.log('QR scanner started')
+      await this.awaitCameraSettle()
     } catch (error) {
       // camera permission denial
       const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
@@ -140,7 +146,9 @@ export class AccountModalComponent implements OnInit {
     if (backCamera && backCamera.deviceId) {
       console.log("using device", { backCamera })
       await this.qrscanner.playDevice(backCamera.deviceId)
+      await this.awaitCameraSettle()
     }
+    this.isCameraSettled = true
     await this.dismissLoading()
   }
 
@@ -201,10 +209,11 @@ export class AccountModalComponent implements OnInit {
     }
   }
 
-  private async showInfoToast(message: string) {
+  private async showInfoToast(message: string, position: "top" | "bottom" | "middle" | undefined = undefined) {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
+      position: position
     })
     await toast.present()
   }
@@ -246,5 +255,41 @@ export class AccountModalComponent implements OnInit {
       buttons: ['OK']
     })
     await alert.present()
+  }
+
+  private async stopScanner() {
+    if(this.qrscanner) {
+      await this.awaitCameraSettle()
+      await firstValueFrom(this.qrscanner.stop())
+    }
+  }
+
+  private async awaitCameraSettle(timeoutMillis: number = 10000) {
+    return new Promise<void>((resolve, reject) => {
+      console.log("Waiting for camera to settle")
+      if(!this.qrscanner) {
+        reject("No scanner")
+        return
+      }
+      let timeout: any = undefined // eslint-disable-line @typescript-eslint/no-explicit-any
+      // while not settled, keep checking every 100ms
+      const interval = setInterval(() => {
+        if(this.qrscanner.isStart) {
+          clearInterval(interval)
+          if(timeout) {
+            clearTimeout(timeout)
+          }
+          console.log("Camera settled")
+          resolve()
+        }
+      }, 100)
+
+      // if timeout, reject
+      timeout = setTimeout(() => {
+        clearInterval(interval)
+        reject("Timeout")
+      }, timeoutMillis)
+      
+    })
   }
 }
