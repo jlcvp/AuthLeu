@@ -49,7 +49,8 @@
       "ERROR_CAMERA_HEADER": "Câmera não disponível",
       "ERROR_CAMERA_MESSAGE": "<p>O acesso à câmera é necessário para escanear QR codes, mas parece que seu dispositivo não possui uma câmera ou as permissões da câmera foram negadas.</p><p>Verifique as permissões e/ou configurações do seu dispositivo e tente novamente.</p>",
       "INVALID_QR_CODE": "QR Code inválido",
-      "INVALID_SESSION": "Sessão inválida"
+      "INVALID_SESSION": "Sessão inválida",
+      "INVALID_FIELDS": "Dados da conta inválidos"
     },
     "EXAMPLI_GRATIA_SHORT": "ex.:",
     "LABEL": "Rótulo",

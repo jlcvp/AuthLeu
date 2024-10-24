@@ -7,11 +7,12 @@ import { HomePage } from './home.page';
 import { HomePageRoutingModule } from './home-routing.module';
 import { AccountFilterPipe } from '../pipes/account-filter.pipe';
 import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
-import { AccountListComponent } from '../components/account-list/account-list.component';
-import { AccountDetailComponent } from '../components/account-detail/account-detail.component';
-import { CountdownTimerComponent } from '../components/countdown-timer/countdown-timer.component';
+import { AccountListComponent } from './components/account-list/account-list.component';
+import { AccountDetailComponent } from './components/account-detail/account-detail.component';
+import { CountdownTimerComponent } from './components/countdown-timer/countdown-timer.component';
 import { TranslateModule } from '@ngx-translate/core'
-import { AccountSelectModalComponent } from '../components/account-select-modal/account-select-modal.component';
+import { AccountSelectModalComponent } from './components/account-select-modal/account-select-modal.component';
+import { AccountModalComponent } from './components/account-modal/account-modal.component';
 
 @NgModule({
   imports: [
@@ -24,6 +25,6 @@ import { AccountSelectModalComponent } from '../components/account-select-modal/
     NgxScannerQrcodeModule,
     TranslateModule.forChild()
   ],
-  declarations: [HomePage, AccountListComponent, AccountDetailComponent, CountdownTimerComponent, AccountSelectModalComponent]
+  declarations: [HomePage, AccountListComponent, AccountDetailComponent, CountdownTimerComponent, AccountSelectModalComponent, AccountModalComponent]
 })
 export class HomePageModule {}

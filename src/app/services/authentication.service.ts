@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { Auth, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
 import { NavController } from '@ionic/angular';
 import { LocalStorageService } from './local-storage.service';
-import { environment } from 'src/environments/environment';
 import { AppConfigService } from './app-config.service';
 
 @Injectable({
