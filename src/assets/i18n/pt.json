@@ -79,7 +79,8 @@
     "IMPORT_ACCOUNTS": "Importar Backup",
     "LOGOUT": "Sair",
     "PERIODIC_CHECK": "Re-checagem periódica",
-    "UNLOCK_ACCOUNTS": "Decriptar contas"
+    "UNLOCK_ACCOUNTS": "Decriptar contas",
+    "ABOUT": "Sobre..."
   },
   "CRYPTO": {
     "ALREADY_DECRYPTED": "Os dados já estão descriptografados",
@@ -171,5 +172,16 @@
   },
   "UTILS": {
     "ERROR_INVALID_SEMVER_FORMAT": "Formato SemVer inválido"
+  },
+  "ABOUT_MODAL": {
+    "CLOSE": "Fechar",
+    "TITLE": "Sobre",
+    "VERSION_INFO_HEADER": "Informações de Versão",
+    "VERSION_INFO": {
+      "VERSION": "Número da versão",
+      "BUILD_DATE": "Data de build",
+      "GIT_HASH": "Hash do commit"
+    },
+    "LICENSES_HEADER": "Licenças"
   }
 }

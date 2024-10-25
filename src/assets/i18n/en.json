@@ -79,7 +79,8 @@
     "IMPORT_ACCOUNTS": "Import Backup",
     "LOGOUT": "Sign out",
     "PERIODIC_CHECK": "Periodic Password Check",
-    "UNLOCK_ACCOUNTS": "Decrypt accounts"
+    "UNLOCK_ACCOUNTS": "Decrypt accounts",
+    "ABOUT": "About..."
   },
   "CRYPTO": {
     "ALREADY_DECRYPTED": "Data is already decrypted",
@@ -171,5 +172,16 @@
   },
   "UTILS": {
     "ERROR_INVALID_SEMVER_FORMAT": "Invalid SemVer format"
+  },
+  "ABOUT_MODAL": {
+    "CLOSE": "Close",
+    "TITLE": "About",
+    "VERSION_INFO_HEADER": "Version Info",
+    "VERSION_INFO": {
+      "VERSION": "Version",
+      "BUILD_DATE": "Build date",
+      "GIT_HASH": "Commit hash"
+    },
+    "LICENSES_HEADER": "Third-party Licenses"
   }
 }

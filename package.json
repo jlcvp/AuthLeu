@@ -1,6 +1,6 @@
 {
   "name": "authleu",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "author": "Leonardo 'Leu' Pereira <jlcvp@users.noreply.github.com>",
   "homepage": "https://github.com/jlcvp/AuthLeu",
   "description": "Open source authenticator and 2fa code generator to use across multiple devices and platforms",
