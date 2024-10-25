@@ -61,7 +61,7 @@ export class AppComponent {
     this.translate.setDefaultLang('en')
     const supportedLanguages = /en|pt/
     // get the browser language
-    let browserLang = this.translate.getBrowserLang()
+    const browserLang = this.translate.getBrowserLang()
     console.log("detected browser language: ", browserLang)
     if (browserLang !== undefined && this.translate.getBrowserLang()?.match(supportedLanguages)) {
       this.translate.use(browserLang)

@@ -8,17 +8,8 @@ export class VersionUtils {
      * @returns {AppVersion} The corresponding AppVersion enum value.
      */
     static appVersionFromVersionString(version: string): AppVersion {
-        // switch (version) {
-        //     case '1.0.0':
-        //         return AppVersion.V1_0_0
-        //     case '2.0.0':
-        //         return AppVersion.V2_0_0
-        //     case '2.1.0':
-        //         return AppVersion.V2_1_0
-        //     default:
-        //         return AppVersion.UNKNOWN
-        // }
-        return AppVersion[version as keyof typeof AppVersion] ?? AppVersion.UNKNOWN
+        const appVersion = Object.values(AppVersion).find((appVersion) => appVersion === version)
+        return appVersion as AppVersion ?? AppVersion.UNKNOWN
     }
 
     /**

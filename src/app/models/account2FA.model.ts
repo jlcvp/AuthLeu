@@ -11,7 +11,7 @@ export interface IAccount2FA {
     issuer?: string;
     active?: boolean;
     logo?: string;
-    added?: any;
+    added?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     encryptedSecret?: string;
     iv?: string;
     salt?: string;
@@ -35,11 +35,11 @@ export class Account2FA implements IAccount2FA {
     issuer?: string;
     active?: boolean;
     logo?: string;
-    added?: any;
+    added?: any;  // eslint-disable-line @typescript-eslint/no-explicit-any
     encryptedSecret?: string;
     iv?: string;
     salt?: string;
-    constructor(id: string, label: string, secret?: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string, encryptedSecret?: string, iv?: string, salt?: string, added?: any) {
+    constructor(id: string, label: string, secret?: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string, encryptedSecret?: string, iv?: string, salt?: string, added?: any) {  // eslint-disable-line @typescript-eslint/no-explicit-any
         this.id = id;
         this.label = label;
         this.secret = secret || '';
@@ -55,7 +55,7 @@ export class Account2FA implements IAccount2FA {
         this.added = added;
     }
 
-    static fromDictionary(dict: any): Account2FA {
+    static fromDictionary(dict: any): Account2FA {  // eslint-disable-line @typescript-eslint/no-explicit-any
         if(!dict || typeof dict !== 'object') {
             throw new Error('Invalid dictionary');
         }
@@ -166,7 +166,7 @@ export class Account2FA implements IAccount2FA {
         return this.interval - (Math.floor(Date.now() / 1000) % this.interval);
     }
 
-    typeErased(): Object {
+    typeErased(): Object { // eslint-disable-line @typescript-eslint/ban-types
         const typeErasedObject = Object.assign({}, this);
         for (const key in typeErasedObject) {
             if (!typeErasedObject[key]) {
