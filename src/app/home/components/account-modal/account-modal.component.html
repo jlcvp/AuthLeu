@@ -2,7 +2,7 @@
   <ion-toolbar>
     <ion-title>{{ "ADD_ACCOUNT_MODAL.TITLE" | translate }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss()" [disabled]="!isCameraSettled"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+      <ion-button (click)="dismiss()" [disabled]="isScanActive && !isCameraSettled "><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
