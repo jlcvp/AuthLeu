@@ -99,7 +99,6 @@
     "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
     "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
     "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
-    "ENCRYPTION_ALERT": {},
     "ERRORS": {
       "ACCOUNTS_LOCKED": "Your accounts are encrypted. You won't be able to view the codes until they are decrypted using the encryption password.",
       "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
@@ -131,7 +130,6 @@
       },
       "TITLE": "Password Confirmation"
     },
-    "VERSION_INFO": {},
     "UNLOCK_ACCOUNTS": "Enter Password"
   },
   "LOGIN": {

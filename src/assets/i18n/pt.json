@@ -99,7 +99,6 @@
     "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
     "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
     "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
-    "ENCRYPTION_ALERT": {},
     "ERRORS": {
       "ACCOUNTS_LOCKED": "Suas contas estão criptografadas. Não será possível gerar os códigos de acesso até que eles sejam descriptografados usando a senha de criptografia.",
       "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
@@ -131,7 +130,6 @@
       },
       "TITLE": "Confirmação de Senha"
     },
-    "VERSION_INFO": {},
     "UNLOCK_ACCOUNTS": "Inserir Senha"
   },
   "LOGIN": {
