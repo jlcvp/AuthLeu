@@ -73,21 +73,20 @@
                   </ion-content>
                 </ng-template>
               </ion-popover>
+              <ion-item button detail="false" (click)="aboutAction()">
+                <ion-icon slot="start" name="information-circle-outline"></ion-icon>
+                <ion-label>{{ "CONFIG_MENU.ABOUT" | translate }}</ion-label>
+              </ion-item>
               <ion-item button detail="false" (click)="logout()">
                 <ion-icon slot="start" name="log-out-outline"></ion-icon>
                 <ion-label>{{ "CONFIG_MENU.LOGOUT" | translate }}</ion-label>
               </ion-item>
             </ion-list>
           </ion-content>
-          <ion-footer *ngIf="versionClickCount < 2;else clickableVersionInfo" class="ion-no-padding ion-no-margin ion-text-center" (click)="showVersionInfoAction()">
-            <ion-note class="ion-no-padding ion-no-margin">{{ versionInfo.versionName }}</ion-note>
-          </ion-footer>
-          <ng-template #clickableVersionInfo>
-          <ion-footer class="ion-no-padding ion-no-margin ion-text-center ion-activatable ripple-parent version-info" (click)="showVersionInfoAction()">
+          <ion-footer class="ion-no-padding ion-no-margin ion-text-center ion-activatable ripple-parent version-info">
             <ion-ripple-effect></ion-ripple-effect>
             <ion-note class="ion-no-padding ion-no-margin">{{ versionInfo.versionName }}</ion-note>
           </ion-footer>
-          </ng-template>
         </ng-template>
       </ion-popover>
     </ion-buttons>

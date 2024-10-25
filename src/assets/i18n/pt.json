@@ -79,7 +79,8 @@
     "IMPORT_ACCOUNTS": "Importar Backup",
     "LOGOUT": "Sair",
     "PERIODIC_CHECK": "Re-checagem periódica",
-    "UNLOCK_ACCOUNTS": "Decriptar contas"
+    "UNLOCK_ACCOUNTS": "Decriptar contas",
+    "ABOUT": "Sobre..."
   },
   "CRYPTO": {
     "ALREADY_DECRYPTED": "Os dados já estão descriptografados",
@@ -98,13 +99,6 @@
     "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
     "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
     "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
-    "ENCRYPTION_ALERT": {
-      "DONT_SHOW_AGAIN": "Não mostrar novamente",
-      "ENABLE_ENCRYPTION": "Ativar criptografia",
-      "LATER": "Mais tarde",
-      "MESSAGE": "Para melhor proteger suas contas, é recomendável ativar a funcionalidade de criptografia de chaves.<p>Deseja configurar uma senha agora?</p>",
-      "TITLE": "Alerta de segurança"
-    },
     "ERRORS": {
       "ACCOUNTS_LOCKED": "Suas contas estão criptografadas. Não será possível gerar os códigos de acesso até que eles sejam descriptografados usando a senha de criptografia.",
       "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
@@ -136,12 +130,6 @@
       },
       "TITLE": "Confirmação de Senha"
     },
-    "VERSION_INFO": {
-      "GIT_HASH": "Hash do commit",
-      "VERSION_DATE": "Data de build",
-      "VERSION_INFO_TITLE": "Informações de Versão",
-      "VERSION_LABEL": "Versão"
-    },
     "UNLOCK_ACCOUNTS": "Inserir Senha"
   },
   "LOGIN": {
@@ -171,5 +159,16 @@
   },
   "UTILS": {
     "ERROR_INVALID_SEMVER_FORMAT": "Formato SemVer inválido"
+  },
+  "ABOUT_MODAL": {
+    "CLOSE": "Fechar",
+    "TITLE": "Sobre",
+    "VERSION_INFO_HEADER": "Informações de Versão",
+    "VERSION_INFO": {
+      "VERSION": "Número da versão",
+      "BUILD_DATE": "Data de build",
+      "GIT_HASH": "Hash do commit"
+    },
+    "LICENSES_HEADER": "Licenças"
   }
 }

@@ -15,6 +15,7 @@ import { LoggingService } from '../services/logging.service';
 import { AppVersionInfo } from '../models/app-version.enum';
 import { PasswordService } from './password.service';
 import { AccountModalComponent } from './components/account-modal/account-modal.component';
+import { AboutModalComponent } from './components/about-modal/about-modal.component';
 
 @Component({
   selector: 'app-home',
@@ -36,7 +37,6 @@ export class HomePage implements OnInit {
   isWindowFocused: boolean = true
   hasLockedAccounts: boolean = true
   versionInfo: AppVersionInfo
-  versionClickCount = 0
 
   private encryptionOptions: EncryptionOptions = ENCRYPTION_OPTIONS_DEFAULT
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -603,25 +603,13 @@ export class HomePage implements OnInit {
     return willInputPassword
   }
 
-  async showVersionInfoAction(): Promise<void> {
-    this.versionClickCount += 1
-    if(this.versionClickCount < 3) {
-      return
-    }
-    if(this.versionClickCount === 3) {
-      this.loggingService.enableConsole()
-    }
-    const versionInfo = this.configService.versionInfo
-    const title = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_INFO_TITLE'))
-    const versionLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_LABEL'))
-    const buildDateLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.VERSION_DATE'))
-    const gitHashLabel = await firstValueFrom(this.translateService.get('HOME.VERSION_INFO.GIT_HASH'))
-    const message = `
-    <p>${versionLabel}: ${versionInfo.versionName}</p>
-    <p>${buildDateLabel}: ${versionInfo.buildDate}</p>
-    <p>${gitHashLabel}: ${versionInfo.commitHash}</p>`
-
-    await this.showAlert(message, title)
+  async aboutAction(): Promise<void> {
+    // show about modal
+    const modal = await this.modalController.create({
+      component: AboutModalComponent,
+      backdropDismiss: true
+    })
+    await modal.present()
   }
 
   async enableLogging() {

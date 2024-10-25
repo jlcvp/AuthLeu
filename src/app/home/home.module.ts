@@ -13,6 +13,7 @@ import { CountdownTimerComponent } from './components/countdown-timer/countdown-
 import { TranslateModule } from '@ngx-translate/core'
 import { AccountSelectModalComponent } from './components/account-select-modal/account-select-modal.component';
 import { AccountModalComponent } from './components/account-modal/account-modal.component';
+import { AboutModalComponent } from './components/about-modal/about-modal.component';
 
 @NgModule({
   imports: [
@@ -25,6 +26,14 @@ import { AccountModalComponent } from './components/account-modal/account-modal.
     NgxScannerQrcodeModule,
     TranslateModule.forChild()
   ],
-  declarations: [HomePage, AccountListComponent, AccountDetailComponent, CountdownTimerComponent, AccountSelectModalComponent, AccountModalComponent]
+  declarations: [
+    HomePage, 
+    AccountListComponent, 
+    AccountDetailComponent, 
+    CountdownTimerComponent, 
+    AccountSelectModalComponent, 
+    AccountModalComponent,
+    AboutModalComponent
+  ]
 })
 export class HomePageModule {}
