@@ -99,13 +99,7 @@
     "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
     "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
     "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
-    "ENCRYPTION_ALERT": {
-      "DONT_SHOW_AGAIN": "Não mostrar novamente",
-      "ENABLE_ENCRYPTION": "Ativar criptografia",
-      "LATER": "Mais tarde",
-      "MESSAGE": "Para melhor proteger suas contas, é recomendável ativar a funcionalidade de criptografia de chaves.<p>Deseja configurar uma senha agora?</p>",
-      "TITLE": "Alerta de segurança"
-    },
+    "ENCRYPTION_ALERT": {},
     "ERRORS": {
       "ACCOUNTS_LOCKED": "Suas contas estão criptografadas. Não será possível gerar os códigos de acesso até que eles sejam descriptografados usando a senha de criptografia.",
       "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
@@ -137,12 +131,7 @@
       },
       "TITLE": "Confirmação de Senha"
     },
-    "VERSION_INFO": {
-      "GIT_HASH": "Hash do commit",
-      "VERSION_DATE": "Data de build",
-      "VERSION_INFO_TITLE": "Informações de Versão",
-      "VERSION_LABEL": "Versão"
-    },
+    "VERSION_INFO": {},
     "UNLOCK_ACCOUNTS": "Inserir Senha"
   },
   "LOGIN": {
