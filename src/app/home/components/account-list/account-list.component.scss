@@ -2,9 +2,12 @@
     object-fit: scale-down;
 }
 
-.thumb {
+.thumbnail-card {
     width: 100%;
     max-height: 35%;
+}
+
+.thumbnail-flex-container {
     display: flex;
     justify-content: center;
     align-items: center;

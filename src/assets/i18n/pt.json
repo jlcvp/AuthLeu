@@ -5,7 +5,8 @@
     "SELECT_ACCOUNT_HINT": "Selecione uma conta para iniciar..."
   },
   "ACCOUNT_LIST": {
-    "LOCKED": "Criptografada"
+    "LOCKED": "Criptografada",
+    "ADD_ACCOUNT_LABEL": "Adicionar conta"
   },
   "ACCOUNT_SELECT_MODAL": {
     "CANCEL": "Cancelar",

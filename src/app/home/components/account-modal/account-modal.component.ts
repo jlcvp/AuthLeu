@@ -83,7 +83,7 @@ export class AccountModalComponent implements OnInit {
 
   async onQRCodeScanned(evt: ScannerQRCodeResult[], qrscanner: NgxScannerQrcodeComponent) {
     try {
-      await qrscanner.stop()
+      console.log('qr code scanned', { evt, qrscanner })
       await this.stopScanner()
     } catch (error) {
       console.error("Error stopping scanner", error)

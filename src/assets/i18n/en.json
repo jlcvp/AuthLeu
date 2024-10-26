@@ -5,7 +5,8 @@
     "SELECT_ACCOUNT_HINT": "Select an account to start..."
   },
   "ACCOUNT_LIST": {
-    "LOCKED": "Encrypted"
+    "LOCKED": "Encrypted",
+    "ADD_ACCOUNT_LABEL": "Add account"
   },
   "ACCOUNT_SELECT_MODAL": {
     "CANCEL": "Cancel",

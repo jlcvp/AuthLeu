@@ -10,6 +10,7 @@ export class AccountListComponent {
   @Input() accounts: Account2FA[] = [];
   @Input() type: "list" | "grid" = "list";
   @Output() accountSelected = new EventEmitter<Account2FA>();
+  @Output() newAccountClick = new EventEmitter<void>();
   
   constructor() { }
 
@@ -17,11 +18,15 @@ export class AccountListComponent {
     this.accountSelected.emit(account);
   }
 
+  addAccount() {
+    this.newAccountClick.emit();
+  }
+
   get isGridType() {
     return this.type === "grid";
   }
 
-  itemTrackBy(index: number, account: Account2FA) {
+  itemTrackBy(_index: number, account: Account2FA) {
     return account.id;
   }
 }
