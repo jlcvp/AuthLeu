@@ -99,6 +99,7 @@
       [account]="selectedAccount"></app-account-detail>
     <app-account-list [ngClass]="layoutOrientationClass" id="accounts-container"
       [accounts]="accounts$ | async | accountFilter: searchTxt" [type]="accountListType"
-      (accountSelected)="selectAccount($event)"></app-account-list>
+      (accountSelected)="selectAccount($event)"
+      (newAccountClick)="addAccountAction()"></app-account-list>
   </div>
 </ion-content>
