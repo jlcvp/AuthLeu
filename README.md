@@ -6,25 +6,26 @@ An open-source, self-hosted alternative to Twilio's Authy, capable of syncing or
 
 All the firebase integration is optional, and we currently don't offer a SaaS option (because rea$ons), but you change the `environment.x.ts` files to use your own firebase project or you can use the app fully offline, but in this case you will need to manually export and import your accounts between devices.
 
-## Current and Planned Features
+## Live version on github pages
+https://jlcvp.github.io/AuthLeu
+
+## Features
 - [x] Progressive Web App (PWA) support.
 - [x] Add 2FA accounts by scanning QR code or manually entering the secret key and account details.
+- [x] Logo search
 - [ ] Edit 2FA account details.
 - [ ] Delete/disable/hide 2FA accounts.
 - [x] Sync 2FA accounts across multiple devices using Firebase Firestore.
 - [x] Import/Export 2FA accounts as a JSON file.
     - [x] Import/Export only selected 2FA accounts.
-- [ ] Encrypt 2FA Secrets in the local storage using a master password.
-- [ ] Encrypt 2FA Secrets in the firestore using a master password. 
-- [ ] Support for other 2FA methods like HOTP.
+- [x] Encryption of 2FA Secret keys.
+- [ ] Support for other 2FA algorithms like pure HOTP.
 - [x] Internationalization
     - [x] English
     - [x] Portuguese (Brazil)
     - [ ] Other languages support (HELP WANTED)
 - [x] Dark mode support.
 
-## Live version on github pages
-https://jlcvp.github.io/AuthLeu
 
 ## Screenshots
 ### Portrait layout
