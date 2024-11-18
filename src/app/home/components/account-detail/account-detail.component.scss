@@ -9,7 +9,9 @@
 }
 
 .service-logo {
+    display: flex;
     object-fit: scale-down;
+    justify-content: center;
     max-height: 120px;
 }
 

@@ -14,6 +14,7 @@ import { TranslateModule } from '@ngx-translate/core'
 import { AccountSelectModalComponent } from './components/account-select-modal/account-select-modal.component';
 import { AccountModalComponent } from './components/account-modal/account-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
+import { StrokedImgComponent } from '../shared/components/stroked-img/stroked-img.component';
 
 @NgModule({
   imports: [
@@ -33,7 +34,8 @@ import { AboutModalComponent } from './components/about-modal/about-modal.compon
     CountdownTimerComponent, 
     AccountSelectModalComponent, 
     AccountModalComponent,
-    AboutModalComponent
+    AboutModalComponent,
+    StrokedImgComponent
   ]
 })
 export class HomePageModule {}

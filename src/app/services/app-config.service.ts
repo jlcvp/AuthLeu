@@ -70,4 +70,18 @@ export class AppConfigService {
   static supportsCryptoAPI(): boolean {
     return !!(crypto && crypto.subtle)
   }
+
+  static isUsingDarkMode() {
+    const classList = document.documentElement.classList;
+    console.log('Class list:', classList);
+    for (let i = 0; i < classList.length; i++) {
+      const classToken = classList[i];
+      console.log('Class token:', classToken);
+      if (classToken == 'ion-palette-dark') {
+        return true
+      }
+    }
+    return false
+        //    return document.documentElement.classList.contains('ion-pallette-dark');
+  }
 }

@@ -17,6 +17,7 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations'
+import { StrokedImgComponent } from './shared/components/stroked-img/stroked-img.component';
 
 LOAD_WASM().subscribe() // Preload NGXScanner WASM module
 

@@ -391,8 +391,8 @@ export class HomePage implements OnInit {
         this.useDarkPalette(true);
         break;
       default:
-        const isCurrentlyDark = this.systemPrefersDark.matches;
-        this.useDarkPalette(isCurrentlyDark)
+        const systemPrefersDarkMode = this.systemPrefersDark.matches;
+        this.useDarkPalette(systemPrefersDarkMode)
         break;
     }
   }
