@@ -171,5 +171,8 @@
       "GIT_HASH": "Commit hash"
     },
     "LICENSES_HEADER": "Third-party Licenses"
+  },
+  "MIGRATION": {
+    "RUNNING_UPDATE": "Updating application..."
   }
 }

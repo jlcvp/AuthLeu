@@ -17,4 +17,11 @@ export class GlobalUtils {
             }
         });
     }
+
+    static updateSplashScreenMessage(message: string) {
+        const splashMessage = document.getElementById('splash-message')
+        if (splashMessage != null) {
+            splashMessage.innerHTML = message
+        }
+    }
 }
