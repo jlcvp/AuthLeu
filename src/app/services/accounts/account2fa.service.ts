@@ -5,6 +5,7 @@ import { RemoteAccount2faService } from './remote-account2fa.service';
 import { LocalAccount2faService } from './local-account2fa.service';
 import { AppConfigService } from '../app-config.service';
 import { TranslateService } from '@ngx-translate/core';
+import { LogoService } from '../logo.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,7 @@ export class Account2faService {
   }
 
   constructor(private appConfig: AppConfigService,
+    private logoService: LogoService,
     private remoteService: RemoteAccount2faService,
     private localService: LocalAccount2faService,
     private translateService: TranslateService) {
@@ -167,7 +169,7 @@ export class Account2faService {
   public readAccountsFromFile(file: File): Promise<Account2FA[]> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
           const data = e.target?.result as string | undefined
           if (!data) {
@@ -183,6 +185,26 @@ export class Account2faService {
 
             const accountsDict = JSON.parse(data) as IAccount2FA[]
             const accounts = accountsDict.map(a => Account2FA.fromDictionary(a))
+            
+            // load logo images
+            const promises: Promise<void>[] = []
+
+            for (const account of accounts) {
+              if (account.logo && account.logo.startsWith('http')) {
+                const logo = account.logo
+                const p = new Promise<void>(async (resolve) => {
+                  try {
+                    account.logo = await this.logoService.downloadImageAsBase64(logo)
+                  } catch (error) {
+                    console.warn('Error downloading logo (Using original URL instead)', error)
+                  }
+                  resolve()
+                })
+                promises.push(p)
+              }
+            }
+
+            await Promise.all(promises)
             resolve(accounts)
           } catch (error) {
             console.error('Error parsing backup file', { error })

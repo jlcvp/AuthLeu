@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { BrandFetchSearchAPIResult, BrandFetchSearchResultArray } from '../models/brand-fetch-search.model';
+import { CorsProxyService } from './cors-proxy.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class LogoService {
   private static baseBrandFetchURL = "https://api.brandfetch.io/v2/search/$SERVICE_NAME$"
   private static logodevAPIKey = environment.LOGO_DEV_APIKEY
   private static brandfetchAPIKey = environment.BRANDFETCH_APIKEY
-  constructor() { }
+  constructor(private corsProxy: CorsProxyService) { }
 
   
   getLogoDevURL(domain: string, size: number = 128, format: ("png" | "jpg") = "png", greyscale: boolean = true): string {
@@ -80,31 +81,12 @@ export class LogoService {
    async downloadImageAsBase64(imageUrl: string): Promise<string> {
     try {
       // Fetch the image as a blob
-      const response = await fetch(imageUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${response.statusText}`);
-      }
-      const blob = await response.blob();
-
-      // Convert the blob to a Base64 string
-      return await this.blobToBase64(blob);
+      const dataURL = await this.corsProxy.fetchDataURL(imageUrl);
+      console.log("Downloaded image as Base64:", { imageUrl, dataURL });
+      return dataURL
     } catch (error) {
       console.error('Error downloading or converting image:', error);
       throw error;
     }
-  }
-
-  /**
-   * Converts a Blob to a Base64 string.
-   * @param blob The Blob to convert.
-   * @returns A Promise that resolves with the Base64 string.
-   */
-  private blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-      reader.readAsDataURL(blob);
-    });
   }
 }
