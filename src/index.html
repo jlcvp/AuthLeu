@@ -35,11 +35,18 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-direction: column;
       transition: opacity 250ms ease-in-out;
     }
     .centered-img {
       width: 200px;
       height: 200px;
+    }
+    #splash-message {
+      color: white;
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-top: 1em;
     }
     #splash-image {
       display: inline-block;
@@ -59,6 +66,8 @@
   </style>
   <div id="splash-container" class="splash-screen">
     <img id="splash-image" class="centered-img" src="assets/icon/256.png" alt="AuthLeu Logo" />
+    <p></p>
+    <p id="splash-message">&nbsp;</p>
   </div>
   <app-root></app-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>

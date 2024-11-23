@@ -170,6 +170,9 @@
       "BUILD_DATE": "Data de build",
       "GIT_HASH": "Hash do commit"
     },
-    "LICENSES_HEADER": "Licenças"
+    "LICENSES_HEADER": "Licenças de Terceiros"
+  },
+  "MIGRATION": {
+    "RUNNING_UPDATE": "Atualizando aplicativo..."
   }
 }
