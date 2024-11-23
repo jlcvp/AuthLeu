@@ -82,6 +82,10 @@ export class LogoService {
     try {
       // Fetch the image as a blob
       const dataURL = await this.corsProxy.fetchDataURL(imageUrl);
+      if (!dataURL || !dataURL.includes("image")) {
+        console.error("Received invalid image data", { imageUrl, dataURL });
+        throw new Error("invalid image data");
+      }
       console.log("Downloaded image as Base64:", { imageUrl, dataURL });
       return dataURL
     } catch (error) {
