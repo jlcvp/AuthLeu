@@ -21,8 +21,8 @@
       <ion-button (click)="onSelectAllClick()">{{ selectAllLabelKey | translate }}</ion-button>
     </ion-item>
     <ion-item *ngFor="let item of selection; let i = index" button (click)="onItemClick(i)" detail="false" [color]="item.selected ? 'light' : ''">
-      <ion-thumbnail class="thumb" slot="start">
-        <img class="thumb-img" [src]="item.account.getLogo()" />
+      <ion-thumbnail slot="start">
+        <img class="thumb-img img-outline" [src]="item.account.getLogo()" />
       </ion-thumbnail>
       <ion-checkbox labelPlacement="start" [checked]="item.selected">
         {{item.account.label}}

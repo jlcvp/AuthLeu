@@ -54,3 +54,10 @@ ion-popover.wider-popover {
 ion-popover.wider-popover .version-info {
     cursor: pointer;
 }
+
+.img-outline {
+    filter: drop-shadow(1px 1px 0 var(--ion-color-outline, --color)) 
+            drop-shadow(-1px 1px 0 var(--ion-color-outline, --color))
+            drop-shadow(1px -1px 0 var(--ion-color-outline, --color))
+            drop-shadow(-1px -1px 0 var(--ion-color-outline, --color));
+}

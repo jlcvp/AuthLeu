@@ -19,7 +19,7 @@
             <!-- <ion-ripple-effect></ion-ripple-effect> -->
             <ion-card-content class="ion-no-padding ion-padding-start ion-padding-end ">
               <ion-thumbnail class="thumbnail-card ion-no-padding ion-padding-top">
-                <img class="thumb-img" [src]="account.getLogo()">
+                <img class="thumb-img img-outline" [src]="account.getLogo()">
               </ion-thumbnail>
               <p class="small-text ion-text-center ion-no-padding ion-padding-top">{{account.label}}</p>
             </ion-card-content>
@@ -47,7 +47,7 @@
       <ng-template #accountsList>
         <ion-item button *ngFor="let account of accounts; trackBy:itemTrackBy" [disabled]="account.isLocked" (click)="selectAccount(account)">
           <ion-thumbnail slot="start" class="thumbnail-flex-container">
-            <img class="thumb-img" [src]="account.getLogo()">
+            <img class="thumb-img img-outline" [src]="account.getLogo()">
           </ion-thumbnail>
           <ion-label>
             <h2>{{ account.label }}</h2>
