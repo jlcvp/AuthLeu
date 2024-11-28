@@ -31,6 +31,12 @@ export class AccountDetailComponent {
     this.updateTokenCountdown()
   }
 
+  @HostListener('copy', ['$event'])
+  onCopy(event: Event): void {
+    console.log('copy event captured', { event })
+    this.copyCode(undefined)
+    event?.preventDefault()
+  }
   get account(): Account2FA | undefined {
     return this._account
   }
@@ -88,8 +94,8 @@ export class AccountDetailComponent {
     const message = await firstValueFrom(this.translateService.get('ACCOUNT_DETAIL.CODE_COPIED'))
     const toast = await this.toastController.create({
       message,
-      positionAnchor: evt.target,
-      //position: 'middle'
+      positionAnchor: evt?.target,
+      position: evt ? undefined : 'middle',
       mode: 'md',
       cssClass: 'width-auto',
       duration: 2000
