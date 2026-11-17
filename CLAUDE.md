@@ -19,7 +19,7 @@ npx ng test --include src/app/path/to/file.spec.ts                       # run a
 npm run translations:check   # verify every key in en.json exists in all other i18n files
 ```
 
-Test coverage is minimal: `src/app/app.component.spec.ts` is the only spec.
+Test coverage is minimal: there are only `app.component.spec.ts` and `utils/version-utils.spec.ts`.
 
 ## CI requirements for PRs to `main`
 
@@ -62,7 +62,7 @@ The provider is chosen by `AppConfigService.isOfflineMode()`, which reads the `i
 1. Add the version to the `AppVersion` enum (`models/app-version.enum.ts`).
 2. Add a `case` in `runMigration`, along with a `migrateToVx_y_z()` method.
 
-Migrations run for enum versions where `stored data_version < version <= app version`. **The comparison is a plain string comparison**, not semver.
+Migrations run for enum versions where `stored data_version < version <= app version`. `VersionUtils.pendingMigrations` selects them using a numeric semver comparison and is covered by `version-utils.spec.ts`. If the app version isn't valid semver (e.g. the dev `%VERSION%` placeholder), migrations are skipped.
 
 ### Logos
 

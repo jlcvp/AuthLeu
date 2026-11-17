@@ -28,17 +28,14 @@ export class MigrationService {
     
     const appVersion = environment.versionConfig.versionNumber
     console.log('App version:', appVersion )
-    const migrationsToRun = Object.values(AppVersion)
-      .filter(version => { 
-        console.log('Checking version:', {version, dataVersion, appVersion})
-        return version > dataVersion && version <= appVersion && version != AppVersion.UNKNOWN
-      })
-      .map(versionString => { 
-        const versionMapped = VersionUtils.appVersionFromVersionString(versionString) 
-        console.log('Mapped version:', versionMapped)
-        return versionMapped
-      })
-      .sort(VersionUtils.appVersionCompare)
+    let migrationsToRun: AppVersion[]
+    try {
+      migrationsToRun = VersionUtils.pendingMigrations(dataVersion, appVersion)
+    } catch (error) {
+      // e.g. dev builds, where versionNumber is still the '%VERSION%' placeholder
+      console.warn('Skipping migrations, invalid version:', {dataVersion, appVersion, error})
+      return
+    }
 
     if (migrationsToRun.length === 0) {
       console.log('No migrations to run.')
