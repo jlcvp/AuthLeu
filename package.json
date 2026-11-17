@@ -15,8 +15,8 @@
     "lint": "ng lint",
     "translations:check": "node ./resources/scripts/translations_complete_check.js",
     "firebase:deploy:firestore:indexes": "firebase deploy --only firestore:indexes",
-    "firebase:deploy:hosting": "ng build --prod && firebase deploy --only hosting",
-    "firebase:deploy:all": "ng build --prod && firebase deploy",
+    "firebase:deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "firebase:deploy:all": "npm run build && firebase deploy",
     "version:config": "node ./resources/scripts/version-config.js"
   },
   "private": true,
