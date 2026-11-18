@@ -19,7 +19,7 @@ npx ng test --include src/app/path/to/file.spec.ts                       # run a
 npm run translations:check   # verify every key in en.json exists in all other i18n files
 ```
 
-Test coverage is minimal: there are only `app.component.spec.ts` and `utils/version-utils.spec.ts`.
+Test coverage is minimal: there are only `app.component.spec.ts`, `utils/version-utils.spec.ts` and `services/accounts/account2fa.service.spec.ts`.
 
 ## CI requirements for PRs to `main`
 
@@ -50,9 +50,10 @@ The provider is chosen by `AppConfigService.isOfflineMode()`, which reads the `i
 ### Secret encryption
 
 - `Account2FA` holds either a plaintext `secret` or the `encryptedSecret` + `iv` + `salt` triple. Encryption is AES-GCM with a PBKDF2-derived key (`utils/crypto-utils.ts`).
-- `isLocked` means there's no valid base32 secret in memory. `lock()` and `unlock()` change the instance in place.
+- `isLocked` means there's no valid base32 secret in memory. `lock()` and `unlock()` change the instance in place. `unlock()` deletes the encrypted fields, so a decrypted account looks the same as one that was never encrypted.
 - `Account2faService.getAccounts()` decrypts accounts in memory using the stored password (storage key `_eok`).
-- `updateAccount()` and `updateAccountsBatch()` blank the plaintext `secret` before saving any account that has encrypted fields. Keep that invariant: plaintext secrets must never be saved for encrypted accounts.
+- **Saving goes through `Account2faService.toStoredAccount()`.** `addAccount`, `importAccounts`, `updateAccount` and `updateAccountsBatch` save a copy, never the caller's object. While encryption is active (`encryptionActive` plus a stored key), that copy is always encrypted. A plaintext secret is never saved next to its ciphertext.
+- Don't save through the providers directly. The one exception is `decryptAccounts()`, which saves plaintext on purpose while turning encryption off. It runs while encryption is still flagged active, so going through the facade would re-encrypt the secrets.
 - Use `account.copy()` before changing accounts that came from the observable.
 - `home/password.service.ts` handles password setup, the unlock prompt, and the weekly password check.
 
