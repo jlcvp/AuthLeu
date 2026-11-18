@@ -1,6 +1,10 @@
 import { Observable } from "rxjs";
 import { CryptoUtils } from "../utils/crypto-utils";
 import { Secret } from 'otpauth'
+
+/** Hash algorithms supported for code generation, as listed in the Key URI format */
+export const SUPPORTED_ALGORITHMS = ['SHA1', 'SHA256', 'SHA512'];
+
 export interface IAccount2FA {
     id: string;
     label: string;
@@ -43,9 +47,10 @@ export class Account2FA implements IAccount2FA {
         this.id = id;
         this.label = label;
         this.secret = secret || '';
-        this.tokenLength = tokenLength || 6;
-        this.interval = interval || 30;
-        this.algorithm = algorithm || 'SHA1';
+        // form inputs and older records may hold these numbers as strings
+        this.tokenLength = Number(tokenLength) || 6;
+        this.interval = Number(interval) || 30;
+        this.algorithm = (algorithm || 'SHA1').toUpperCase();
         this.issuer = issuer;
         this.active = active;
         this.logo = logo;
@@ -102,7 +107,10 @@ export class Account2FA implements IAccount2FA {
         }
 
         const issuer = params.get('issuer') ?? undefined;
-        const algorithm = params.get('algorithm') ?? 'SHA1';
+        const algorithm = (params.get('algorithm') ?? 'SHA1').toUpperCase();
+        if (!SUPPORTED_ALGORITHMS.includes(algorithm)) {
+            throw new Error('Unsupported algorithm');
+        }
         const tokenLength = params.get('digits') ? parseInt(params.get('digits')!) : undefined;
         const interval = params.get('period') ? parseInt(params.get('period')!) : undefined;
 

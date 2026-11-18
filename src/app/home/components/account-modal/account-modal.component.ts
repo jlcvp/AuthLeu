@@ -4,7 +4,7 @@ import { AlertController, LoadingController, ModalController, SearchbarCustomEve
 import { TranslateService } from '@ngx-translate/core';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { firstValueFrom } from 'rxjs';
-import { Account2FA } from 'src/app/models/account2FA.model';
+import { Account2FA, SUPPORTED_ALGORITHMS } from 'src/app/models/account2FA.model';
 import { LogoService } from 'src/app/services/logo.service';
 
 @Component({
@@ -20,6 +20,7 @@ export class AccountModalComponent implements OnInit {
   draftLogoURL = '';
   draftLogoSearchTxt = '';
   searchLogoResults: string[] = [];
+  readonly algorithms = SUPPORTED_ALGORITHMS;
 
   qrScannerOpts: ScannerQRCodeConfig = {
     isBeep: false,
@@ -60,6 +61,7 @@ export class AccountModalComponent implements OnInit {
         Validators.required,
         Validators.pattern('^[1-9]+[0-9]*$')
       ])),
+      algorithm: new FormControl('SHA1', Validators.required),
     });
   }
 
@@ -198,6 +200,7 @@ export class AccountModalComponent implements OnInit {
       this.validations_form.controls['secret'].setValue(account.secret)
       this.validations_form.controls['tokenLength'].setValue(account.tokenLength)
       this.validations_form.controls['interval'].setValue(account.interval)
+      this.validations_form.controls['algorithm'].setValue(account.algorithm)
       // service name inferred from issuer or label
       const serviceName = account.issuer || account.label.split(':')[0]
       const event = new CustomEvent('search', { detail: { value: serviceName } }) as SearchbarCustomEvent

@@ -45,6 +45,7 @@
   },
   "ADD_ACCOUNT_MODAL": {
     "ADDING_ACCOUNT": "Adding account...",
+    "ALGORITHM": "Algorithm",
     "ERROR_MSGS": {
       "ERROR_ADDING_ACCOUNT": "Error adding account",
       "ERROR_CAMERA_HEADER": "Camera unavailable",

@@ -45,6 +45,7 @@
   },
   "ADD_ACCOUNT_MODAL": {
     "ADDING_ACCOUNT": "Adicionando conta...",
+    "ALGORITHM": "Algoritmo",
     "ERROR_MSGS": {
       "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
       "ERROR_CAMERA_HEADER": "Câmera não disponível",

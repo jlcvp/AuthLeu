@@ -19,7 +19,7 @@ npx ng test --include src/app/path/to/file.spec.ts                       # run a
 npm run translations:check   # verify every key in en.json exists in all other i18n files
 ```
 
-Test coverage is minimal: there are only `app.component.spec.ts`, `utils/version-utils.spec.ts` and `services/accounts/account2fa.service.spec.ts`.
+Test coverage is thin. Specs sit next to their sources (`*.spec.ts`), and most cover models and services. `OtpService` is checked against the RFC 6238 test vectors.
 
 ## CI requirements for PRs to `main`
 

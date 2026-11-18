@@ -114,7 +114,13 @@ export class AccountDetailComponent {
   updateCode() {
     if(this.account) {
       console.log("generating new code")
-      this.token = this.otpService.generateTOTP(this.account.secret, this.account.interval)
+      try {
+        this.token = this.otpService.generateTOTP(this.account)
+      } catch (error) {
+        // e.g. an imported account with an unsupported algorithm: never show a code that may be wrong
+        console.error("Error generating code", error)
+        this.token = '-'.repeat(this.account.tokenLength)
+      }
     }
   }
 
