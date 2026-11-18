@@ -63,7 +63,7 @@ The provider is chosen by `AppConfigService.isOfflineMode()`, which reads the `i
 1. Add the version to the `AppVersion` enum (`models/app-version.enum.ts`).
 2. Add a `case` in `runMigration`, along with a `migrateToVx_y_z()` method.
 
-Migrations run for enum versions where `stored data_version < version <= app version`. `VersionUtils.pendingMigrations` selects them using a numeric semver comparison and is covered by `version-utils.spec.ts`. If the app version isn't valid semver (e.g. the dev `%VERSION%` placeholder), migrations are skipped.
+Migrations run for enum versions where `stored data_version < version <= app version`. `VersionUtils.pendingMigrations` selects them using a numeric semver comparison and is covered by `version-utils.spec.ts`. If the app version isn't valid semver (e.g. the dev `%VERSION%` placeholder), migrations are skipped. If a migration throws, `migrate()` logs the error and stops. `data_version` stays at the last successful migration, so the remaining ones run again on the next launch. Write migrations so they're safe to run more than once.
 
 ### Logos
 

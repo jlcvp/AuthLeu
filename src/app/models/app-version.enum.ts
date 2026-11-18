@@ -9,6 +9,7 @@ export enum AppVersion {
     V2_0_0 = '2.0.0',
     V2_1_0 = '2.1.0',
     V2_2_0 = '2.2.0',
+    V3_0_0 = '3.0.0',
 }
 
 export interface AppVersionInfo {

@@ -34,7 +34,8 @@ describe('VersionUtils', () => {
 
         it('returns only the migrations newer than the data version', () => {
             expect(VersionUtils.pendingMigrations('2.1.0', '2.2.3')).toEqual([AppVersion.V2_2_0])
-            expect(VersionUtils.pendingMigrations('2.2.0', '3.0.0')).toEqual([])
+            expect(VersionUtils.pendingMigrations('2.2.0', '3.0.0')).toEqual([AppVersion.V3_0_0])
+            expect(VersionUtils.pendingMigrations('3.0.0', '3.0.0')).toEqual([])
         })
 
         it('does not run migrations newer than the app version', () => {
@@ -43,7 +44,7 @@ describe('VersionUtils', () => {
 
         it('compares versions numerically rather than lexically', () => {
             // as strings, '2.2.0' > '10.0.0', so this migration used to be skipped
-            expect(VersionUtils.pendingMigrations('2.1.0', '10.0.0')).toEqual([AppVersion.V2_2_0])
+            expect(VersionUtils.pendingMigrations('2.1.0', '10.0.0')).toEqual([AppVersion.V2_2_0, AppVersion.V3_0_0])
         })
 
         it('throws when the app version is not semver', () => {
