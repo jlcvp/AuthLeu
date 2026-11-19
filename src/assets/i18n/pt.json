@@ -105,6 +105,8 @@
     "ERRORS": {
       "ACCOUNTS_LOCKED": "Suas contas estão criptografadas. Não será possível gerar os códigos de acesso até que eles sejam descriptografados usando a senha de criptografia.",
       "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
+      "DECRYPTION_FAILED": "Não foi possível descriptografar suas contas. A criptografia continua ativada.",
+      "ENCRYPTION_FAILED": "Não foi possível criptografar suas contas. A criptografia continua desativada.",
       "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
       "PASSWORD_NOT_SET_TITLE": "Atenção",
       "INVALID_PASSWORD": "Senha inválida"

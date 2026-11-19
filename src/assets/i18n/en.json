@@ -105,6 +105,8 @@
     "ERRORS": {
       "ACCOUNTS_LOCKED": "Your accounts are encrypted. You won't be able to view the codes until they are decrypted using the encryption password.",
       "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
+      "DECRYPTION_FAILED": "Unable to decrypt your accounts. Encryption is still on.",
+      "ENCRYPTION_FAILED": "Unable to encrypt your accounts. Encryption is still off.",
       "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
       "PASSWORD_NOT_SET_TITLE": "Warning",
       "INVALID_PASSWORD": "Invalid password"

@@ -114,9 +114,20 @@ export class HomePage implements OnInit {
 
     const message = await firstValueFrom(this.translateService.get('HOME.LOGGING_OUT'))
     await this.presentLoading(message)
-    await this.accountsService.clearCache()
-    await this.authService.logout()
-    await this.storageService.clearStorage()
+    // Run every step even if one fails (e.g. clearing the Firestore cache while another tab uses it),
+    // so a single failure can't leave the session or the local data behind
+    const steps = [
+      () => this.accountsService.clearCache(),
+      () => this.authService.logout(),
+      () => this.storageService.clearStorage(),
+    ]
+    for (const step of steps) {
+      try {
+        await step()
+      } catch (error) {
+        console.error("Error signing out", error)
+      }
+    }
     //reload window
     await this.dismissLoading()
     await this.navCtrl.navigateRoot('/').then(() => {
@@ -505,27 +516,39 @@ export class HomePage implements OnInit {
   private async activateEncryption(): Promise<void> {
     const success = await this.passwordService.setupNewPassword()
     if(!success) {
-      this.setEncryptionActive(false)
+      await this.setEncryptionActive(false)
       return
     }
     try {
       await this.accountsService.encryptAccounts()
     } catch (error) {
       console.error("Error encrypting accounts", error)
+      // the accounts are saved in a single write, so none were encrypted: forget the new password
+      await this.configService.clearEncryptionKey()
+      const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ENCRYPTION_FAILED'))
+      await this.showAlert(message)
       return
     }
     console.log("accounts encrypted")
-    this.setEncryptionActive(true)
+    await this.setEncryptionActive(true)
   }
 
   private async deactivateEncryption() {
     const password = await this.configService.getEncryptionKey()
     if(password) {
-      await this.accountsService.decryptAccounts()
+      try {
+        await this.accountsService.decryptAccounts()
+      } catch (error) {
+        console.error("Error decrypting accounts", error)
+        // the accounts are saved in a single write, so none were decrypted: keep encryption on
+        const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.DECRYPTION_FAILED'))
+        await this.showAlert(message)
+        return
+      }
       console.log("accounts decrypted")
     }
     await this.configService.clearEncryptionKey()
-    this.setEncryptionActive(false)
+    await this.setEncryptionActive(false)
   }
 
   private async setEncryptionActive(active: boolean) {
