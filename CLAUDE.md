@@ -14,17 +14,18 @@ npm run build                # production build -> www/ (environment.prod.ts, Fi
 npm run build:githubpages    # GitHub Pages build (environment.githubpages.ts, offline env, relative base href)
 npm run lint                 # angular-eslint over src/**/*.ts and src/**/*.html
 npm test                     # Karma + Jasmine in Chrome, watch mode
-npx ng test --watch=false --browsers=ChromeHeadless                      # single headless run
-npx ng test --include src/app/path/to/file.spec.ts                       # run a single spec file
+npm run test:ci              # single headless run, as in CI
+npx ng test --watch=false --browsers=ChromeHeadless --include src/app/path/to/file.spec.ts   # run a single spec file
 npm run translations:check   # verify every key in en.json exists in all other i18n files
 ```
 
 Test coverage is thin. Specs sit next to their sources (`*.spec.ts`), and most cover models and services. `OtpService` is checked against the RFC 6238 test vectors.
 
-## CI requirements for PRs to `main`
+## CI
 
-- **The `package.json` version must be bumped.** The version-check workflow fails otherwise.
-- **`npm run translations:check` must pass.** Any key added to `src/assets/i18n/en.json` must also be added to `pt.json` (and to any other locale file).
+- **Every pull request** (and every push to `main`) runs the `CI` workflow (`.github/workflows/ci.yml`): `npm ci`, lint, `npm run test:ci`, and both production builds.
+- **PRs to `main` must also bump the `package.json` version;** the version-check workflow fails otherwise.
+- **PRs to `main` must also pass `npm run translations:check`.** Any key added to `src/assets/i18n/en.json` must also be added to `pt.json` (and to any other locale file).
 - Pushing to `main` deploys to both GitHub Pages and Firebase Hosting (project `authleu`). PRs from the same repo get a Firebase preview channel.
 
 ## Build-time version injection (gotcha)
