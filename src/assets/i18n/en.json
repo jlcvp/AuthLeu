@@ -110,6 +110,7 @@
       "ENCRYPTION_FAILED": "Unable to encrypt your accounts. Encryption is still off.",
       "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
       "PASSWORD_NOT_SET_TITLE": "Warning",
+      "SYNC_FAILED": "Unable to sync with the cloud, so your accounts may be out of date. Trying again…",
       "INVALID_PASSWORD": "Invalid password"
     },
     "LOADING_ACCOUNTS": "Loading accounts...",

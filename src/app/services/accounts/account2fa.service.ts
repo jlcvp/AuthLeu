@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Account2FA, IAccount2FAProvider } from '../../models/account2FA.model';
-import { firstValueFrom, mergeMap, Observable } from 'rxjs';
+import { firstValueFrom, mergeMap, Observable, of } from 'rxjs';
 import { RemoteAccount2faService } from './remote-account2fa.service';
 import { LocalAccount2faService } from './local-account2fa.service';
 import { AppConfigService } from '../app-config.service';
@@ -114,6 +114,14 @@ export class Account2faService {
     if (this.service.clearCache) {
       await this.service.clearCache()
     }
+  }
+
+  /**
+   * The error that currently prevents the accounts from syncing with the cloud,
+   * or undefined while they sync (always undefined in offline mode).
+   */
+  get syncError$(): Observable<unknown> {
+    return this.service.syncError$ ?? of(undefined)
   }
 
   /**

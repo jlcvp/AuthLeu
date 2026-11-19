@@ -1,6 +1,6 @@
 import { AlertController, LoadingController, ModalController, NavController, ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { Account2faService } from '../services/accounts/account2fa.service';
 import { AppConfigService } from '../services/app-config.service';
 import { AuthenticationService } from '../services/authentication.service';
@@ -22,10 +22,13 @@ describe('HomePage', () => {
   let configService: jasmine.SpyObj<AppConfigService>
   let passwordService: jasmine.SpyObj<PasswordService>
   let alerts: (string | undefined)[] // messages of the alerts shown
+  let syncError$: BehaviorSubject<unknown>
+  let toastController: jasmine.SpyObj<ToastController>
   let page: HomePage
 
   beforeEach(() => {
-    accountsService = jasmine.createSpyObj<Account2faService>('Account2faService', ['clearCache', 'encryptAccounts', 'decryptAccounts'])
+    syncError$ = new BehaviorSubject<unknown>(undefined)
+    accountsService = jasmine.createSpyObj<Account2faService>('Account2faService', ['clearCache', 'encryptAccounts', 'decryptAccounts'], { syncError$ })
     authService = jasmine.createSpyObj<AuthenticationService>('AuthenticationService', ['logout'])
     storageService = jasmine.createSpyObj<LocalStorageService>('LocalStorageService', ['clearStorage'])
     configService = jasmine.createSpyObj<AppConfigService>('AppConfigService', ['getEncryptionKey', 'clearEncryptionKey', 'setEncryptionOptions'], { versionInfo: undefined })
@@ -51,12 +54,14 @@ describe('HomePage', () => {
     // signing out ends by reloading the window, which would reload the test runner: stop before that
     const navController = { navigateRoot: () => Promise.reject(new Error('stopped before reloading')) }
     const translateService = { get: (key: string) => of(key) }
+    toastController = jasmine.createSpyObj<ToastController>('ToastController', ['create'])
+    toastController.create.and.resolveTo({ present: async () => undefined } as HTMLIonToastElement)
 
     page = new HomePage(
       authService,
       accountsService,
       loadingController as unknown as LoadingController,
-      {} as ToastController,
+      toastController,
       alertController as unknown as AlertController,
       {} as ModalController,
       storageService,
@@ -105,6 +110,21 @@ describe('HomePage', () => {
       expect(configService.clearEncryptionKey).not.toHaveBeenCalled()
       expect(page.isEncryptionActive).toBeTrue()
       expect(alerts).toEqual(['HOME.ERRORS.DECRYPTION_FAILED'])
+    })
+  })
+
+  describe('sync errors', () => {
+    it('tells the user once each time syncing starts failing', async () => {
+      page['watchSyncErrors']()
+
+      syncError$.next(new Error('permission-denied'))
+      syncError$.next(new Error('permission-denied')) // a retry fails too
+      syncError$.next(undefined) // synced again
+      syncError$.next(new Error('permission-denied'))
+      await new Promise(resolve => setTimeout(resolve)) // the toasts are created asynchronously
+
+      expect(toastController.create).toHaveBeenCalledTimes(2)
+      expect(toastController.create.calls.mostRecent().args[0]?.message).toBe('HOME.ERRORS.SYNC_FAILED')
     })
   })
 });

@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
 import { AlertController, IonPopover, LoadingController, ModalController, NavController, SearchbarCustomEvent, ToastController } from '@ionic/angular';
-import { firstValueFrom, Observable, tap } from 'rxjs';
+import { distinctUntilChanged, filter, firstValueFrom, map, Observable, tap } from 'rxjs';
 import { Account2FA } from '../models/account2FA.model';
 import { Account2faService } from '../services/accounts/account2fa.service';
 import { LocalStorageService } from '../services/local-storage.service';
@@ -103,6 +103,7 @@ export class HomePage implements OnInit {
     GlobalUtils.hideSplashScreen()
     await this.setupEncryption()
     await this.loadAccounts()
+    this.watchSyncErrors()
     await this.configService.setFirstRun(false)
   }
 
@@ -469,6 +470,25 @@ export class HomePage implements OnInit {
     await this.dismissLoading()
      
     this.accounts$ = accounts$
+  }
+
+  /** Tells the user each time syncing with the cloud starts failing (once, not on every retry) */
+  private watchSyncErrors() {
+    this.accountsService.syncError$.pipe(
+      map(error => !!error),
+      distinctUntilChanged(),
+      filter(failing => failing),
+    ).subscribe(() => this.showSyncErrorToast())
+  }
+
+  private async showSyncErrorToast() {
+    const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.SYNC_FAILED'))
+    const toast = await this.toastController.create({
+      message,
+      color: 'warning',
+      duration: 5000
+    })
+    await toast.present()
   }
 
   private async setupEncryption(): Promise<void> {

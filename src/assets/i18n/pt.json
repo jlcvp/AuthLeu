@@ -110,6 +110,7 @@
       "ENCRYPTION_FAILED": "Não foi possível criptografar suas contas. A criptografia continua desativada.",
       "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
       "PASSWORD_NOT_SET_TITLE": "Atenção",
+      "SYNC_FAILED": "Não foi possível sincronizar com a nuvem, então suas contas podem estar desatualizadas. Tentando novamente…",
       "INVALID_PASSWORD": "Senha inválida"
     },
     "LOADING_ACCOUNTS": "Carregando contas...",

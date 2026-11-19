@@ -27,6 +27,8 @@ export interface IAccount2FAProvider {
     updateAccount(account: Account2FA): Promise<void>;
     updateAccountsBatch(accounts: Account2FA[]): Promise<void>;
     clearCache?(): Promise<void>;
+    /** The error that currently prevents the accounts from syncing, or undefined while they sync */
+    syncError$?: Observable<unknown>;
 }
 
 export class Account2FA implements IAccount2FA {

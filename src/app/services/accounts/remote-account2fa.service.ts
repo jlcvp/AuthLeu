@@ -1,29 +1,31 @@
 import { inject, Injectable } from '@angular/core';
-import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { Account2FA, IAccount2FAProvider } from '../../models/account2FA.model';
+import { BehaviorSubject, map, Observable, retry, Subscription, tap, timer } from 'rxjs';
 import { AuthenticationService } from '../authentication.service';
-import { clearIndexedDbPersistence, collection, collectionData, doc, Firestore, orderBy, query, runTransaction, serverTimestamp, setDoc, terminate, where } from '@angular/fire/firestore';
+import { clearIndexedDbPersistence, collection, collectionData, doc, DocumentData, Firestore, orderBy, query, runTransaction, serverTimestamp, setDoc, terminate, where } from '@angular/fire/firestore';
 import { LocalAccount2faService } from './local-account2fa.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RemoteAccount2faService implements IAccount2FAProvider {
-  private loaded = false
+  private loading?: Promise<void>
   private firestore: Firestore = inject(Firestore)
-  private remoteAccounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
-  private localAccounts$: Observable<Account2FA[]> = new Observable<Account2FA[]>();
   private accountsSubject: BehaviorSubject<Account2FA[]> = new BehaviorSubject<Account2FA[]>([]);
   private accounts$: Observable<Account2FA[]>
+  private syncErrorSubject = new BehaviorSubject<unknown>(undefined)
+  private subscriptions: Subscription[] = []
+
+  /** The error that currently prevents the accounts from syncing, or undefined while they sync */
+  readonly syncError$ = this.syncErrorSubject.asObservable()
 
   constructor(private authService: AuthenticationService, private localAccountService: LocalAccount2faService) {
     this.accounts$ = this.accountsSubject.asObservable()
   }
 
   async getAccounts(): Promise<Observable<Account2FA[]>> {
-    if(!this.loaded) {
-      await this.loadAccounts()
-    }
+    this.loading ??= this.loadAccounts() // load only once, even for concurrent calls
+    await this.loading
     return this.accounts$
   }
 
@@ -65,56 +67,77 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
   }
 
   public async clearCache() {
+    // stop listening first: once Firestore is terminated, the listeners would fail and keep retrying
+    this.subscriptions.forEach(subscription => subscription.unsubscribe())
+    this.subscriptions = []
     await terminate(this.firestore)
     await clearIndexedDbPersistence(this.firestore)
   }
 
   private async loadAccounts() {
     try {
-      this.localAccounts$ = await this.localAccountService.getAccounts()
-      
-      // all updates will go through the local service, 
-      // but let's wait a bit before exitting this function to give a chance for the remote service to have a value before emitting the first value
-      this.localAccounts$.subscribe(accounts => {
-        // forward to the main accountsSubject
+      // all updates go through the local service, which keeps a copy of the remote accounts
+      const localAccounts$ = await this.localAccountService.getAccounts()
+      this.subscriptions.push(localAccounts$.subscribe(accounts => {
         console.log("emmiting:", {accounts})
         this.accountsSubject.next(accounts)
-      })
-      // start a timeout to give a chance for the remote service to load
-      const timeoutPromise = new Promise<'timeout'>((resolve) => { setTimeout(resolve, 2500, "timeout")});
-      
-      const remoteLoadPromise = this.loadRemoteAccounts() // load remote accounts
-      // race the two promises
-      const race = await Promise.race([remoteLoadPromise, timeoutPromise])
-      console.log("Race won by: ", race || 'remoteLoadPromise')
-
+      }))
     } catch (error) {
-      console.error('Failed to load remote accounts', {error})
+      console.error('Failed to load local accounts', {error})
     }
-    // delay a little bit more before resolving to let the local service settle the first value
-    // await new Promise((resolve, _) => { setTimeout(resolve, 500)});
+
+    try {
+      await this.syncRemoteAccounts()
+    } catch (error) {
+      console.error('Failed to sync remote accounts', {error})
+      this.syncErrorSubject.next(error)
+    }
     console.log("Loaded accounts")
-    this.loaded = true
   }
 
-  private async loadRemoteAccounts() {
+  private async syncRemoteAccounts() {
     const userId = await this.authService.getCurrentUserId()
     if(!userId) {
       throw new Error('INVALID_SESSION')
     }
 
-    const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
-
-    // by default, order by added date
-    const q = query(accountCollection, orderBy('added', 'asc'), where('active', '==', true))
-    this.remoteAccounts$ = collectionData(q).pipe(map(accounts => {
-        return accounts.map(account => Account2FA.fromDictionary(account as IAccount2FA)) 
+    // keep the local copy in sync with the remote accounts. A listener stops at its first error,
+    // so report it and listen again after a delay that grows while the errors continue
+    this.subscriptions.push(this.listenToAccounts(userId).pipe(
+      map(documents => this.readAccounts(documents)),
+      tap({ error: error => {
+        console.error('Failed to sync remote accounts', {error})
+        this.syncErrorSubject.next(error)
+      } }),
+      retry({
+        delay: (_error, retryCount) => timer(Math.min(5000 * 2 ** (retryCount - 1), 5 * 60 * 1000)),
+        resetOnSuccess: true,
+      }),
+    ).subscribe(accounts => {
+      this.syncErrorSubject.next(undefined)
+      this.localAccountService.updateAccountsBatch(accounts, true).catch(error => {
+        console.error('Failed to save synced accounts', {error})
+      })
     }))
+  }
 
-    // router all updates to the local service, replacing existing accounts
-    this.remoteAccounts$.subscribe(accounts => {
-      this.localAccountService.updateAccountsBatch(accounts, true)
-    })
+  /** Listens to the user's active accounts, ordered by the date they were added */
+  protected listenToAccounts(userId: string): Observable<DocumentData[]> {
+    const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
+    return collectionData(query(accountCollection, orderBy('added', 'asc'), where('active', '==', true)))
+  }
+
+  /** Reads the accounts in the given documents, skipping the ones that aren't valid accounts */
+  private readAccounts(documents: DocumentData[]): Account2FA[] {
+    const accounts: Account2FA[] = []
+    for (const document of documents) {
+      try {
+        accounts.push(Account2FA.fromDictionary(document))
+      } catch (error) {
+        console.error('Skipping an invalid synced account', {error})
+      }
+    }
+    return accounts
   }
 
   private createId(): string {
