@@ -56,7 +56,7 @@ export class LocalAccount2faService implements IAccount2FAProvider {
         this.updateAccountData(account)
       }
     }
-    this.persistAccounts()
+    await this.persistAccounts()
     this.accountsSubject.next(this.accounts)
   }
 
