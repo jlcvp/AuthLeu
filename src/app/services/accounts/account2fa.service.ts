@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/account2FA.model';
+import { Account2FA, IAccount2FAProvider } from '../../models/account2FA.model';
 import { firstValueFrom, mergeMap, Observable } from 'rxjs';
 import { RemoteAccount2faService } from './remote-account2fa.service';
 import { LocalAccount2faService } from './local-account2fa.service';
@@ -178,39 +178,42 @@ export class Account2faService {
           }
 
           // check if file is a valid json
+          let accounts: Account2FA[]
           try {
-            const anyArray = JSON.parse(data)
-            if (!Array.isArray(anyArray)) {
+            const accountsDict = JSON.parse(data)
+            if (!Array.isArray(accountsDict)) {
               throw new Error('Not an array')
             }
-
-            const accountsDict = JSON.parse(data) as IAccount2FA[]
-            const accounts = accountsDict.map(a => Account2FA.fromDictionary(a))
-            
-            // load logo images
-            const promises: Promise<void>[] = []
-
-            for (const account of accounts) {
-              if (account.logo && account.logo.startsWith('http')) {
-                const logo = account.logo
-                const p = new Promise<void>(async (resolve) => {
-                  try {
-                    account.logo = await this.logoService.downloadImageAsBase64(logo)
-                  } catch (error) {
-                    console.warn('Error downloading logo (Using original URL instead)', error)
-                  }
-                  resolve()
-                })
-                promises.push(p)
-              }
-            }
-
-            await Promise.all(promises)
-            resolve(accounts)
+            accounts = accountsDict.map(a => Account2FA.fromDictionary(a))
           } catch (error) {
             console.error('Error parsing backup file', { error })
             throw new Error('ACCOUNT_SYNC.ERROR.CORRUPT_BACKUP_FILE')
           }
+
+          if (accounts.some(account => account.hasInvalidSecret)) {
+            throw new Error('ACCOUNT_SYNC.ERROR.INVALID_SECRET')
+          }
+
+          // load logo images
+          const promises: Promise<void>[] = []
+
+          for (const account of accounts) {
+            if (account.logo && account.logo.startsWith('http')) {
+              const logo = account.logo
+              const p = new Promise<void>(async (resolve) => {
+                try {
+                  account.logo = await this.logoService.downloadImageAsBase64(logo)
+                } catch (error) {
+                  console.warn('Error downloading logo (Using original URL instead)', error)
+                }
+                resolve()
+              })
+              promises.push(p)
+            }
+          }
+
+          await Promise.all(promises)
+          resolve(accounts)
         } catch (error) {
           reject(error)
           return

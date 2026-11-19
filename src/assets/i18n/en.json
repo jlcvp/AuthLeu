@@ -31,6 +31,7 @@
       "GENERIC_IMPORT_ERROR": "Unknown error while importing accounts from backup",
       "IMPORT_ERROR_TITLE": "Error importing accounts",
       "INVALID_PASSWORD": "The provided password could not decrypt the accounts. The import was unsuccessful.",
+      "INVALID_SECRET": "The backup has an account with an invalid secret key.",
       "NO_ACCOUNTS_SELECTED_TO_EXPORT": "You must select at least one account to export",
       "NO_ACCOUNTS_SELECTED_TO_IMPORT": "No accounts selected to import",
       "NO_PASSWORD_PROVIDED": "A password is required to decrypt the accounts"

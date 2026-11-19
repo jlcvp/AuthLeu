@@ -149,4 +149,33 @@ describe('Account2faService', () => {
       expect(stored.isEncrypted).toBeFalse()
     })
   })
+
+  describe('readAccountsFromFile', () => {
+    const backup = (accounts: unknown) => new File([JSON.stringify(accounts)], 'backup.json', { type: 'application/json' })
+
+    it('reads backups without the active flag, normalizing the secrets', async () => {
+      const accounts = await service.readAccountsFromFile(backup([{ label: 'john', secret: 'jbsw y3dp ehpk 3pxp' }]))
+
+      expect(accounts.length).toBe(1)
+      expect(accounts[0].active).toBeTrue()
+      expect(accounts[0].secret).toBe(SECRET)
+      expect(accounts[0].isLocked).toBeFalse()
+    })
+
+    it('reads encrypted accounts', async () => {
+      const accounts = await service.readAccountsFromFile(backup([await encryptedAccount()]))
+
+      expect(accounts[0].isEncrypted).toBeTrue()
+    })
+
+    it('rejects backups with a secret that is not base32', async () => {
+      await expectAsync(service.readAccountsFromFile(backup([{ label: 'john', secret: 'ABCD1890', active: true }])))
+        .toBeRejectedWithError('ACCOUNT_SYNC.ERROR.INVALID_SECRET')
+    })
+
+    it('rejects files that are not a list of accounts', async () => {
+      await expectAsync(service.readAccountsFromFile(backup({ label: 'john', secret: SECRET })))
+        .toBeRejectedWithError('ACCOUNT_SYNC.ERROR.CORRUPT_BACKUP_FILE')
+    })
+  })
 })

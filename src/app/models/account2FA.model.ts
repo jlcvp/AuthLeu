@@ -46,7 +46,8 @@ export class Account2FA implements IAccount2FA {
     constructor(id: string, label: string, secret?: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string, encryptedSecret?: string, iv?: string, salt?: string, added?: any) {  // eslint-disable-line @typescript-eslint/no-explicit-any
         this.id = id;
         this.label = label;
-        this.secret = secret || '';
+        // secrets are often shown in lowercase or split into groups (e.g. "jbsw y3dp ehpk 3pxp")
+        this.secret = (secret || '').replace(/[\s-]/g, '').toUpperCase();
         // form inputs and older records may hold these numbers as strings
         this.tokenLength = Number(tokenLength) || 6;
         this.interval = Number(interval) || 30;
@@ -66,13 +67,14 @@ export class Account2FA implements IAccount2FA {
         }
 
         // check if dict contains all required fields
-        if(!dict.label || (!dict.secret && !(dict.encryptedSecret && dict.salt && dict.iv) || dict.active == undefined)) {
+        if(!dict.label || (!dict.secret && !(dict.encryptedSecret && dict.salt && dict.iv))) {
             console.log({dict})
             throw new Error('Missing required fields');
         }
-        
+
         const data = dict as IAccount2FA;
-        return new Account2FA(data.id || '', data.label, data.secret, data.tokenLength, data.interval, data.algorithm, data.issuer, data.active, data.logo, data.encryptedSecret, data.iv, data.salt, data.added);
+        // backups from other apps have no active flag
+        return new Account2FA(data.id || '', data.label, data.secret, data.tokenLength, data.interval, data.algorithm, data.issuer, data.active ?? true, data.logo, data.encryptedSecret, data.iv, data.salt, data.added);
     }
 
     static fromOTPAuthURL(url: string): Account2FA {
@@ -114,7 +116,11 @@ export class Account2FA implements IAccount2FA {
         const tokenLength = params.get('digits') ? parseInt(params.get('digits')!) : undefined;
         const interval = params.get('period') ? parseInt(params.get('period')!) : undefined;
 
-        return new Account2FA('', label, secret, tokenLength, interval, algorithm, issuer);
+        const account = new Account2FA('', label, secret, tokenLength, interval, algorithm, issuer);
+        if (account.hasInvalidSecret) {
+            throw new Error('Invalid secret key');
+        }
+        return account;
     }
 
     get isLocked(): boolean {
@@ -127,6 +133,14 @@ export class Account2FA implements IAccount2FA {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Whether the account has a plaintext secret that can't generate codes (it isn't valid base32).
+     * Such an account would otherwise look locked forever.
+     */
+    get hasInvalidSecret(): boolean {
+        return !!this.secret && this.isLocked;
     }
 
     get isEncrypted(): boolean {

@@ -31,6 +31,7 @@
       "GENERIC_IMPORT_ERROR": "Erro desconhecido ao importar contas do backup",
       "IMPORT_ERROR_TITLE": "Erro ao importar contas",
       "INVALID_PASSWORD": "Não foi possível decodificar as contas com a senha informada. A importação de contas foi abortada.",
+      "INVALID_SECRET": "O backup tem uma conta com uma chave secreta inválida.",
       "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar",
       "NO_ACCOUNTS_SELECTED_TO_IMPORT": "Nenhuma conta selecionada para importar",
       "NO_PASSWORD_PROVIDED": "É necessário informar uma senha para desencriptar as contas"
