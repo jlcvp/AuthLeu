@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-AuthLeu is an open-source TOTP 2FA authenticator (an Authy / Google Authenticator alternative). It's an Ionic 8 + Angular 18 app that ships mainly as a PWA. It can sync accounts through Firebase (Auth + Firestore) or run fully offline using local storage. Capacitor is configured, but there are no native platform projects in the repo.
+AuthLeu is an open-source TOTP 2FA authenticator (an Authy / Google Authenticator alternative). It's an Ionic 8 + Angular 18 app that ships only as a PWA; there's no native build, and Capacitor was removed in 3.0. It can sync accounts through Firebase (Auth + Firestore) or run fully offline using local storage.
 
 ## Commands
 
