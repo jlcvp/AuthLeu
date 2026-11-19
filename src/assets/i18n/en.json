@@ -27,6 +27,7 @@
     "ERROR": {
       "CORRUPT_BACKUP_FILE": "Corrupted backup file",
       "EMPTY_FILE": "The file is empty",
+      "GENERIC_EXPORT_ERROR": "Unknown error while exporting accounts",
       "GENERIC_IMPORT_ERROR": "Unknown error while importing accounts from backup",
       "IMPORT_ERROR_TITLE": "Error importing accounts",
       "INVALID_PASSWORD": "The provided password could not decrypt the accounts. The import was unsuccessful.",
@@ -45,6 +46,7 @@
   },
   "ADD_ACCOUNT_MODAL": {
     "ADDING_ACCOUNT": "Adding account...",
+    "ALGORITHM": "Algorithm",
     "ERROR_MSGS": {
       "ERROR_ADDING_ACCOUNT": "Error adding account",
       "ERROR_CAMERA_HEADER": "Camera unavailable",
@@ -103,6 +105,8 @@
     "ERRORS": {
       "ACCOUNTS_LOCKED": "Your accounts are encrypted. You won't be able to view the codes until they are decrypted using the encryption password.",
       "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
+      "DECRYPTION_FAILED": "Unable to decrypt your accounts. Encryption is still on.",
+      "ENCRYPTION_FAILED": "Unable to encrypt your accounts. Encryption is still off.",
       "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
       "PASSWORD_NOT_SET_TITLE": "Warning",
       "INVALID_PASSWORD": "Invalid password"

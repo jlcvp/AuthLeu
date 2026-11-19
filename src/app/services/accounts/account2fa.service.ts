@@ -37,8 +37,18 @@ export class Account2faService {
     }
   }
 
+  /**
+   * Adds a new account, encrypting its secret if encryption is active.
+   * The given account keeps its plaintext secret and receives the new id.
+   *
+   * @param account - The account to add.
+   * @returns A promise that resolves with the id of the new account.
+   */
   public async addAccount(account: Account2FA): Promise<string> {
-    return this.service.addAccount(account)
+    const encryptionKey = await this.getActiveEncryptionKey()
+    const id = await this.service.addAccount(await this.toStoredAccount(account, encryptionKey))
+    account.id = id
+    return id
   }
 
   /**
@@ -78,31 +88,26 @@ export class Account2faService {
   }
 
   /**
-   * Updates an existing account with new information.
-   * 
+   * Updates an existing account with new information, encrypting its secret if encryption is active.
+   *
    * @param account - The account object containing updated information.
    * @returns A promise that resolves when the account has been updated.
    */
   public async updateAccount(account: Account2FA) {
-    if (account.secret && account.encryptedSecret && account.iv && account.salt) {
-      account.secret = '' // clear decoded secret for encrypted accounts
-    }
-    return this.service.updateAccount(account)
+    const encryptionKey = await this.getActiveEncryptionKey()
+    return this.service.updateAccount(await this.toStoredAccount(account, encryptionKey))
   }
 
   /**
-   * Updates multiple accounts with new information.
-   * 
+   * Updates multiple accounts with new information, encrypting their secrets if encryption is active.
+   *
    * @param accounts - The array of account objects containing updated information.
    * @returns A promise that resolves when the accounts have been updated.
    */
   public async updateAccountsBatch(accounts: Account2FA[]) {
-    for (const account of accounts) {
-      if (account.secret && account.encryptedSecret && account.iv && account.salt) {
-        account.secret = '' // clear decoded secret for encrypted accounts
-      }
-    }
-    return this.service.updateAccountsBatch(accounts)
+    const encryptionKey = await this.getActiveEncryptionKey()
+    const storedAccounts = await Promise.all(accounts.map(account => this.toStoredAccount(account, encryptionKey)))
+    return this.service.updateAccountsBatch(storedAccounts)
   }
 
   public async clearCache() {
@@ -148,15 +153,11 @@ export class Account2faService {
   }
 
   /**
-   * Adds the given accounts to the account provider.
+   * Adds the given accounts to the account provider, encrypting their secrets if encryption is active.
    * @param accounts - The array of accounts to import.
    */
   public async importAccounts(accounts: Account2FA[]) {
-    const password = await this.appConfig.getEncryptionKey()
     for (const account of accounts) {
-        if (password && !account.isLocked) {    
-          await account.lock(password)
-        }
         await this.addAccount(account)
     }
   }
@@ -234,6 +235,10 @@ export class Account2faService {
       }
     }
 
+    if (encryptions.length === 0) {
+      return // nothing to encrypt
+    }
+
     await Promise.all(encryptions)
     await this.updateAccountsBatch(accounts)
   }
@@ -256,6 +261,36 @@ export class Account2faService {
     }
 
     await Promise.all(decryptions)
-    await this.updateAccountsBatch(accounts)
+    // Write through the provider directly: encryption is still active at this point,
+    // and updateAccountsBatch would encrypt the secrets again
+    await this.service.updateAccountsBatch(accounts)
+  }
+
+  /**
+   * Gets the encryption key, if encryption is active.
+   * @returns The encryption key, or undefined if encryption is inactive or no key is set.
+   */
+  private async getActiveEncryptionKey(): Promise<string | undefined> {
+    const { encryptionActive } = await this.appConfig.getEncryptionOptions()
+    return encryptionActive ? await this.appConfig.getEncryptionKey() : undefined
+  }
+
+  /**
+   * Creates the copy of an account that gets persisted, so the given account is never modified.
+   * With an encryption key, the copy's secret is always encrypted. A plaintext secret is never
+   * persisted alongside its encrypted form.
+   *
+   * @param account - The account to persist.
+   * @param encryptionKey - The key to encrypt the secret with, if encryption is active.
+   * @returns The account copy to persist.
+   */
+  private async toStoredAccount(account: Account2FA, encryptionKey?: string): Promise<Account2FA> {
+    const storedAccount = account.copy()
+    if (encryptionKey && !storedAccount.isLocked) {
+      await storedAccount.lock(encryptionKey)
+    } else if (storedAccount.isEncrypted) {
+      storedAccount.secret = ''
+    }
+    return storedAccount
   }
 }

@@ -4,7 +4,7 @@ import { AlertController, LoadingController, ModalController, SearchbarCustomEve
 import { TranslateService } from '@ngx-translate/core';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { firstValueFrom } from 'rxjs';
-import { Account2FA } from 'src/app/models/account2FA.model';
+import { Account2FA, SUPPORTED_ALGORITHMS } from 'src/app/models/account2FA.model';
 import { LogoService } from 'src/app/services/logo.service';
 
 @Component({
@@ -20,6 +20,7 @@ export class AccountModalComponent implements OnInit {
   draftLogoURL = '';
   draftLogoSearchTxt = '';
   searchLogoResults: string[] = [];
+  readonly algorithms = SUPPORTED_ALGORITHMS;
 
   qrScannerOpts: ScannerQRCodeConfig = {
     isBeep: false,
@@ -33,6 +34,8 @@ export class AccountModalComponent implements OnInit {
   validations_form: FormGroup;
 
   private loading: HTMLIonLoadingElement | undefined = undefined
+  private scannedIssuer?: string // the form has no issuer field, so keep the one from the scanned QR code
+  private logoSearchCount = 0
 
   constructor(
     formBuilder: FormBuilder, 
@@ -60,6 +63,7 @@ export class AccountModalComponent implements OnInit {
         Validators.required,
         Validators.pattern('^[1-9]+[0-9]*$')
       ])),
+      algorithm: new FormControl('SHA1', Validators.required),
     });
   }
 
@@ -155,12 +159,20 @@ export class AccountModalComponent implements OnInit {
   async handleSearchLogo(evt: SearchbarCustomEvent) {
     const searchTerm = evt?.detail?.value
     console.log({ evt, searchTerm })
+    // searches can finish out of order, so only the latest one may update the results
+    const searchId = ++this.logoSearchCount
     if (!searchTerm) {
       this.draftLogoURL = ''
       this.searchLogoResults = []
       return
     }
-    const brandInfo = await this.logoService.searchServiceInfo(searchTerm)
+    const brandInfo = await this.logoService.searchServiceInfo(searchTerm).catch(error => {
+      console.error("Error searching logos", error)
+      return []
+    })
+    if (searchId !== this.logoSearchCount) {
+      return
+    }
     if (brandInfo && brandInfo.length > 0) {
       this.draftLogoURL = brandInfo[0].logo
       this.searchLogoResults = brandInfo.map(brand => brand.logo)
@@ -175,7 +187,7 @@ export class AccountModalComponent implements OnInit {
   async createAccount(formValues: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.log({ formValues })
     const logo = this.draftLogoURL
-    const newAccountDict = Object.assign(formValues, { logo, active: true })
+    const newAccountDict = Object.assign(formValues, { logo, active: true, issuer: this.scannedIssuer })
     try {
     const account = Account2FA.fromDictionary(newAccountDict)
     console.log({ account2fa: account })
@@ -198,6 +210,8 @@ export class AccountModalComponent implements OnInit {
       this.validations_form.controls['secret'].setValue(account.secret)
       this.validations_form.controls['tokenLength'].setValue(account.tokenLength)
       this.validations_form.controls['interval'].setValue(account.interval)
+      this.validations_form.controls['algorithm'].setValue(account.algorithm)
+      this.scannedIssuer = account.issuer
       // service name inferred from issuer or label
       const serviceName = account.issuer || account.label.split(':')[0]
       const event = new CustomEvent('search', { detail: { value: serviceName } }) as SearchbarCustomEvent

@@ -27,6 +27,7 @@
     "ERROR": {
       "CORRUPT_BACKUP_FILE": "Arquivo de backup corrompido",
       "EMPTY_FILE": "O arquivo está vazio",
+      "GENERIC_EXPORT_ERROR": "Erro desconhecido ao exportar contas",
       "GENERIC_IMPORT_ERROR": "Erro desconhecido ao importar contas do backup",
       "IMPORT_ERROR_TITLE": "Erro ao importar contas",
       "INVALID_PASSWORD": "Não foi possível decodificar as contas com a senha informada. A importação de contas foi abortada.",
@@ -45,6 +46,7 @@
   },
   "ADD_ACCOUNT_MODAL": {
     "ADDING_ACCOUNT": "Adicionando conta...",
+    "ALGORITHM": "Algoritmo",
     "ERROR_MSGS": {
       "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
       "ERROR_CAMERA_HEADER": "Câmera não disponível",
@@ -103,6 +105,8 @@
     "ERRORS": {
       "ACCOUNTS_LOCKED": "Suas contas estão criptografadas. Não será possível gerar os códigos de acesso até que eles sejam descriptografados usando a senha de criptografia.",
       "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
+      "DECRYPTION_FAILED": "Não foi possível descriptografar suas contas. A criptografia continua ativada.",
+      "ENCRYPTION_FAILED": "Não foi possível criptografar suas contas. A criptografia continua desativada.",
       "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
       "PASSWORD_NOT_SET_TITLE": "Atenção",
       "INVALID_PASSWORD": "Senha inválida"

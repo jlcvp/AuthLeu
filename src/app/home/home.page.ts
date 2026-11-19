@@ -16,6 +16,7 @@ import { AppVersionInfo } from '../models/app-version.enum';
 import { PasswordService } from './password.service';
 import { AccountModalComponent } from './components/account-modal/account-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
+import { AccountDetailComponent } from './components/account-detail/account-detail.component';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +25,7 @@ import { AboutModalComponent } from './components/about-modal/about-modal.compon
 })
 export class HomePage implements OnInit {
   @ViewChild('popover') popover!: IonPopover;
+  @ViewChild(AccountDetailComponent) accountDetail?: AccountDetailComponent;
 
   @HostListener('window:resize', ['$event'])
   onWindowResize() {
@@ -112,9 +114,20 @@ export class HomePage implements OnInit {
 
     const message = await firstValueFrom(this.translateService.get('HOME.LOGGING_OUT'))
     await this.presentLoading(message)
-    await this.accountsService.clearCache()
-    await this.authService.logout()
-    await this.storageService.clearStorage()
+    // Run every step even if one fails (e.g. clearing the Firestore cache while another tab uses it),
+    // so a single failure can't leave the session or the local data behind
+    const steps = [
+      () => this.accountsService.clearCache(),
+      () => this.authService.logout(),
+      () => this.storageService.clearStorage(),
+    ]
+    for (const step of steps) {
+      try {
+        await step()
+      } catch (error) {
+        console.error("Error signing out", error)
+      }
+    }
     //reload window
     await this.dismissLoading()
     await this.navCtrl.navigateRoot('/').then(() => {
@@ -201,8 +214,15 @@ export class HomePage implements OnInit {
       console.log("Selected accounts to export", { selectedAccounts })
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORTING_ACCOUNTS'))
       await this.presentLoading(message)
-      await this.accountsService.exportAccounts(selectedAccounts, exportWithEncryption)
-      await this.dismissLoading()
+      try {
+        await this.accountsService.exportAccounts(selectedAccounts, exportWithEncryption)
+        await this.dismissLoading()
+      } catch (error) {
+        console.error("Error exporting accounts", error)
+        await this.dismissLoading()
+        const errorMessage = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.GENERIC_EXPORT_ERROR'))
+        await this.showAlert(errorMessage)
+      }
     } else {
       console.log("No accounts selected to export")
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_EXPORT'))
@@ -300,6 +320,7 @@ export class HomePage implements OnInit {
           }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
+          await this.dismissLoading() // the loading overlay can't be dismissed by the user
           const errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
           const message = await firstValueFrom(this.translateService.get(errorKey))
           const header = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.IMPORT_ERROR_TITLE'))
@@ -495,27 +516,39 @@ export class HomePage implements OnInit {
   private async activateEncryption(): Promise<void> {
     const success = await this.passwordService.setupNewPassword()
     if(!success) {
-      this.setEncryptionActive(false)
+      await this.setEncryptionActive(false)
       return
     }
     try {
       await this.accountsService.encryptAccounts()
     } catch (error) {
       console.error("Error encrypting accounts", error)
+      // the accounts are saved in a single write, so none were encrypted: forget the new password
+      await this.configService.clearEncryptionKey()
+      const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ENCRYPTION_FAILED'))
+      await this.showAlert(message)
       return
     }
     console.log("accounts encrypted")
-    this.setEncryptionActive(true)
+    await this.setEncryptionActive(true)
   }
 
   private async deactivateEncryption() {
     const password = await this.configService.getEncryptionKey()
     if(password) {
-      await this.accountsService.decryptAccounts()
+      try {
+        await this.accountsService.decryptAccounts()
+      } catch (error) {
+        console.error("Error decrypting accounts", error)
+        // the accounts are saved in a single write, so none were decrypted: keep encryption on
+        const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.DECRYPTION_FAILED'))
+        await this.showAlert(message)
+        return
+      }
       console.log("accounts decrypted")
     }
     await this.configService.clearEncryptionKey()
-    this.setEncryptionActive(false)
+    await this.setEncryptionActive(false)
   }
 
   private async setEncryptionActive(active: boolean) {
@@ -562,6 +595,8 @@ export class HomePage implements OnInit {
         await this.configService.setLastPasswordCheck()
         await this.setEncryptionActive(true)
         this.hasLockedAccounts = false
+        // the accounts were unlocked in place, so the selected account's code must be refreshed
+        this.accountDetail?.updateCode()
       }
     }
   }

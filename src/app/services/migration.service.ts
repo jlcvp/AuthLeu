@@ -28,17 +28,14 @@ export class MigrationService {
     
     const appVersion = environment.versionConfig.versionNumber
     console.log('App version:', appVersion )
-    const migrationsToRun = Object.values(AppVersion)
-      .filter(version => { 
-        console.log('Checking version:', {version, dataVersion, appVersion})
-        return version > dataVersion && version <= appVersion && version != AppVersion.UNKNOWN
-      })
-      .map(versionString => { 
-        const versionMapped = VersionUtils.appVersionFromVersionString(versionString) 
-        console.log('Mapped version:', versionMapped)
-        return versionMapped
-      })
-      .sort(VersionUtils.appVersionCompare)
+    let migrationsToRun: AppVersion[]
+    try {
+      migrationsToRun = VersionUtils.pendingMigrations(dataVersion, appVersion)
+    } catch (error) {
+      // e.g. dev builds, where versionNumber is still the '%VERSION%' placeholder
+      console.warn('Skipping migrations, invalid version:', {dataVersion, appVersion, error})
+      return
+    }
 
     if (migrationsToRun.length === 0) {
       console.log('No migrations to run.')
@@ -49,7 +46,13 @@ export class MigrationService {
     const message = await firstValueFrom(this.translate.get('MIGRATION.RUNNING_UPDATE'))
     GlobalUtils.updateSplashScreenMessage(message)
     for(const version of migrationsToRun) {
-      await this.runMigration(version)
+      try {
+        await this.runMigration(version)
+      } catch (error) {
+        // data_version stays at the last successful migration, so the remaining ones run again on the next launch
+        console.error('Migration failed:', {version, error})
+        break
+      }
     }
   }
 
@@ -70,6 +73,10 @@ export class MigrationService {
       case AppVersion.V2_2_0:
         await this.migrateToV2_2_0()
         await this.localStorage.set('data_version', AppVersion.V2_2_0)
+        break
+      case AppVersion.V3_0_0:
+        await this.migrateToV3_0_0()
+        await this.localStorage.set('data_version', AppVersion.V3_0_0)
         break
       default:
         console.warn('Migration not implemented for version:', version)
@@ -135,5 +142,22 @@ export class MigrationService {
       await Promise.all(promises)
       await this.accounts2FAService.updateAccountsBatch(accounts)
     }
+  }
+
+  private async migrateToV3_0_0() {
+    console.log('Migrating to v3.0.0')
+
+    // Older versions could persist plaintext secrets while encryption was active
+    // (accounts added after enabling encryption, and the v2.2.0 migration), so encrypt them now
+    const { encryptionActive } = await this.appConfigService.getEncryptionOptions()
+    if (!encryptionActive || !(await this.appConfigService.getEncryptionKey())) {
+      return
+    }
+
+    // start loading the accounts and let them settle for 1000ms
+    await this.accounts2FAService.getAccounts()
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    await this.accounts2FAService.encryptAccounts()
   }
 }

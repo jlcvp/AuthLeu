@@ -57,6 +57,12 @@
           placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} 30"></ion-input>
       </ion-item>
       <ion-item>
+        <ion-select label="{{ 'ADD_ACCOUNT_MODAL.ALGORITHM' | translate }}" labelPlacement="stacked"
+          formControlName="algorithm" interface="popover">
+          <ion-select-option *ngFor="let algorithm of algorithms" [value]="algorithm">{{ algorithm }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item>
         <ion-label position="stacked">{{ "ADD_ACCOUNT_MODAL.LOGO" | translate }}</ion-label>
         <ion-searchbar placeholder="{{ 'SEARCH' | translate }}" class="ion-padding-top" [debounce]="250"
           [value]="draftLogoSearchTxt" (ionInput)="handleSearchLogo($event)"></ion-searchbar>

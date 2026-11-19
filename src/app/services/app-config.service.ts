@@ -16,10 +16,8 @@ export class AppConfigService {
   }
 
   async isOfflineMode() {
-    const isOfflinePref = await this.localStorage.get<boolean>('isOfflineMode') ?? false;
-    // if isOfflinePref is not set, use the environment variable
-    return isOfflinePref ?? environment.isOfflineEnv;
-    
+    // until the user chooses, use the build's default (the GitHub Pages build is offline-only)
+    return (await this.localStorage.get<boolean>('isOfflineMode')) ?? environment.isOfflineEnv;
   }
 
   async setOfflineMode(isOffline: boolean) {

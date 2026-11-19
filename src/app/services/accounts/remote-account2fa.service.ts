@@ -46,7 +46,7 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
   }
 
   async updateAccount(account: Account2FA): Promise<void> {
-    this.updateAccountsBatch([account])
+    return this.updateAccountsBatch([account])
   }
 
   public async updateAccountsBatch(accounts: Account2FA[]): Promise<void> {
