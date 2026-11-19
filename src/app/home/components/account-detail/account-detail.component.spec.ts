@@ -59,4 +59,34 @@ describe('AccountDetailComponent', () => {
 
     expect(component.token.replace(/\s/g, '')).toMatch(/^\d{6}$/)
   })
+
+  describe('codeEndTime', () => {
+    beforeEach(() => {
+      jasmine.clock().install()
+      jasmine.clock().mockDate(new Date(Date.UTC(2026, 0, 1, 0, 0, 10, 500)))
+    })
+
+    afterEach(() => {
+      jasmine.clock().uninstall()
+    })
+
+    it('is when the code of the account changes', () => {
+      component.account = new Account2FA('id', 'john', SECRET, 6, 30, 'SHA1', undefined, true)
+      expect(component.codeEndTime).toBe(Date.UTC(2026, 0, 1, 0, 0, 30))
+
+      component.account = new Account2FA('id', 'john', SECRET, 6, 60, 'SHA1', undefined, true)
+      expect(component.codeEndTime).toBe(Date.UTC(2026, 0, 1, 0, 1, 0))
+    })
+
+    it('moves to the next code change when the timer ends', () => {
+      component.account = new Account2FA('id', 'john', SECRET, 6, 30, 'SHA1', undefined, true)
+      const firstToken = component.token
+
+      jasmine.clock().mockDate(new Date(Date.UTC(2026, 0, 1, 0, 0, 30)))
+      component.timerEnd()
+
+      expect(component.codeEndTime).toBe(Date.UTC(2026, 0, 1, 0, 1, 0))
+      expect(component.token).not.toBe(firstToken)
+    })
+  })
 });

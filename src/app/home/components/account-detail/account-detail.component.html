@@ -22,7 +22,7 @@
       </ion-row>
       <ion-row class="ion-no-padding ion-text-center">
         <ion-col size="12">
-          <app-countdown-timer #countdownTimer [seconds]="tokenCountdown" (timerEnd)="timerEnd()"></app-countdown-timer>
+          <app-countdown-timer [endTime]="codeEndTime" (timerEnd)="timerEnd()"></app-countdown-timer>
         </ion-col>
       </ion-row>
     

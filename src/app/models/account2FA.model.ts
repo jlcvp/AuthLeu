@@ -170,10 +170,6 @@ export class Account2FA implements IAccount2FA {
         return this.logo || 'assets/icon/128.png';
     }
 
-    getNextRollingTimeLeft(): number {
-        return this.interval - (Math.floor(Date.now() / 1000) % this.interval);
-    }
-
     typeErased(): Object { // eslint-disable-line @typescript-eslint/ban-types
         const typeErasedObject = Object.assign({}, this);
         for (const key in typeErasedObject) {

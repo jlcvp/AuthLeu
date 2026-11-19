@@ -1,8 +1,7 @@
-import { Component, HostListener, Input, ViewChild } from '@angular/core';
+import { Component, HostListener, Input } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Account2FA } from 'src/app/models/account2FA.model';
 import { OtpService } from 'src/app/services/otp.service';
-import { CountdownTimerComponent } from '../countdown-timer/countdown-timer.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -12,24 +11,24 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./account-detail.component.scss'],
 })
 export class AccountDetailComponent {
-  @ViewChild(CountdownTimerComponent) countdownTimer!: CountdownTimerComponent;
+  /** When the current code changes, in milliseconds since the epoch */
+  codeEndTime = 0
 
   private _account?: Account2FA
   private _token = '000 000'
   private hasCode = false
-  private _tokenCountdown = 0
   @Input() set account(value: Account2FA | undefined) {
     this._account = value
-    this.updateTokenCountdown()
+    this.updateCodeEndTime()
     this.updateCode()
   }
 
-  @HostListener('window:focus', ['$event'])
-  onFocus(event: FocusEvent): void {
-    // resume timer
-    console.log('focus event', event)
+  // timers are throttled while the app is in the background, so resync when it's back
+  @HostListener('window:focus')
+  @HostListener('document:visibilitychange')
+  onResume(): void {
     this.updateCode()
-    this.updateTokenCountdown()
+    this.updateCodeEndTime()
   }
 
   @HostListener('copy', ['$event'])
@@ -73,17 +72,6 @@ export class AccountDetailComponent {
     return this._token
   }
 
-  private set tokenCountdown(value: number) {
-    this._tokenCountdown = value
-    setTimeout(() => {
-      this.countdownTimer?.startTimer()
-    }, 50);
-  }
-
-  get tokenCountdown(): number {
-    return this._tokenCountdown
-  }
-
   async copyCode(evt: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     if(!this.account || !this.hasCode) {
       return
@@ -106,10 +94,8 @@ export class AccountDetailComponent {
 
   timerEnd() {
     console.log("timer end")
-    setTimeout(() => {
-      this.updateTokenCountdown()
-      this.updateCode()
-    }, 150); // using 150ms to debounce the timer end event
+    this.updateCodeEndTime()
+    this.updateCode()
   }
 
   updateCode() {
@@ -139,8 +125,10 @@ export class AccountDetailComponent {
     }
   }
 
-  private updateTokenCountdown() {
-    const countdown = this.account?.getNextRollingTimeLeft() || this.account?.interval || 30   
-    this.tokenCountdown = countdown > 0 ? countdown : 0
+  private updateCodeEndTime() {
+    // the code changes when the time step (Unix time divided by the period) changes
+    const period = (this.account?.interval || 30) * 1000
+    const now = Date.now()
+    this.codeEndTime = now - (now % period) + period
   }
 }
