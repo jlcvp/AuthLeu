@@ -35,6 +35,7 @@ export class AccountModalComponent implements OnInit {
 
   private loading: HTMLIonLoadingElement | undefined = undefined
   private scannedIssuer?: string // the form has no issuer field, so keep the one from the scanned QR code
+  private logoSearchCount = 0
 
   constructor(
     formBuilder: FormBuilder, 
@@ -158,12 +159,20 @@ export class AccountModalComponent implements OnInit {
   async handleSearchLogo(evt: SearchbarCustomEvent) {
     const searchTerm = evt?.detail?.value
     console.log({ evt, searchTerm })
+    // searches can finish out of order, so only the latest one may update the results
+    const searchId = ++this.logoSearchCount
     if (!searchTerm) {
       this.draftLogoURL = ''
       this.searchLogoResults = []
       return
     }
-    const brandInfo = await this.logoService.searchServiceInfo(searchTerm)
+    const brandInfo = await this.logoService.searchServiceInfo(searchTerm).catch(error => {
+      console.error("Error searching logos", error)
+      return []
+    })
+    if (searchId !== this.logoSearchCount) {
+      return
+    }
     if (brandInfo && brandInfo.length > 0) {
       this.draftLogoURL = brandInfo[0].logo
       this.searchLogoResults = brandInfo.map(brand => brand.logo)
