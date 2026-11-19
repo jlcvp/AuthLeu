@@ -130,6 +130,7 @@ export class PasswordService {
           role: 'cancel'
         }, {
           text: okText,
+          role: 'confirm',
           handler: (data) => {
             return { password: data.password, passwordConfirmation: data.passwordConfirmation }
           }
@@ -138,8 +139,9 @@ export class PasswordService {
     })
     await alert.present()
 
-    const { data } = await alert.onDidDismiss()
-    if(!data) {
+    // Ionic passes the typed values even when the alert is cancelled
+    const { data, role } = await alert.onDidDismiss()
+    if(role !== 'confirm' || !data) {
       return { password: '', passwordConfirmation: '' }
     }
     return data.values
@@ -175,8 +177,9 @@ export class PasswordService {
       ]
     })
     await alert.present()
-    const { data } = await alert.onDidDismiss()
-    if(data && data.values) {
+    // Ionic passes the typed values even when the alert is cancelled
+    const { data, role } = await alert.onDidDismiss()
+    if(role === 'confirm' && data && data.values) {
       return data.values.password
     }
     return ''
