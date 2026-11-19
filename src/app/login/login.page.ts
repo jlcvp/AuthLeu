@@ -112,8 +112,8 @@ export class LoginPage implements OnInit {
     await toast.present();
   }
 
-  continueOffline() {
-    this.appConfig.setOfflineMode(true)
+  async continueOffline() {
+    await this.appConfig.setOfflineMode(true)
     this.navCtrl.navigateForward('/home', {skipLocationChange: true})
   }
 
