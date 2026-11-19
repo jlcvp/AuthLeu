@@ -27,6 +27,7 @@
     "ERROR": {
       "CORRUPT_BACKUP_FILE": "Arquivo de backup corrompido",
       "EMPTY_FILE": "O arquivo está vazio",
+      "GENERIC_EXPORT_ERROR": "Erro desconhecido ao exportar contas",
       "GENERIC_IMPORT_ERROR": "Erro desconhecido ao importar contas do backup",
       "IMPORT_ERROR_TITLE": "Erro ao importar contas",
       "INVALID_PASSWORD": "Não foi possível decodificar as contas com a senha informada. A importação de contas foi abortada.",

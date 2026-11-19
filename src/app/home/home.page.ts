@@ -203,8 +203,15 @@ export class HomePage implements OnInit {
       console.log("Selected accounts to export", { selectedAccounts })
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORTING_ACCOUNTS'))
       await this.presentLoading(message)
-      await this.accountsService.exportAccounts(selectedAccounts, exportWithEncryption)
-      await this.dismissLoading()
+      try {
+        await this.accountsService.exportAccounts(selectedAccounts, exportWithEncryption)
+        await this.dismissLoading()
+      } catch (error) {
+        console.error("Error exporting accounts", error)
+        await this.dismissLoading()
+        const errorMessage = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.GENERIC_EXPORT_ERROR'))
+        await this.showAlert(errorMessage)
+      }
     } else {
       console.log("No accounts selected to export")
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_ACCOUNTS_SELECTED_TO_EXPORT'))
@@ -302,6 +309,7 @@ export class HomePage implements OnInit {
           }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
+          await this.dismissLoading() // the loading overlay can't be dismissed by the user
           const errorKey = error && error.message || 'ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'
           const message = await firstValueFrom(this.translateService.get(errorKey))
           const header = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.IMPORT_ERROR_TITLE'))

@@ -27,6 +27,7 @@
     "ERROR": {
       "CORRUPT_BACKUP_FILE": "Corrupted backup file",
       "EMPTY_FILE": "The file is empty",
+      "GENERIC_EXPORT_ERROR": "Unknown error while exporting accounts",
       "GENERIC_IMPORT_ERROR": "Unknown error while importing accounts from backup",
       "IMPORT_ERROR_TITLE": "Error importing accounts",
       "INVALID_PASSWORD": "The provided password could not decrypt the accounts. The import was unsuccessful.",
