@@ -16,6 +16,7 @@ import { AppVersionInfo } from '../models/app-version.enum';
 import { PasswordService } from './password.service';
 import { AccountModalComponent } from './components/account-modal/account-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
+import { AccountDetailComponent } from './components/account-detail/account-detail.component';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +25,7 @@ import { AboutModalComponent } from './components/about-modal/about-modal.compon
 })
 export class HomePage implements OnInit {
   @ViewChild('popover') popover!: IonPopover;
+  @ViewChild(AccountDetailComponent) accountDetail?: AccountDetailComponent;
 
   @HostListener('window:resize', ['$event'])
   onWindowResize() {
@@ -562,6 +564,8 @@ export class HomePage implements OnInit {
         await this.configService.setLastPasswordCheck()
         await this.setEncryptionActive(true)
         this.hasLockedAccounts = false
+        // the accounts were unlocked in place, so the selected account's code must be refreshed
+        this.accountDetail?.updateCode()
       }
     }
   }

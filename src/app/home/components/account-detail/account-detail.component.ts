@@ -16,6 +16,7 @@ export class AccountDetailComponent {
 
   private _account?: Account2FA
   private _token = '000 000'
+  private hasCode = false
   private _tokenCountdown = 0
   @Input() set account(value: Account2FA | undefined) {
     this._account = value
@@ -84,7 +85,7 @@ export class AccountDetailComponent {
   }
 
   async copyCode(evt: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-    if(!this.account) {
+    if(!this.account || !this.hasCode) {
       return
     }
     console.log("copying code", {evt})
@@ -114,13 +115,27 @@ export class AccountDetailComponent {
   updateCode() {
     if(this.account) {
       console.log("generating new code")
-      try {
-        this.token = this.otpService.generateTOTP(this.account)
-      } catch (error) {
-        // e.g. an imported account with an unsupported algorithm: never show a code that may be wrong
-        console.error("Error generating code", error)
-        this.token = '-'.repeat(this.account.tokenLength)
-      }
+      const code = this.generateCode(this.account)
+      this.hasCode = !!code
+      // never show a code that may be wrong
+      this.token = code || '-'.repeat(this.account.tokenLength)
+    }
+  }
+
+  /**
+   * Generates the current code of an account.
+   * @returns The code, or undefined if a correct code can't be generated.
+   */
+  private generateCode(account: Account2FA): string | undefined {
+    if(account.isLocked) {
+      return undefined // the secret is still encrypted
+    }
+    try {
+      return this.otpService.generateTOTP(account)
+    } catch (error) {
+      // e.g. an imported account with an unsupported algorithm
+      console.error("Error generating code", error)
+      return undefined
     }
   }
 
