@@ -48,8 +48,7 @@ export class Account2FA implements IAccount2FA {
     constructor(id: string, label: string, secret?: string, tokenLength?: number, interval?: number, algorithm?: string, issuer?:string, active?: boolean, logo?: string, encryptedSecret?: string, iv?: string, salt?: string, added?: any) {  // eslint-disable-line @typescript-eslint/no-explicit-any
         this.id = id;
         this.label = label;
-        // secrets are often shown in lowercase or split into groups (e.g. "jbsw y3dp ehpk 3pxp")
-        this.secret = (secret || '').replace(/[\s-]/g, '').toUpperCase();
+        this.secret = Account2FA.normalizeSecret(secret || '');
         // form inputs and older records may hold these numbers as strings
         this.tokenLength = Number(tokenLength) || 6;
         this.interval = Number(interval) || 30;
@@ -61,6 +60,14 @@ export class Account2FA implements IAccount2FA {
         this.iv = iv;
         this.salt = salt;
         this.added = added;
+    }
+
+    /**
+     * Normalizes a base32 secret: sites often show secrets in lowercase or split into groups
+     * (e.g. "jbsw y3dp ehpk 3pxp"), so remove spaces and dashes and convert to upper case.
+     */
+    static normalizeSecret(secret: string): string {
+        return secret.replace(/[\s-]/g, '').toUpperCase();
     }
 
     static fromDictionary(dict: any): Account2FA {  // eslint-disable-line @typescript-eslint/no-explicit-any

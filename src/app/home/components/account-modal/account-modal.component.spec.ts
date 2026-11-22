@@ -30,6 +30,16 @@ describe('AccountModalComponent', () => {
   })
 
   describe('createAccount', () => {
+    it('saves secrets typed in lowercase or groups normalized', async () => {
+      component.validations_form.setValue({ label: 'john', secret: 'jbsw y3dp ehpk 3pxp', tokenLength: 6, interval: 30, algorithm: 'SHA1' })
+      expect(component.validations_form.valid).toBeTrue()
+
+      await component.createAccount(component.validations_form.value)
+      await new Promise(resolve => setTimeout(resolve)) // createAccount doesn't wait for the modal to be dismissed
+
+      const account = modalController.dismiss.calls.mostRecent().args[0] as Account2FA
+      expect(account.secret).toBe('JBSWY3DPEHPK3PXP')
+    })
     it('keeps the issuer of a scanned QR code', async () => {
       await component['processQRCode']('otpauth://totp/ACME%20Co:john@example.com?secret=JBSWY3DPEHPK3PXP&issuer=ACME%20Co&algorithm=SHA256&digits=8')
 
@@ -40,6 +50,24 @@ describe('AccountModalComponent', () => {
       expect(account.issuer).toBe('ACME Co')
       expect(account.algorithm).toBe('SHA256')
       expect(account.tokenLength).toBe(8)
+    })
+  })
+
+  describe('secret validation', () => {
+    const secretControl = () => component.validations_form.controls['secret']
+
+    it('accepts base32 secrets, also in lowercase or split into groups', () => {
+      for (const secret of ['JBSWY3DPEHPK3PXP', 'jbsw y3dp ehpk 3pxp', 'JBSW-Y3DP-EHPK-3PXP', 'JBSWY3DPEHPK3PXP====']) {
+        secretControl().setValue(secret)
+        expect(secretControl().valid).withContext(secret).toBeTrue()
+      }
+    })
+
+    it('rejects secrets that are missing, not base32 or shorter than 8 characters', () => {
+      for (const secret of ['', 'ABCD1890', 'JBSW Y3D', 'JBSW=Y3DPEHPK3PXP']) {
+        secretControl().setValue(secret)
+        expect(secretControl().valid).withContext(secret).toBeFalse()
+      }
     })
   })
 

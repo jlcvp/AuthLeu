@@ -1,11 +1,17 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, FormControl, Validators, FormBuilder, ValidatorFn } from '@angular/forms';
 import { AlertController, LoadingController, ModalController, SearchbarCustomEvent, ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { NgxScannerQrcodeComponent, ScannerQRCodeConfig, ScannerQRCodeResult } from 'ngx-scanner-qrcode';
 import { firstValueFrom } from 'rxjs';
 import { Account2FA, SUPPORTED_ALGORITHMS } from 'src/app/models/account2FA.model';
 import { LogoService } from 'src/app/services/logo.service';
+
+/** Validates a base32 secret of at least 8 characters, allowing the lowercase and grouped forms that sites often show */
+const secretValidator: ValidatorFn = control => {
+  const secret = Account2FA.normalizeSecret(control.value ?? '')
+  return secret.length >= 8 && /^[A-Z2-7]+=*$/.test(secret) ? null : { secret: true }
+}
 
 @Component({
   selector: 'app-account-modal',
@@ -52,8 +58,7 @@ export class AccountModalComponent implements OnInit {
       ])),
       secret: new FormControl('', Validators.compose([
         Validators.required,
-        Validators.minLength(8),
-        Validators.pattern('^[A-Z2-7]+=*$')
+        secretValidator
       ])),
       tokenLength: new FormControl(6, Validators.compose([
         Validators.required,
