@@ -4,7 +4,7 @@ import { LocalStorageService } from './local-storage.service';
 import { AppVersion } from '../models/app-version.enum';
 import { VersionUtils } from '../utils/version-utils';
 import { AppConfigService } from './app-config.service';
-import { EncryptionOptions } from '../models/encryption-options.model';
+import { ENCRYPTION_OPTIONS_KEY, EncryptionOptions } from '../models/encryption-options.model';
 import { Account2faService } from './accounts/account2fa.service';
 import { firstValueFrom } from 'rxjs';
 import { LogoService } from './logo.service';
@@ -90,13 +90,16 @@ export class MigrationService {
   private async migrateToV2_0_0() {
     console.log('Migrating to v2.0.0')
 
-    // Initial encryption options
-    const encryptionOptions: EncryptionOptions = {
-      encryptionActive: false,
-      shouldPerformPeriodicCheck: false
+    // Initial encryption options. Installs without a recorded data version (GitHub Pages builds
+    // before 3.0.0) run every migration, so keep the options of users who already have some
+    if (!(await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY))) {
+      const encryptionOptions: EncryptionOptions = {
+        encryptionActive: false,
+        shouldPerformPeriodicCheck: false
+      }
+      await this.appConfigService.setEncryptionOptions(encryptionOptions)
+      await this.appConfigService.setLastPasswordCheck(0)
     }
-    await this.appConfigService.setEncryptionOptions(encryptionOptions)
-    await this.appConfigService.setLastPasswordCheck(0)
 
     await this.appConfigService.setFirstRun() // reset first run
   }

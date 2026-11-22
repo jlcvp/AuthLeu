@@ -30,7 +30,7 @@ Test coverage is thin. Specs sit next to their sources (`*.spec.ts`), and most c
 
 ## Build-time version injection (gotcha)
 
-`npm run build` runs a `prebuild` step (`resources/scripts/version-config.js`). That script **rewrites `src/environments/environment*.ts` in place**, replacing `%VERSION%`, `%BUILD_DATE%` and `%COMMIT_HASH%` (the hash comes from `LAST_COMMIT_SHA`). Don't commit those substitutions; the placeholders must stay in source.
+`npm run build` and `npm run build:githubpages` both run a pre-step (`resources/scripts/version-config.js`) through their `prebuild` / `prebuild:githubpages` scripts. If you add a build script, give it a matching `pre…` script: npm only runs `prebuild` before a script named exactly `build`. The script **rewrites `src/environments/environment*.ts` in place**, replacing `%VERSION%`, `%BUILD_DATE%` and `%COMMIT_HASH%` (the hash comes from `LAST_COMMIT_SHA`). Don't commit those substitutions; the placeholders must stay in source.
 
 `ng serve` doesn't run this step, so in development `versionNumber` is the literal `"%VERSION%"` and no data migrations run. To test migrations locally, temporarily set `versionNumber` in `environment.ts`.
 
@@ -64,7 +64,7 @@ The provider is chosen by `AppConfigService.isOfflineMode()`, which reads the `i
 1. Add the version to the `AppVersion` enum (`models/app-version.enum.ts`).
 2. Add a `case` in `runMigration`, along with a `migrateToVx_y_z()` method.
 
-Migrations run for enum versions where `stored data_version < version <= app version`. `VersionUtils.pendingMigrations` selects them using a numeric semver comparison and is covered by `version-utils.spec.ts`. If the app version isn't valid semver (e.g. the dev `%VERSION%` placeholder), migrations are skipped. If a migration throws, `migrate()` logs the error and stops. `data_version` stays at the last successful migration, so the remaining ones run again on the next launch. Write migrations so they're safe to run more than once.
+Migrations run for enum versions where `stored data_version < version <= app version`. `VersionUtils.pendingMigrations` selects them using a numeric semver comparison and is covered by `version-utils.spec.ts`. If the app version isn't valid semver (e.g. the dev `%VERSION%` placeholder), migrations are skipped. If a migration throws, `migrate()` logs the error and stops. `data_version` stays at the last successful migration, so the remaining ones run again on the next launch. Write migrations so they're safe to run more than once, and never overwrite user data. Installs with no recorded `data_version` run every migration from the start: that's both new installs and GitHub Pages installs from before 3.0.0, which never got a version injected.
 
 ### Logos
 
