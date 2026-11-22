@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Account2FA, IAccount2FAProvider } from '../../models/account2FA.model';
-import { firstValueFrom, mergeMap, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of, switchMap } from 'rxjs';
 import { RemoteAccount2faService } from './remote-account2fa.service';
 import { LocalAccount2faService } from './local-account2fa.service';
 import { AppConfigService } from '../app-config.service';
@@ -59,9 +59,10 @@ export class Account2faService {
     // Get the observable of accounts from the service
     const accounts$ = await this.service.getAccounts();
 
-    // If a decryption key is provided, decrypt the accounts
+    // If a decryption key is provided, decrypt the accounts. Decryptions can finish out of order,
+    // so a newer list of accounts discards the decryption of an older one
     return accounts$.pipe(
-      mergeMap(async (accounts) => {
+      switchMap(async (accounts) => {
         const key = await this.appConfig.getEncryptionKey() // always get updated key
         if (key) {
           const decryptions: Promise<void>[] = [];

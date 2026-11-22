@@ -1,4 +1,4 @@
-import { of } from 'rxjs'
+import { firstValueFrom, of, Subject } from 'rxjs'
 import { TranslateService } from '@ngx-translate/core'
 import { Account2FA, IAccount2FAProvider } from '../../models/account2FA.model'
 import { AppConfigService } from '../app-config.service'
@@ -13,6 +13,7 @@ const KEY = 'correct horse battery staple'
 describe('Account2faService', () => {
   let provider: jasmine.SpyObj<IAccount2FAProvider>
   let encryptionActive: boolean
+  let getEncryptionKey: jasmine.Spy<() => Promise<string | undefined>>
   let service: Account2faService
 
   function plaintextAccount(id = 'id-1'): Account2FA {
@@ -32,10 +33,11 @@ describe('Account2faService', () => {
     provider.updateAccount.and.resolveTo()
     provider.updateAccountsBatch.and.resolveTo()
 
+    getEncryptionKey = jasmine.createSpy('getEncryptionKey').and.resolveTo(KEY)
     const appConfig = {
       isOfflineMode: async () => true,
       getEncryptionOptions: async () => ({ encryptionActive, shouldPerformPeriodicCheck: false }),
-      getEncryptionKey: async () => KEY,
+      getEncryptionKey: () => getEncryptionKey(),
     }
     service = new Account2faService(
       appConfig as unknown as AppConfigService,
@@ -45,6 +47,33 @@ describe('Account2faService', () => {
       {} as TranslateService,
     )
     await new Promise(resolve => setTimeout(resolve)) // let the service select its provider
+  })
+
+  describe('getAccounts', () => {
+    it('decrypts the accounts', async () => {
+      provider.getAccounts.and.resolveTo(of([await encryptedAccount()]))
+
+      const [account] = await firstValueFrom(await service.getAccounts())
+
+      expect(account.secret).toBe(SECRET)
+    })
+
+    it('emits only the latest accounts when decrypting them takes longer for older ones', async () => {
+      const accounts$ = new Subject<Account2FA[]>()
+      provider.getAccounts.and.resolveTo(accounts$)
+      let releaseFirstKey!: () => void
+      getEncryptionKey.and.returnValues(new Promise(resolve => releaseFirstKey = () => resolve(KEY)), Promise.resolve(KEY))
+      const emitted: string[][] = []
+      ;(await service.getAccounts()).subscribe(accounts => emitted.push(accounts.map(account => account.id)))
+
+      accounts$.next([plaintextAccount('old')])
+      accounts$.next([plaintextAccount('new')])
+      await new Promise(resolve => setTimeout(resolve))
+      releaseFirstKey() // the older accounts finish decrypting last
+      await new Promise(resolve => setTimeout(resolve))
+
+      expect(emitted).toEqual([['new']])
+    })
   })
 
   describe('addAccount', () => {
