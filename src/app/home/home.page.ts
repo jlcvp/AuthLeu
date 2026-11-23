@@ -19,9 +19,10 @@ import { AboutModalComponent } from './components/about-modal/about-modal.compon
 import { AccountDetailComponent } from './components/account-detail/account-detail.component';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+    selector: 'app-home',
+    templateUrl: 'home.page.html',
+    styleUrls: ['home.page.scss'],
+    standalone: false
 })
 export class HomePage implements OnInit {
   @ViewChild('popover') popover!: IonPopover;

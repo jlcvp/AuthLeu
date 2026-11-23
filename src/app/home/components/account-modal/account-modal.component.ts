@@ -14,9 +14,10 @@ const secretValidator: ValidatorFn = control => {
 }
 
 @Component({
-  selector: 'app-account-modal',
-  templateUrl: './account-modal.component.html',
-  styleUrls: ['./account-modal.component.scss'],
+    selector: 'app-account-modal',
+    templateUrl: './account-modal.component.html',
+    styleUrls: ['./account-modal.component.scss'],
+    standalone: false
 })
 export class AccountModalComponent implements OnInit {
   @ViewChild('qrscanner') qrscanner!: NgxScannerQrcodeComponent;

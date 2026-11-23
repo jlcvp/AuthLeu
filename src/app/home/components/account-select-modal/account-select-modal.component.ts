@@ -3,9 +3,10 @@ import { Config, ModalController } from '@ionic/angular';
 import { Account2FA } from 'src/app/models/account2FA.model';
 
 @Component({
-  selector: 'app-account-select-modal',
-  templateUrl: './account-select-modal.component.html',
-  styleUrls: ['./account-select-modal.component.scss'],
+    selector: 'app-account-select-modal',
+    templateUrl: './account-select-modal.component.html',
+    styleUrls: ['./account-select-modal.component.scss'],
+    standalone: false
 })
 export class AccountSelectModalComponent implements OnInit {
   @Input() accounts: Account2FA[] = []

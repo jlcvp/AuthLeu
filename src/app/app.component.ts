@@ -6,9 +6,10 @@ import { firstValueFrom } from 'rxjs';
 import { LoggingService } from './services/logging.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
+    selector: 'app-root',
+    templateUrl: 'app.component.html',
+    styleUrls: ['app.component.scss'],
+    standalone: false
 })
 export class AppComponent {
   constructor(platform: Platform, private alertController: AlertController, private updates: SwUpdate, private translate: TranslateService, logging: LoggingService) {

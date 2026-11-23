@@ -10,16 +10,17 @@ import { GlobalUtils } from '../utils/global-utils';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
-  animations: [
-    trigger('openClose', [
-      state('true', style({height: '*'})),
-      state('false', style({height: '0px'})),
-      transition('false <=> true', animate(300)),
-    ])
-  ]
+    selector: 'app-login',
+    templateUrl: './login.page.html',
+    styleUrls: ['./login.page.scss'],
+    animations: [
+        trigger('openClose', [
+            state('true', style({ height: '*' })),
+            state('false', style({ height: '0px' })),
+            transition('false <=> true', animate(300)),
+        ])
+    ],
+    standalone: false
 })
 export class LoginPage implements OnInit {
   loginFormVisible = false;
