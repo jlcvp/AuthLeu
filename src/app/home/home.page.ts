@@ -28,7 +28,7 @@ export class HomePage implements OnInit {
   @ViewChild('popover') popover!: IonPopover;
   @ViewChild(AccountDetailComponent) accountDetail?: AccountDetailComponent;
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onWindowResize() {
     this.isLandscape = window.innerWidth > window.innerHeight
   }

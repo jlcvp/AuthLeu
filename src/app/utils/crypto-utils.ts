@@ -32,7 +32,7 @@ export class CryptoUtils {
         }
     }
     
-    async deriveKey(password: string, salt: Uint8Array, iterations: number, keyLength: number): Promise<CryptoKey> {
+    async deriveKey(password: string, salt: Uint8Array<ArrayBuffer>, iterations: number, keyLength: number): Promise<CryptoKey> {
         // Encode password as Uint8Array
         const enc = new TextEncoder();
         const passwordKey = enc.encode(password);

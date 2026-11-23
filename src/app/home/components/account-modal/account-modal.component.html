@@ -7,9 +7,9 @@
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding">
-  <ng-container *ngIf="isScanActive;else manualForm">
+  @if (isScanActive) {
     <ngx-scanner-qrcode #qrscanner="scanner" (event)="onQRCodeScanned($event, qrscanner)"
-      [config]="qrScannerOpts"></ngx-scanner-qrcode>
+    [config]="qrScannerOpts"></ngx-scanner-qrcode>
     <ion-grid>
       <ion-row>
         <ion-col size="auto">
@@ -30,8 +30,7 @@
         </ion-col>
       </ion-row>
     </ion-grid>
-  </ng-container>
-  <ng-template #manualForm>
+  } @else {
     <ion-button size="large" expand="block" (click)="scanCode()">
       <ion-icon slot="start" name="qr-code-outline"></ion-icon>
       {{ "ADD_ACCOUNT_MODAL.SCAN_QR_CODE" | translate }}
@@ -39,33 +38,35 @@
     <form [formGroup]="validations_form" (ngSubmit)="createAccount(validations_form.value)">
       <ion-item>
         <ion-input label="{{ 'ADD_ACCOUNT_MODAL.LABEL' | translate }}" labelPlacement="stacked" formControlName="label"
-          placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} Google:teste@gmail.com"></ion-input>
+        placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} Google:teste@gmail.com"></ion-input>
       </ion-item>
       <ion-item>
         <ion-input label="{{ 'ADD_ACCOUNT_MODAL.SECRET_KEY' | translate }}" labelPlacement="stacked"
           formControlName="secret"
-          placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} JBSW Y3DP EHPK 3PXP"></ion-input>
+        placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} JBSW Y3DP EHPK 3PXP"></ion-input>
       </ion-item>
       <ion-item>
         <ion-input label="{{ 'ADD_ACCOUNT_MODAL.TOKEN_SIZE' | translate }}" labelPlacement="stacked"
           formControlName="tokenLength"
-          placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} 6"></ion-input>
+        placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} 6"></ion-input>
       </ion-item>
       <ion-item>
         <ion-input label="{{ 'ADD_ACCOUNT_MODAL.TOKEN_INTERVAL' | translate }}" labelPlacement="stacked"
           formControlName="interval"
-          placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} 30"></ion-input>
+        placeholder="{{ 'ADD_ACCOUNT_MODAL.EXAMPLI_GRATIA_SHORT' | translate }} 30"></ion-input>
       </ion-item>
       <ion-item>
         <ion-select label="{{ 'ADD_ACCOUNT_MODAL.ALGORITHM' | translate }}" labelPlacement="stacked"
           formControlName="algorithm" interface="popover">
-          <ion-select-option *ngFor="let algorithm of algorithms" [value]="algorithm">{{ algorithm }}</ion-select-option>
+          @for (algorithm of algorithms; track algorithm) {
+            <ion-select-option [value]="algorithm">{{ algorithm }}</ion-select-option>
+          }
         </ion-select>
       </ion-item>
       <ion-item>
         <ion-label position="stacked">{{ "ADD_ACCOUNT_MODAL.LOGO" | translate }}</ion-label>
         <ion-searchbar placeholder="{{ 'SEARCH' | translate }}" class="ion-padding-top" [debounce]="250"
-          [value]="draftLogoSearchTxt" (ionInput)="handleSearchLogo($event)"></ion-searchbar>
+        [value]="draftLogoSearchTxt" (ionInput)="handleSearchLogo($event)"></ion-searchbar>
         <ion-grid class="full-row">
           <ion-row class="full-row">
             <ion-col size-xs="6" size-sm="4" size="4">
@@ -74,19 +75,23 @@
                 <p>{{ "ADD_ACCOUNT_MODAL.NO_LOGO" | translate }}</p>
               </ion-card>
             </ion-col>
-            <ion-col size-xs="6" size-sm="4" *ngFor="let logoResult of searchLogoResults">
-              <ion-card class="logo-card" (click)="selectLogo(logoResult)"
-                [ngClass]="{ 'selected-logo': logoResult === draftLogoURL }">
-                <ion-img class="ion-padding ion-margin img-outline" [src]="logoResult"></ion-img>
-              </ion-card>
-            </ion-col>
+            @for (logoResult of searchLogoResults; track logoResult) {
+              <ion-col size-xs="6" size-sm="4">
+                <ion-card class="logo-card" (click)="selectLogo(logoResult)"
+                  [ngClass]="{ 'selected-logo': logoResult === draftLogoURL }">
+                  <ion-img class="ion-padding ion-margin img-outline" [src]="logoResult"></ion-img>
+                </ion-card>
+              </ion-col>
+            }
           </ion-row>
         </ion-grid>
-        <p *ngIf="searchLogoResults.length > 0">Logos provided by <a href="https://brandfetch.com">Brandfetch</a>
+        @if (searchLogoResults.length > 0) {
+          <p>Logos provided by <a href="https://brandfetch.com">Brandfetch</a>
         </p>
-      </ion-item>
-      <ion-button expand="block" [disabled]="!validations_form.valid" type="submit">{{ "ADD_ACCOUNT_MODAL.SAVE" |
-        translate }}</ion-button>
-    </form>
-  </ng-template>
+      }
+    </ion-item>
+    <ion-button expand="block" [disabled]="!validations_form.valid" type="submit">{{ "ADD_ACCOUNT_MODAL.SAVE" |
+    translate }}</ion-button>
+  </form>
+}
 </ion-content>

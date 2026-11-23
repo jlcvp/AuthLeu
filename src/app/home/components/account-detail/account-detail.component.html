@@ -1,33 +1,31 @@
 <div id="code-container-component" class="ion-justify-content-center ion-align-items-center ion-padding-top">
-  <ng-container *ngIf="account;else selectAccountContainer">
-      <ion-row>
-        <ion-col size="2"></ion-col>
-        <ion-col class="ion-padding" size="8">
-          <img class="service-logo img-outline" [src]="account.getLogo()">
-        </ion-col>
-        <ion-col size="2"></ion-col>
-      </ion-row>
-      <ion-row class="ion-padding-top ion-text-center">
-        <ion-col size="12">
-          {{account.label}}
-        </ion-col>
-      </ion-row>
-      <ion-row class="center-vertical ion-no-padding ion-text-center">
-        <ion-col size="auto" class="center-vertical">
-          <ion-button class="large-text" size="large" fill="clear" (click)="copyCode($event)">
-            <ion-text class="code-color"><strong>{{token}}</strong></ion-text>
-            <ion-icon slot="end" name="copy-outline"></ion-icon>
-          </ion-button>
-        </ion-col>
-      </ion-row>
-      <ion-row class="ion-no-padding ion-text-center">
-        <ion-col size="12">
-          <app-countdown-timer [endTime]="codeEndTime" (timerEnd)="timerEnd()"></app-countdown-timer>
-        </ion-col>
-      </ion-row>
-    
-  </ng-container>
-  <ng-template #selectAccountContainer>
+  @if (account) {
+    <ion-row>
+      <ion-col size="2"></ion-col>
+      <ion-col class="ion-padding" size="8">
+        <img class="service-logo img-outline" [src]="account.getLogo()">
+      </ion-col>
+      <ion-col size="2"></ion-col>
+    </ion-row>
+    <ion-row class="ion-padding-top ion-text-center">
+      <ion-col size="12">
+        {{account.label}}
+      </ion-col>
+    </ion-row>
+    <ion-row class="center-vertical ion-no-padding ion-text-center">
+      <ion-col size="auto" class="center-vertical">
+        <ion-button class="large-text" size="large" fill="clear" (click)="copyCode($event)">
+          <ion-text class="code-color"><strong>{{token}}</strong></ion-text>
+          <ion-icon slot="end" name="copy-outline"></ion-icon>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+    <ion-row class="ion-no-padding ion-text-center">
+      <ion-col size="12">
+        <app-countdown-timer [endTime]="codeEndTime" (timerEnd)="timerEnd()"></app-countdown-timer>
+      </ion-col>
+    </ion-row>
+  } @else {
     <p><ion-text color="medium">{{ "ACCOUNT_DETAIL.SELECT_ACCOUNT_HINT" | translate }}</ion-text></p>
-  </ng-template>
+  }
 </div>
