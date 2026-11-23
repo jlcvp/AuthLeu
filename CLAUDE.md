@@ -29,6 +29,7 @@ Test coverage is thin. Specs sit next to their sources (`*.spec.ts`), and most c
 - **PRs to `main` must also bump the `package.json` version;** the version-check workflow fails otherwise.
 - **PRs to `main` must also pass `npm run translations:check`.** Any key added to `src/assets/i18n/en.json` must also be added to `pt.json` (and to any other locale file).
 - Pushing to `main` deploys to both GitHub Pages and Firebase Hosting (project `authleu`). PRs from the same repo get a Firebase preview channel.
+- **`package-lock.json` must only reference `https://registry.npmjs.org/`,** because CI and the deploy workflows install from there. If your npm uses another registry (e.g. a company mirror), npm writes that host into the `resolved` URLs of packages it adds. Rewrite those URLs to `https://registry.npmjs.org/` before committing; mirrors use the same paths and integrity hashes. Check with `grep '"resolved"' package-lock.json | grep -v registry.npmjs.org`.
 
 ## Build-time version injection (gotcha)
 
