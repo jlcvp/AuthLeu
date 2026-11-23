@@ -10,7 +10,7 @@ import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { initializeFirestore, persistentLocalCache, provideFirestore } from '@angular/fire/firestore';
 import { environment } from 'src/environments/environment';
-import { NgxScannerQrcodeModule, LOAD_WASM } from 'ngx-scanner-qrcode';
+import { LOAD_WASM } from 'ngx-scanner-qrcode';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { IonicStorageModule } from '@ionic/storage-angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -54,7 +54,6 @@ export function createTranslateLoader(http: HttpClient) {
       innerHTMLTemplatesEnabled: true
     }), 
     AppRoutingModule,
-    NgxScannerQrcodeModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable
