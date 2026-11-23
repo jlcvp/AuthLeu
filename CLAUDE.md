@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-AuthLeu is an open-source TOTP 2FA authenticator (an Authy / Google Authenticator alternative). It's an Ionic 8 + Angular 18 app that ships only as a PWA; there's no native build, and Capacitor was removed in 3.0. It can sync accounts through Firebase (Auth + Firestore) or run fully offline using local storage.
+AuthLeu is an open-source TOTP 2FA authenticator (an Authy / Google Authenticator alternative). It's an Ionic 8 + Angular 21 app (with Angular Fire 21 and Firebase 12) that ships only as a PWA; there's no native build, and Capacitor was removed in 3.0. It can sync accounts through Firebase (Auth + Firestore) or run fully offline using local storage.
 
 ## Commands
+
+Angular 21 needs Node 20.19+ or 22.12+; CI and the deploy workflows use Node 22.
 
 ```bash
 npm start                    # ng serve (development config, environment.ts)
@@ -36,7 +38,7 @@ Test coverage is thin. Specs sit next to their sources (`*.spec.ts`), and most c
 
 ## Architecture
 
-The app is NgModule-based (not standalone). Import Ionic from `@ionic/angular`; `.vscode/settings.json` excludes the `/standalone` entry point from auto-import. There are two lazy routes:
+The app is NgModule-based: components are declared in modules with `standalone: false`, and templates use the built-in control flow (`@if`, `@for`). Import Ionic from `@ionic/angular`; `.vscode/settings.json` excludes the `/standalone` entry point from auto-import. The `prefer-standalone` and `prefer-inject` lint rules are off until the app moves to standalone components and `inject()`. There are two lazy routes:
 - `login`: email/password Firebase login or "continue offline".
 - `home`: guarded by `AuthenticationService.canActivate()`, which always passes in offline mode. `HomePageModule` declares all the UI components under `home/components/`.
 
