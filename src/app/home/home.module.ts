@@ -6,7 +6,7 @@ import { HomePage } from './home.page';
 
 import { HomePageRoutingModule } from './home-routing.module';
 import { AccountFilterPipe } from '../pipes/account-filter.pipe';
-import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
+import { NgxScannerQrcodeComponent } from 'ngx-scanner-qrcode';
 import { AccountListComponent } from './components/account-list/account-list.component';
 import { AccountDetailComponent } from './components/account-detail/account-detail.component';
 import { CountdownTimerComponent } from './components/countdown-timer/countdown-timer.component';
@@ -23,7 +23,7 @@ import { AboutModalComponent } from './components/about-modal/about-modal.compon
     IonicModule,
     HomePageRoutingModule,
     AccountFilterPipe,
-    NgxScannerQrcodeModule,
+    NgxScannerQrcodeComponent,
     TranslateModule.forChild()
   ],
   declarations: [

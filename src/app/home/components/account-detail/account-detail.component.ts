@@ -6,9 +6,10 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-account-detail',
-  templateUrl: './account-detail.component.html',
-  styleUrls: ['./account-detail.component.scss'],
+    selector: 'app-account-detail',
+    templateUrl: './account-detail.component.html',
+    styleUrls: ['./account-detail.component.scss'],
+    standalone: false
 })
 export class AccountDetailComponent {
   /** When the current code changes, in milliseconds since the epoch */

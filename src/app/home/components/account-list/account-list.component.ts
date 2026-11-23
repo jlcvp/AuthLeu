@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Account2FA } from 'src/app/models/account2FA.model';
 
 @Component({
-  selector: 'app-account-list',
-  templateUrl: './account-list.component.html',
-  styleUrls: ['./account-list.component.scss'],
+    selector: 'app-account-list',
+    templateUrl: './account-list.component.html',
+    styleUrls: ['./account-list.component.scss'],
+    standalone: false
 })
 export class AccountListComponent {
   @Input() accounts: Account2FA[] = [];

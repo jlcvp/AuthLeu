@@ -1,6 +1,6 @@
 <ion-content >
   <div class="login-bg">
-    <div class="login-card-container"> 
+    <div class="login-card-container">
       <ion-card class="ion-text-center login-card">
         <ion-card-header color="primary" class="ion-padding">
           <img class="logo ion-align-self-center" src="assets/pwaicons/ios/256.png" />
@@ -12,12 +12,13 @@
               <ion-input type="text" formControlName="email"></ion-input>
             </ion-item>
             <div class="validation-errors">
-              <ng-container *ngFor="let validation of validation_messages.email">
-                <div class="error-message"
-                  *ngIf="validations_form.get('email')?.hasError(validation.type) && (validations_form.get('email')?.dirty || validations_form.get('email')?.touched)">
-                  {{ validation.message | translate }}
-                </div>
-              </ng-container>
+              @for (validation of validation_messages.email; track validation) {
+                @if (validations_form.get('email')?.hasError(validation.type) && (validations_form.get('email')?.dirty || validations_form.get('email')?.touched)) {
+                  <div class="error-message">
+                    {{ validation.message | translate }}
+                  </div>
+                }
+              }
             </div>
 
             <ion-item class="form-rounded-bottom">
@@ -25,21 +26,24 @@
               <ion-input type="password" formControlName="password" required></ion-input>
             </ion-item>
             <div class="validation-errors">
-                <ng-container *ngFor="let validation of validation_messages.password">
-                  <div class="error-message ion-padding"
-                  *ngIf="validations_form.get('password')?.hasError(validation.type) && (validations_form.get('password')?.dirty || validations_form.get('password')?.touched)">
-                  {{ validation.message | translate }}
-                </div>
-              </ng-container>
+              @for (validation of validation_messages.password; track validation) {
+                @if (validations_form.get('password')?.hasError(validation.type) && (validations_form.get('password')?.dirty || validations_form.get('password')?.touched)) {
+                  <div class="error-message ion-padding">
+                    {{ validation.message | translate }}
+                  </div>
+                }
+              }
             </div>
 
             <ion-button color="primary" class="ion-margin-top ion-padding-top ion-padding-bottom" expand="block" type="submit"
-              [disabled]="!validations_form.valid">{{ "LOGIN.SIGN_IN_BUTTON" | translate }}</ion-button>
+            [disabled]="!validations_form.valid">{{ "LOGIN.SIGN_IN_BUTTON" | translate }}</ion-button>
           </form>
           <ion-button fill="outline" class="ion-padding-top ion-padding-bottom" expand="block" (click)="continueOffline()">{{ "LOGIN.CONTINUE_OFFLINE" | translate }}</ion-button>
-          <ion-button *ngIf="!loginFormVisible" fill="outline" class="ion-padding-top ion-padding-bottom" expand="block" (click)="loginFormVisible = true">{{ "LOGIN.CLOUD_SYNC" | translate }}</ion-button>
+          @if (!loginFormVisible) {
+            <ion-button fill="outline" class="ion-padding-top ion-padding-bottom" expand="block" (click)="loginFormVisible = true">{{ "LOGIN.CLOUD_SYNC" | translate }}</ion-button>
+          }
         </ion-card-content>
-      </ion-card>    
+      </ion-card>
     </div>
   </div>
 </ion-content>

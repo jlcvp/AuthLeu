@@ -22,20 +22,19 @@
                 <ng-template>
                   <ion-content>
                     <ion-list>
-                      <ng-container *ngIf="!hasLockedAccounts;else unlockAccountsItem">
-                      <ion-item button detail="false" [disabled]="hasLockedAccounts" (click)="encryptionActiveToggle()">
-                        <ion-toggle color="success" [checked]="isEncryptionActive"> {{ "CONFIG_MENU.ENCRYPT_ACCOUNTS" | translate }} </ion-toggle>
-                      </ion-item>
-                      <ion-item button detail="false" [disabled]="!isEncryptionActive" (click)="periodicCheckToggle()">
-                        <ion-toggle [checked]="shouldPeriodicCheckPassword"> {{ "CONFIG_MENU.PERIODIC_CHECK" | translate }} </ion-toggle>
-                      </ion-item>
-                      </ng-container>
-                      <ng-template #unlockAccountsItem>
+                      @if (!hasLockedAccounts) {
+                        <ion-item button detail="false" [disabled]="hasLockedAccounts" (click)="encryptionActiveToggle()">
+                          <ion-toggle color="success" [checked]="isEncryptionActive"> {{ "CONFIG_MENU.ENCRYPT_ACCOUNTS" | translate }} </ion-toggle>
+                        </ion-item>
+                        <ion-item button detail="false" [disabled]="!isEncryptionActive" (click)="periodicCheckToggle()">
+                          <ion-toggle [checked]="shouldPeriodicCheckPassword"> {{ "CONFIG_MENU.PERIODIC_CHECK" | translate }} </ion-toggle>
+                        </ion-item>
+                      } @else {
                         <ion-item button detail="false" (click)="unlockAccountsAction()">
                           <ion-icon slot="start" name="key-outline"></ion-icon>
                           <ion-label>{{ "CONFIG_MENU.UNLOCK_ACCOUNTS" | translate }}</ion-label>
                         </ion-item>
-                      </ng-template>
+                      }
                     </ion-list>
                   </ion-content>
                 </ng-template>
@@ -96,10 +95,10 @@
 <ion-content scroll-y="false">
   <div id="container" [ngClass]="layoutOrientationClass">
     <app-account-detail [ngClass]="layoutOrientationClass" id="code-container"
-      [account]="selectedAccount"></app-account-detail>
+    [account]="selectedAccount"></app-account-detail>
     <app-account-list [ngClass]="layoutOrientationClass" id="accounts-container"
       [accounts]="accounts$ | async | accountFilter: searchTxt" [type]="accountListType"
       (accountSelected)="selectAccount($event)"
-      (newAccountClick)="addAccountAction()"></app-account-list>
+    (newAccountClick)="addAccountAction()"></app-account-list>
   </div>
 </ion-content>

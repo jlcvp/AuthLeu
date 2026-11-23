@@ -19,15 +19,16 @@ import { AboutModalComponent } from './components/about-modal/about-modal.compon
 import { AccountDetailComponent } from './components/account-detail/account-detail.component';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+    selector: 'app-home',
+    templateUrl: 'home.page.html',
+    styleUrls: ['home.page.scss'],
+    standalone: false
 })
 export class HomePage implements OnInit {
   @ViewChild('popover') popover!: IonPopover;
   @ViewChild(AccountDetailComponent) accountDetail?: AccountDetailComponent;
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onWindowResize() {
     this.isLandscape = window.innerWidth > window.innerHeight
   }
@@ -297,7 +298,7 @@ export class HomePage implements OnInit {
                         await account.unlock(password)
                       }
                     }
-                  } catch (error) {
+                  } catch {
                     const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.INVALID_PASSWORD'))
                     throw new Error(message)
                   }
@@ -596,7 +597,7 @@ export class HomePage implements OnInit {
             await lockedAccount.unlock(password)
           }
           success = true
-        } catch (error) {
+        } catch {
           const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
           await this.showAlert(message)
         }

@@ -6,9 +6,10 @@ import { AppVersionInfo } from 'src/app/models/app-version.enum';
 import { AppConfigService } from 'src/app/services/app-config.service';
 
 @Component({
-  selector: 'app-about-modal',
-  templateUrl: './about-modal.component.html',
-  styleUrls: ['./about-modal.component.scss'],
+    selector: 'app-about-modal',
+    templateUrl: './about-modal.component.html',
+    styleUrls: ['./about-modal.component.scss'],
+    standalone: false
 })
 export class AboutModalComponent {
 

@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, Output, OnDestroy } from '@angular/core
 import { interval, Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-countdown-timer',
-  templateUrl: './countdown-timer.component.html',
-  styleUrls: ['./countdown-timer.component.scss'],
+    selector: 'app-countdown-timer',
+    templateUrl: './countdown-timer.component.html',
+    styleUrls: ['./countdown-timer.component.scss'],
+    standalone: false
 })
 export class CountdownTimerComponent implements OnDestroy {
   private _endTime = 0;

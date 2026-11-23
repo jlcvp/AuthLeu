@@ -14,9 +14,10 @@ const secretValidator: ValidatorFn = control => {
 }
 
 @Component({
-  selector: 'app-account-modal',
-  templateUrl: './account-modal.component.html',
-  styleUrls: ['./account-modal.component.scss'],
+    selector: 'app-account-modal',
+    templateUrl: './account-modal.component.html',
+    styleUrls: ['./account-modal.component.scss'],
+    standalone: false
 })
 export class AccountModalComponent implements OnInit {
   @ViewChild('qrscanner') qrscanner!: NgxScannerQrcodeComponent;
@@ -134,7 +135,7 @@ export class AccountModalComponent implements OnInit {
       await firstValueFrom(this.qrscanner.start())
       console.log('QR scanner started')
       await this.awaitCameraSettle()
-    } catch (error) {
+    } catch {
       // camera permission denial
       const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))
