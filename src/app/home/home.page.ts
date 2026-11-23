@@ -297,7 +297,7 @@ export class HomePage implements OnInit {
                         await account.unlock(password)
                       }
                     }
-                  } catch (error) {
+                  } catch {
                     const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.INVALID_PASSWORD'))
                     throw new Error(message)
                   }
@@ -596,7 +596,7 @@ export class HomePage implements OnInit {
             await lockedAccount.unlock(password)
           }
           success = true
-        } catch (error) {
+        } catch {
           const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
           await this.showAlert(message)
         }

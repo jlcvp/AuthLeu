@@ -134,7 +134,7 @@ export class AccountModalComponent implements OnInit {
       await firstValueFrom(this.qrscanner.start())
       console.log('QR scanner started')
       await this.awaitCameraSettle()
-    } catch (error) {
+    } catch {
       // camera permission denial
       const header = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_HEADER'))
       const message = await firstValueFrom(this.translateService.get('ADD_ACCOUNT_MODAL.ERROR_MSGS.ERROR_CAMERA_MESSAGE'))

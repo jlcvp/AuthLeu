@@ -138,7 +138,7 @@ export class Account2FA implements IAccount2FA {
         }
         try {
             Secret.fromBase32(this.secret); // this can be a costly operation, need to evaluate if it's worth it to check in a getter or have it computed once
-        } catch (error) {
+        } catch {
             return true;
         }
         return false;
@@ -168,7 +168,7 @@ export class Account2FA implements IAccount2FA {
         const decryptedSecret = await CryptoUtils.shared.decryptSecretKey(this.encryptedSecret, decryptionKey, this.salt, this.iv);
         try {
             Secret.fromBase32(decryptedSecret);
-        } catch (error) {
+        } catch {
             throw new Error('CRYPTO.INVALID_DECRYPTION_KEY');
         }
         this.secret = decryptedSecret;
@@ -193,7 +193,7 @@ export class Account2FA implements IAccount2FA {
         return this.logo || 'assets/icon/128.png';
     }
 
-    typeErased(): Object { // eslint-disable-line @typescript-eslint/ban-types
+    typeErased(): Object { // eslint-disable-line @typescript-eslint/no-wrapper-object-types
         const typeErasedObject = Object.assign({}, this);
         for (const key in typeErasedObject) {
             if (!typeErasedObject[key]) {
