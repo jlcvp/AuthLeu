@@ -1,6 +1,6 @@
 import { Observable } from "rxjs";
 import { CryptoUtils } from "../utils/crypto-utils";
-import { DataKey } from "./vault.model";
+import { DataKey, VaultRecord } from "./vault.model";
 import { Secret } from 'otpauth'
 
 /** Hash algorithms supported for code generation, as listed in the Key URI format */
@@ -33,6 +33,16 @@ export interface IAccount2FAProvider {
     clearCache?(): Promise<void>;
     /** The error that currently prevents the accounts from syncing, or undefined while they sync */
     syncError$?: Observable<unknown>;
+    /** Reads the record of the data key that encrypts the secrets, if encryption is set up */
+    getVaultRecord(): Promise<VaultRecord | undefined>;
+    /**
+     * Saves the record of a new data key, unless a record already exists (e.g. created by another device).
+     * @returns The saved record, or the existing one, which must be used instead.
+     */
+    createVaultRecord(record: VaultRecord): Promise<VaultRecord>;
+    /** Replaces the record of the data key, e.g. after a password change */
+    updateVaultRecord(record: VaultRecord): Promise<void>;
+    deleteVaultRecord(): Promise<void>;
 }
 
 export class Account2FA implements IAccount2FA {

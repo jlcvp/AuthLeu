@@ -2,8 +2,9 @@ import { inject, Injectable } from '@angular/core';
 import { Account2FA, IAccount2FAProvider } from '../../models/account2FA.model';
 import { BehaviorSubject, map, Observable, retry, Subscription, tap, timer } from 'rxjs';
 import { AuthenticationService } from '../authentication.service';
-import { clearIndexedDbPersistence, collection, collectionData, doc, DocumentData, Firestore, orderBy, query, runTransaction, serverTimestamp, setDoc, terminate, where } from '@angular/fire/firestore';
+import { clearIndexedDbPersistence, collection, collectionData, deleteDoc, doc, DocumentData, Firestore, getDoc, orderBy, query, runTransaction, serverTimestamp, setDoc, terminate, where } from '@angular/fire/firestore';
 import { LocalAccount2faService } from './local-account2fa.service';
+import { VaultRecord } from '../../models/vault.model';
 
 @Injectable({
   providedIn: 'root'
@@ -66,6 +67,37 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
     })
   }
 
+  // The vault record is kept in Firestore, so other devices can unlock with the same password,
+  // and copied to the local service, so this device can unlock while the server can't be reached
+
+  async getVaultRecord(): Promise<VaultRecord | undefined> {
+    let record: VaultRecord | undefined
+    try {
+      record = await this.readVaultDocument(await this.requireUserId())
+    } catch (error) {
+      console.warn('Failed to read the vault record, using the local copy', {error})
+      return this.localAccountService.getVaultRecord()
+    }
+    await (record ? this.localAccountService.updateVaultRecord(record) : this.localAccountService.deleteVaultRecord())
+    return record
+  }
+
+  async createVaultRecord(record: VaultRecord): Promise<VaultRecord> {
+    const saved = await this.createVaultDocument(await this.requireUserId(), record)
+    await this.localAccountService.updateVaultRecord(saved)
+    return saved
+  }
+
+  async updateVaultRecord(record: VaultRecord): Promise<void> {
+    await this.writeVaultDocument(await this.requireUserId(), record)
+    await this.localAccountService.updateVaultRecord(record)
+  }
+
+  async deleteVaultRecord(): Promise<void> {
+    await this.writeVaultDocument(await this.requireUserId(), undefined)
+    await this.localAccountService.deleteVaultRecord()
+  }
+
   public async clearCache() {
     // stop listening first: once Firestore is terminated, the listeners would fail and keep retrying
     this.subscriptions.forEach(subscription => subscription.unsubscribe())
@@ -125,6 +157,43 @@ export class RemoteAccount2faService implements IAccount2FAProvider {
   protected listenToAccounts(userId: string): Observable<DocumentData[]> {
     const accountCollection = collection(this.firestore, `accounts2fa/${userId}/accounts`)
     return collectionData(query(accountCollection, orderBy('added', 'asc'), where('active', '==', true)))
+  }
+
+  /** Reads the vault record from Firestore, or from its cache while offline */
+  protected async readVaultDocument(userId: string): Promise<VaultRecord | undefined> {
+    const snapshot = await getDoc(this.vaultDocument(userId))
+    return snapshot.exists() ? snapshot.data() as VaultRecord : undefined
+  }
+
+  /** Saves the vault record unless one already exists, and returns the saved or the existing record */
+  protected async createVaultDocument(userId: string, record: VaultRecord): Promise<VaultRecord> {
+    const document = this.vaultDocument(userId)
+    return runTransaction(this.firestore, async transaction => {
+      const snapshot = await transaction.get(document)
+      if (snapshot.exists()) {
+        return snapshot.data() as VaultRecord
+      }
+      transaction.set(document, record)
+      return record
+    })
+  }
+
+  /** Replaces the vault record, or deletes it when undefined */
+  protected async writeVaultDocument(userId: string, record: VaultRecord | undefined): Promise<void> {
+    const document = this.vaultDocument(userId)
+    await (record ? setDoc(document, record) : deleteDoc(document))
+  }
+
+  private vaultDocument(userId: string) {
+    return doc(this.firestore, `accounts2fa/${userId}/vault/current`)
+  }
+
+  private async requireUserId(): Promise<string> {
+    const userId = await this.authService.getCurrentUserId()
+    if (!userId) {
+      throw new Error('INVALID_SESSION')
+    }
+    return userId
   }
 
   /** Reads the accounts in the given documents, skipping the ones that aren't valid accounts */
