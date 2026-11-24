@@ -3,6 +3,7 @@ import { LocalStorageService } from './local-storage.service';
 import { environment } from 'src/environments/environment';
 import { ENCRYPTION_OPTIONS_DEFAULT, ENCRYPTION_OPTIONS_KEY, ENCRYPTION_OPTIONS_PASSWORD_KEY, EncryptionOptions, LAST_PASSWORD_CHECK_KEY } from '../models/encryption-options.model';
 import { AppVersionInfo } from '../models/app-version.enum';
+import { VAULT_OPTIONS_DEFAULT, VAULT_OPTIONS_KEY, VaultOptions } from '../models/vault.model';
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +35,14 @@ export class AppConfigService {
   
   async setEncryptionOptions(options: EncryptionOptions) {
     await this.localStorage.set(ENCRYPTION_OPTIONS_KEY, options);
+  }
+
+  async getVaultOptions(): Promise<VaultOptions> {
+    return { ...VAULT_OPTIONS_DEFAULT, ...(await this.localStorage.get<Partial<VaultOptions>>(VAULT_OPTIONS_KEY)) };
+  }
+
+  async setVaultOptions(options: Partial<VaultOptions>) {
+    await this.localStorage.set(VAULT_OPTIONS_KEY, { ...(await this.getVaultOptions()), ...options });
   }
 
   async getEncryptionKey() {
