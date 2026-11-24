@@ -1,4 +1,6 @@
+import { CryptoUtils } from "../utils/crypto-utils"
 import { Account2FA } from "./account2FA.model"
+import { DataKey } from "./vault.model"
 
 const SECRET = 'JBSWY3DPEHPK3PXP'
 
@@ -76,6 +78,62 @@ describe('Account2FA', () => {
             expect(account.tokenLength).toBe(8)
             expect(account.interval).toBe(60)
             expect(account.algorithm).toBe('SHA256')
+        })
+    })
+
+    describe('data key encryption', () => {
+        let dataKey: DataKey
+
+        beforeAll(async () => {
+            dataKey = (await CryptoUtils.shared.createDataKey('password', 1000)).dataKey
+        })
+
+        it('encrypts and decrypts the secret with a data key', async () => {
+            const account = new Account2FA('id', 'john', SECRET)
+
+            await account.lockWithDataKey(dataKey)
+            expect(account.secret).toBe('')
+            expect(account.keyId).toBe(dataKey.keyId)
+            expect(account.isEncrypted).toBeTrue()
+            expect(account.isLegacyEncrypted).toBeFalse()
+            expect(account.isLocked).toBeTrue()
+
+            await account.unlockWithDataKey(dataKey)
+            expect(account.secret).toBe(SECRET)
+            expect(account.encryptedSecret).toBeUndefined()
+            expect(account.keyId).toBeUndefined()
+        })
+
+        it('rejects a secret encrypted with another data key', async () => {
+            const otherKey = (await CryptoUtils.shared.createDataKey('password', 1000)).dataKey
+            const account = new Account2FA('id', 'john', SECRET)
+            await account.lockWithDataKey(otherKey)
+
+            await expectAsync(account.unlockWithDataKey(dataKey)).toBeRejectedWithError('CRYPTO.WRONG_DATA_KEY')
+        })
+
+        it('replaces the 2.x encryption when encrypting with a data key', async () => {
+            const account = new Account2FA('id', 'john', SECRET)
+            await account.lock('password')
+            expect(account.isLegacyEncrypted).toBeTrue()
+
+            await account.unlock('password')
+            await account.lockWithDataKey(dataKey)
+
+            expect(account.salt).toBeUndefined()
+            expect(account.isLegacyEncrypted).toBeFalse()
+        })
+
+        it('reads and copies data key encrypted accounts', async () => {
+            const account = new Account2FA('id', 'john', SECRET)
+            await account.lockWithDataKey(dataKey)
+
+            const read = Account2FA.fromDictionary(JSON.parse(JSON.stringify(account)))
+            expect(read.keyId).toBe(dataKey.keyId)
+            expect(read.copy().keyId).toBe(dataKey.keyId)
+
+            await read.unlockWithDataKey(dataKey)
+            expect(read.secret).toBe(SECRET)
         })
     })
 })
