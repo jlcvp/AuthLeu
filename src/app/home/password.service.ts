@@ -23,10 +23,11 @@ export class PasswordService {
 
   /**
    * Asks for a new password, twice. The password isn't stored.
+   * @param messageKey - Translation key of the message shown in the prompt.
    * @returns The password, or undefined if the prompt was cancelled or the passwords don't match.
    */
-  public async setupNewPassword(): Promise<string | undefined> {
-    const passwordData = await this.promptNewPassword()
+  public async setupNewPassword(messageKey = 'HOME.PASSWORD_PROMPT_MESSAGE'): Promise<string | undefined> {
+    const passwordData = await this.promptNewPassword(messageKey)
     if(passwordData && passwordData.password && passwordData.password === passwordData.passwordConfirmation) {
       await this.configService.setLastPasswordCheck()
       return passwordData.password
@@ -98,9 +99,9 @@ export class PasswordService {
     return false
   }
 
-  private async promptNewPassword(): Promise<{password: string, passwordConfirmation: string}> {
+  private async promptNewPassword(messageKey: string): Promise<{password: string, passwordConfirmation: string}> {
     const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_MESSAGE'))
+    const message = await firstValueFrom(this.translateService.get(messageKey))
     const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_PLACEHOLDER'))
     const passwordConfirmationPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
     const cancelText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CANCEL'))
@@ -145,8 +146,13 @@ export class PasswordService {
     return data.values
   }
 
-  public async promptUnlockPassword(): Promise<string> {
-    const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.MESSAGE'))
+  /**
+   * Asks for the password.
+   * @param messageKey - Translation key of the message shown in the prompt.
+   * @returns The password, or an empty string if the prompt was cancelled.
+   */
+  public async promptUnlockPassword(messageKey = 'HOME.ASK_PASSWORD.MESSAGE'): Promise<string> {
+    const message = await firstValueFrom(this.translateService.get(messageKey))
     const confirm = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.CONFIRM'))
     const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
     const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))

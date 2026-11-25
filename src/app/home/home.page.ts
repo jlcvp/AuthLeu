@@ -10,12 +10,14 @@ import { GlobalUtils } from '../utils/global-utils';
 import { AccountSelectModalComponent } from './components/account-select-modal/account-select-modal.component';
 import { AppConfigService } from '../services/app-config.service';
 import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions } from '../models/encryption-options.model';
+import { VAULT_OPTIONS_DEFAULT } from '../models/vault.model';
 import { MigrationService } from '../services/migration.service';
 import { LoggingService } from '../services/logging.service';
 import { AppVersionInfo } from '../models/app-version.enum';
 import { PasswordService } from './password.service';
 import { AccountModalComponent } from './components/account-modal/account-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
+import { AutoLockService } from '../services/auto-lock.service';
 
 @Component({
     selector: 'app-home',
@@ -60,6 +62,7 @@ export class HomePage implements OnInit {
     private loggingService: LoggingService,
     private passwordService: PasswordService,
     private navCtrl: NavController,
+    private autoLock: AutoLockService,
   ) {
     this.versionInfo = this.configService.versionInfo
   }
@@ -95,6 +98,17 @@ export class HomePage implements OnInit {
     return this.encryptionOptions.shouldPerformPeriodicCheck
   }
 
+  /** Whether encryption is set up but the data key is locked, so the lock screen covers the app */
+  get isLocked(): boolean {
+    return this.hasVaultRecord && !this.accountsService.isUnlocked
+  }
+
+  // Unlock settings, when encryption is set up
+  hasVaultRecord = false
+  askPasswordOnOpen = false
+  autoLockMinutes = VAULT_OPTIONS_DEFAULT.autoLockMinutes
+  readonly autoLockChoices = [1, 5, 15, 0] // 0 = never
+
   async ngOnInit() {
     await this.migrationService.migrate()
     this.onWindowResize()
@@ -103,6 +117,7 @@ export class HomePage implements OnInit {
     await this.setupEncryption()
     await this.loadAccounts()
     this.watchSyncErrors()
+    this.autoLock.start()
     await this.configService.setFirstRun(false)
   }
 
@@ -432,8 +447,8 @@ export class HomePage implements OnInit {
     const loadingMsg = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS'))
     await this.presentLoading(loadingMsg)
     const accounts$ = (await this.accountsService.getAccounts()).pipe(tap(accounts => {
-      // only encrypted accounts can be unlocked with a password
-      const lockedAccounts = accounts.filter(account => account.isEncrypted && account.isLocked)
+      // the lock screen unlocks the data key; a password can still decrypt the accounts 2.x encrypted
+      const lockedAccounts = this.isLocked ? [] : accounts.filter(account => account.isLegacyEncrypted && account.isLocked)
       this.hasLockedAccounts = lockedAccounts.length > 0
       if(this.shouldAlertAboutLockedAccounts && this.hasLockedAccounts) {
         this.shouldAlertAboutLockedAccounts = false
@@ -478,15 +493,14 @@ export class HomePage implements OnInit {
     if (!migrationPending && this.isEncryptionActive !== !!record) {
       await this.setEncryptionActive(!!record)
     }
+    this.hasVaultRecord = !!record
     if (!record) {
       return
     }
+    await this.loadUnlockSettings()
 
-    if (!(await this.accountsService.restoreUnlock())) {
-      await this.unlockWithPassword()
-    }
-
-    if (this.accountsService.isUnlocked) {
+    // without a data key remembered on this device, the lock screen asks for the password
+    if (await this.accountsService.restoreUnlock()) {
       await this.upgradeLegacyAccountsWithStoredPassword()
       if (this.shouldPeriodicCheckPassword) {
         console.log("Starting periodic password check")
@@ -495,24 +509,59 @@ export class HomePage implements OnInit {
     }
   }
 
-  /** Asks for the password until it unlocks the data key, or the user cancels */
-  private async unlockWithPassword(): Promise<boolean> {
-    let unlocked = false
-    while (!unlocked) {
-      const password = await this.passwordService.promptUnlockPassword()
-      if (!password) {
-        break
-      }
-      try {
-        await this.accountsService.unlock(password)
-        unlocked = true
-      } catch (error) {
-        console.error("Error unlocking", error)
-        const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
-        await this.showAlert(message)
-      }
+  /** Called when the lock screen unlocks the data key */
+  async onUnlocked() {
+    await this.configService.setLastPasswordCheck() // the user just entered the password
+    await this.upgradeLegacyAccountsWithStoredPassword()
+  }
+
+  private async loadUnlockSettings() {
+    const { rememberUnlock, autoLockMinutes } = await this.configService.getVaultOptions()
+    this.askPasswordOnOpen = !rememberUnlock
+    this.autoLockMinutes = autoLockMinutes
+  }
+
+  async askPasswordOnOpenToggle() {
+    this.askPasswordOnOpen = !this.askPasswordOnOpen
+    await this.accountsService.setUnlockRemembered(!this.askPasswordOnOpen)
+  }
+
+  async autoLockChange(minutes: number) {
+    this.autoLockMinutes = minutes
+    await this.configService.setVaultOptions({ autoLockMinutes: minutes })
+  }
+
+  lockAction() {
+    this.popover?.dismiss()
+    this.accountsService.lock()
+  }
+
+  async changePasswordAction() {
+    this.popover?.dismiss()
+    const currentPassword = await this.passwordService.promptUnlockPassword('HOME.CHANGE_PASSWORD.CURRENT')
+    if (!currentPassword) {
+      return
     }
-    return unlocked
+    if (!(await this.accountsService.verifyPassword(currentPassword))) {
+      const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
+      await this.showAlert(message)
+      return
+    }
+    const newPassword = await this.passwordService.setupNewPassword('HOME.CHANGE_PASSWORD.NEW')
+    if (!newPassword) {
+      return
+    }
+    try {
+      await this.accountsService.changePassword(currentPassword, newPassword)
+    } catch (error) {
+      console.error("Error changing the password", error)
+      const message = await firstValueFrom(this.translateService.get('HOME.CHANGE_PASSWORD.FAILED'))
+      await this.showAlert(message)
+      return
+    }
+    const message = await firstValueFrom(this.translateService.get('HOME.CHANGE_PASSWORD.DONE'))
+    const toast = await this.toastController.create({ message, duration: 2000 })
+    await toast.present()
   }
 
   private async activateEncryption(): Promise<void> {
@@ -532,6 +581,8 @@ export class HomePage implements OnInit {
       return
     }
     console.log("accounts encrypted")
+    this.hasVaultRecord = true
+    await this.loadUnlockSettings()
     await this.setEncryptionActive(true)
   }
 
@@ -550,6 +601,7 @@ export class HomePage implements OnInit {
       return
     }
     console.log("accounts decrypted")
+    this.hasVaultRecord = false
     await this.setEncryptionActive(false)
   }
 
@@ -594,23 +646,16 @@ export class HomePage implements OnInit {
       return
     }
 
-    // accounts encrypted with the data key unlock with the password
-    if (!this.accountsService.isUnlocked && lockedAccounts.some(account => account.keyId)) {
-      await this.unlockWithPassword()
-    }
-
-    // accounts encrypted by 2.x (e.g. on a device that hasn't updated yet) are re-encrypted with the data key
-    const legacyAccounts = lockedAccounts.filter(account => account.isLegacyEncrypted)
-    if (legacyAccounts.length === 0) {
-      return
-    }
-    const password = await this.promptUnlockPassword(legacyAccounts)
+    // the accounts were encrypted by 2.x (e.g. on a device that hasn't updated yet): re-encrypt them with the data key
+    const password = await this.promptUnlockPassword(lockedAccounts)
     if (!password) {
       return
     }
     try {
       if (!(await this.accountsService.getVaultRecord())) {
         await this.accountsService.enableEncryption(password)
+        this.hasVaultRecord = true
+        await this.loadUnlockSettings()
         await this.setEncryptionActive(true)
       }
       await this.accountsService.upgradeLegacyAccounts(password)

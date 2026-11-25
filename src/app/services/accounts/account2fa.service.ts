@@ -143,6 +143,15 @@ export class Account2faService {
     this.vault.lock()
   }
 
+  /** Whether the unlocked data key is kept on this device, instead of asking for the password on every launch */
+  public async isUnlockRemembered(): Promise<boolean> {
+    return this.vault.isRemembered()
+  }
+
+  public async setUnlockRemembered(remembered: boolean): Promise<void> {
+    await this.vault.setRemembered(remembered)
+  }
+
   /** Checks a password against the data key, without unlocking it */
   public async verifyPassword(password: string): Promise<boolean> {
     return this.vault.verifyPassword(await this.requireVaultRecord(), password)

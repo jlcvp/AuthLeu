@@ -71,6 +71,11 @@
   },
   "CONFIG_MENU": {
     "ADD_ACCOUNT": "Add Account",
+    "ASK_PASSWORD_ON_OPEN": "Ask for Password on Open",
+    "AUTO_LOCK": "Auto-Lock",
+    "AUTO_LOCK_MINUTES": "{{minutes}} min",
+    "AUTO_LOCK_NEVER": "Never",
+    "CHANGE_PASSWORD": "Change Password",
     "COLOR_MODE": "Color Mode",
     "COLOR_MODE_DARK": "Dark",
     "COLOR_MODE_LIGHT": "Light",
@@ -81,6 +86,7 @@
     "ENCRYPT_ACCOUNTS": "Encrypt Accounts",
     "EXPORT_ACCOUNTS": "Export Backup",
     "IMPORT_ACCOUNTS": "Import Backup",
+    "LOCK_NOW": "Lock Now",
     "LOGOUT": "Sign out",
     "PERIODIC_CHECK": "Periodic Password Check",
     "UNLOCK_ACCOUNTS": "Decrypt accounts",
@@ -100,6 +106,12 @@
       "KEEP_LOCKED": "Do not decrypt"
     },
     "CANCEL": "Cancel",
+    "CHANGE_PASSWORD": {
+      "CURRENT": "Enter your current password.",
+      "DONE": "Password changed",
+      "FAILED": "Unable to change the password. The current password still works.",
+      "NEW": "Enter the new password. Your other devices will ask for it the next time they need the password."
+    },
     "CONFIRM_LOGOUT_MESSAGE": "<p>All local or unsynchronized accounts will be deleted!</p><p><strong>This action cannot be undone.</strong></p>",
     "CONFIRM_LOGOUT_TITLE": "Are you sure you want to sign out?",
     "CONFIRM_LOGOUT_YES": "CLEAR LOCAL DATA AND SIGN OUT",
@@ -139,6 +151,12 @@
       "TITLE": "Password Confirmation"
     },
     "UNLOCK_ACCOUNTS": "Enter Password"
+  },
+  "LOCK_SCREEN": {
+    "MESSAGE": "Enter your password to see your codes.",
+    "PASSWORD": "Password",
+    "TITLE": "AuthLeu is locked",
+    "UNLOCK": "Unlock"
   },
   "LOGIN": {
     "AUTHENTICATING": "Authenticating...",

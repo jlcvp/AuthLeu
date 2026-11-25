@@ -71,6 +71,11 @@
   },
   "CONFIG_MENU": {
     "ADD_ACCOUNT": "Adicionar Conta",
+    "ASK_PASSWORD_ON_OPEN": "Pedir Senha ao Abrir",
+    "AUTO_LOCK": "Bloqueio Automático",
+    "AUTO_LOCK_MINUTES": "{{minutes}} min",
+    "AUTO_LOCK_NEVER": "Nunca",
+    "CHANGE_PASSWORD": "Alterar Senha",
     "COLOR_MODE": "Modo de Cor",
     "COLOR_MODE_DARK": "Escuro",
     "COLOR_MODE_LIGHT": "Claro",
@@ -81,6 +86,7 @@
     "ENCRYPT_ACCOUNTS": "Criptografar Contas",
     "EXPORT_ACCOUNTS": "Exportar Backup",
     "IMPORT_ACCOUNTS": "Importar Backup",
+    "LOCK_NOW": "Bloquear Agora",
     "LOGOUT": "Sair",
     "PERIODIC_CHECK": "Re-checagem periódica",
     "UNLOCK_ACCOUNTS": "Decriptar contas",
@@ -100,6 +106,12 @@
       "KEEP_LOCKED": "Não descriptografar"
     },
     "CANCEL": "Cancelar",
+    "CHANGE_PASSWORD": {
+      "CURRENT": "Digite sua senha atual.",
+      "DONE": "Senha alterada",
+      "FAILED": "Não foi possível alterar a senha. A senha atual continua valendo.",
+      "NEW": "Digite a nova senha. Seus outros dispositivos vão pedi-la na próxima vez que precisarem da senha."
+    },
     "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
     "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
     "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
@@ -139,6 +151,12 @@
       "TITLE": "Confirmação de Senha"
     },
     "UNLOCK_ACCOUNTS": "Inserir Senha"
+  },
+  "LOCK_SCREEN": {
+    "MESSAGE": "Digite sua senha para ver seus códigos.",
+    "PASSWORD": "Senha",
+    "TITLE": "O AuthLeu está bloqueado",
+    "UNLOCK": "Desbloquear"
   },
   "LOGIN": {
     "AUTHENTICATING": "Autenticando...",
