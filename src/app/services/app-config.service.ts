@@ -30,7 +30,7 @@ export class AppConfigService {
   }
 
   async getEncryptionOptions(): Promise<EncryptionOptions> {
-    return (await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY)) || ENCRYPTION_OPTIONS_DEFAULT;
+    return (await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY)) || { ...ENCRYPTION_OPTIONS_DEFAULT };
   }
   
   async setEncryptionOptions(options: EncryptionOptions) {
@@ -45,15 +45,12 @@ export class AppConfigService {
     await this.localStorage.set(VAULT_OPTIONS_KEY, { ...(await this.getVaultOptions()), ...options });
   }
 
-  async getEncryptionKey() {
+  /** The encryption password stored by 2.x. 3.0 stores no password; the 3.0.0 migration deletes it */
+  async getLegacyEncryptionPassword() {
     return await this.localStorage.get<string>(ENCRYPTION_OPTIONS_PASSWORD_KEY);
   }
 
-  async setEncryptionKey(key: string) {
-    await this.localStorage.set(ENCRYPTION_OPTIONS_PASSWORD_KEY, key);
-  }
-
-  async clearEncryptionKey() {
+  async clearLegacyEncryptionPassword() {
     await this.localStorage.remove(ENCRYPTION_OPTIONS_PASSWORD_KEY);
   }
 

@@ -108,6 +108,7 @@
       "ACCOUNTS_LOCKED_TITLE": "Encrypted accounts detected",
       "DECRYPTION_FAILED": "Unable to decrypt your accounts. Encryption is still on.",
       "ENCRYPTION_FAILED": "Unable to encrypt your accounts. Encryption is still off.",
+      "ENCRYPTION_SET_UP_ELSEWHERE": "Encryption was already set up on another device with a different password. Use that password to unlock your accounts.",
       "PASSWORD_NOT_SET": "A password was not set.<p>Encryption feature will be deactivted.</p>",
       "PASSWORD_NOT_SET_TITLE": "Warning",
       "SYNC_FAILED": "Unable to sync with the cloud, so your accounts may be out of date. Trying again…",

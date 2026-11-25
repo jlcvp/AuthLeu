@@ -187,8 +187,9 @@ export class Account2FA implements IAccount2FA {
             throw new Error('CRYPTO.MISSING_ENCRYPTED_DATA');
         }
 
-        const decryptedSecret = await CryptoUtils.shared.decryptSecretKey(this.encryptedSecret, decryptionKey, this.salt, this.iv);
+        let decryptedSecret: string;
         try {
+            decryptedSecret = await CryptoUtils.shared.decryptSecretKey(this.encryptedSecret, decryptionKey, this.salt, this.iv);
             Secret.fromBase32(decryptedSecret);
         } catch {
             throw new Error('CRYPTO.INVALID_DECRYPTION_KEY');

@@ -108,6 +108,7 @@
       "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
       "DECRYPTION_FAILED": "Não foi possível descriptografar suas contas. A criptografia continua ativada.",
       "ENCRYPTION_FAILED": "Não foi possível criptografar suas contas. A criptografia continua desativada.",
+      "ENCRYPTION_SET_UP_ELSEWHERE": "A criptografia já foi configurada em outro dispositivo com uma senha diferente. Use essa senha para desbloquear suas contas.",
       "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
       "PASSWORD_NOT_SET_TITLE": "Atenção",
       "SYNC_FAILED": "Não foi possível sincronizar com a nuvem, então suas contas podem estar desatualizadas. Tentando novamente…",

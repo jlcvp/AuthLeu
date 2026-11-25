@@ -28,13 +28,12 @@ describe('HomePage', () => {
 
   beforeEach(() => {
     syncError$ = new BehaviorSubject<unknown>(undefined)
-    accountsService = jasmine.createSpyObj<Account2faService>('Account2faService', ['clearCache', 'encryptAccounts', 'decryptAccounts'], { syncError$ })
+    accountsService = jasmine.createSpyObj<Account2faService>('Account2faService', ['clearCache', 'enableEncryption', 'disableEncryption'], { syncError$ })
     authService = jasmine.createSpyObj<AuthenticationService>('AuthenticationService', ['logout'])
     storageService = jasmine.createSpyObj<LocalStorageService>('LocalStorageService', ['clearStorage'])
-    configService = jasmine.createSpyObj<AppConfigService>('AppConfigService', ['getEncryptionKey', 'clearEncryptionKey', 'setEncryptionOptions'], { versionInfo: undefined })
-    configService.clearEncryptionKey.and.resolveTo()
+    configService = jasmine.createSpyObj<AppConfigService>('AppConfigService', ['setEncryptionOptions'], { versionInfo: undefined })
     configService.setEncryptionOptions.and.resolveTo()
-    passwordService = jasmine.createSpyObj<PasswordService>('PasswordService', ['setupNewPassword'])
+    passwordService = jasmine.createSpyObj<PasswordService>('PasswordService', ['setupNewPassword', 'promptUnlockPassword'])
 
     alerts = []
     const alertController = {
@@ -88,26 +87,81 @@ describe('HomePage', () => {
   })
 
   describe('encryptionActiveToggle', () => {
-    it('forgets the new password and tells the user when encrypting fails', async () => {
-      passwordService.setupNewPassword.and.resolveTo(true)
-      accountsService.encryptAccounts.and.rejectWith(new Error('offline'))
+    beforeEach(() => {
+      page['encryptionOptions'] = { encryptionActive: false, shouldPerformPeriodicCheck: false }
+    })
+
+    it('turns encryption on with the new password', async () => {
+      passwordService.setupNewPassword.and.resolveTo('secret')
+      accountsService.enableEncryption.and.resolveTo()
 
       await page.encryptionActiveToggle()
 
-      expect(configService.clearEncryptionKey).toHaveBeenCalled()
-      expect(configService.setEncryptionOptions).not.toHaveBeenCalled()
+      expect(accountsService.enableEncryption).toHaveBeenCalledWith('secret')
+      expect(page.isEncryptionActive).toBeTrue()
+      expect(configService.setEncryptionOptions).toHaveBeenCalled()
+    })
+
+    it('keeps encryption off and tells the user when encrypting fails', async () => {
+      passwordService.setupNewPassword.and.resolveTo('secret')
+      accountsService.enableEncryption.and.rejectWith(new Error('offline'))
+
+      await page.encryptionActiveToggle()
+
       expect(page.isEncryptionActive).toBeFalse()
+      expect(configService.setEncryptionOptions).not.toHaveBeenCalled()
       expect(alerts).toEqual(['HOME.ERRORS.ENCRYPTION_FAILED'])
+    })
+
+    it('tells the user when another device set up encryption with another password', async () => {
+      passwordService.setupNewPassword.and.resolveTo('secret')
+      accountsService.enableEncryption.and.rejectWith(new Error('VAULT.INVALID_PASSWORD'))
+
+      await page.encryptionActiveToggle()
+
+      expect(page.isEncryptionActive).toBeFalse()
+      expect(alerts).toEqual(['HOME.ERRORS.ENCRYPTION_SET_UP_ELSEWHERE'])
+    })
+
+    it('asks for the password before turning encryption off', async () => {
+      page['encryptionOptions'] = { encryptionActive: true, shouldPerformPeriodicCheck: true }
+      passwordService.promptUnlockPassword.and.resolveTo('secret')
+      accountsService.disableEncryption.and.resolveTo()
+
+      await page.encryptionActiveToggle()
+
+      expect(accountsService.disableEncryption).toHaveBeenCalledWith('secret')
+      expect(page.isEncryptionActive).toBeFalse()
+    })
+
+    it('keeps encryption on when the password prompt is cancelled', async () => {
+      page['encryptionOptions'] = { encryptionActive: true, shouldPerformPeriodicCheck: true }
+      passwordService.promptUnlockPassword.and.resolveTo('')
+
+      await page.encryptionActiveToggle()
+
+      expect(accountsService.disableEncryption).not.toHaveBeenCalled()
+      expect(page.isEncryptionActive).toBeTrue()
+    })
+
+    it('keeps encryption on and tells the user when the password is wrong', async () => {
+      page['encryptionOptions'] = { encryptionActive: true, shouldPerformPeriodicCheck: true }
+      passwordService.promptUnlockPassword.and.resolveTo('wrong password')
+      accountsService.disableEncryption.and.rejectWith(new Error('VAULT.INVALID_PASSWORD'))
+
+      await page.encryptionActiveToggle()
+
+      expect(page.isEncryptionActive).toBeTrue()
+      expect(alerts).toEqual(['HOME.ERRORS.INVALID_PASSWORD'])
     })
 
     it('keeps encryption on and tells the user when decrypting fails', async () => {
       page['encryptionOptions'] = { encryptionActive: true, shouldPerformPeriodicCheck: true }
-      configService.getEncryptionKey.and.resolveTo('password')
-      accountsService.decryptAccounts.and.rejectWith(new Error('wrong password'))
+      passwordService.promptUnlockPassword.and.resolveTo('secret')
+      accountsService.disableEncryption.and.rejectWith(new Error('offline'))
 
       await page.encryptionActiveToggle()
 
-      expect(configService.clearEncryptionKey).not.toHaveBeenCalled()
       expect(page.isEncryptionActive).toBeTrue()
       expect(alerts).toEqual(['HOME.ERRORS.DECRYPTION_FAILED'])
     })

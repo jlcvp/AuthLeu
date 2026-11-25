@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { AlertController } from '@ionic/angular';
 import { PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
+import { Account2faService } from '../services/accounts/account2fa.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,17 +17,21 @@ export class PasswordService {
   constructor(
     private alertController: AlertController,
     private configService: AppConfigService,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private accountsService: Account2faService
   ) { }
 
-  public async setupNewPassword(): Promise<boolean> {
+  /**
+   * Asks for a new password, twice. The password isn't stored.
+   * @returns The password, or undefined if the prompt was cancelled or the passwords don't match.
+   */
+  public async setupNewPassword(): Promise<string | undefined> {
     const passwordData = await this.promptNewPassword()
     if(passwordData && passwordData.password && passwordData.password === passwordData.passwordConfirmation) {
-      await this.configService.setEncryptionKey(passwordData.password)
       await this.configService.setLastPasswordCheck()
-      return true 
+      return passwordData.password
     }
-    return false
+    return undefined
   }
 
   public async periodicPasswordCheck() {
@@ -43,12 +48,6 @@ export class PasswordService {
         await this.alertUserAboutInabilityToRecoverPassword()
       }
     }
-  }
-  
-  public async showFailedPasswordSetupAlert() {
-    const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET_TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET'))
-    this.showAlert(message, title)
   }
   
   private async presentPasswordCheckAlert(): Promise<boolean> {
@@ -86,9 +85,8 @@ export class PasswordService {
 
     const { data, role } = await alert.onDidDismiss()
     if (role === 'confirm') {
-      console.log('password check', { data })
       const password = data.values.password
-      if(password !== await this.configService.getEncryptionKey()) {
+      if(!(await this.accountsService.verifyPassword(password))) {
         const tryAgain = await this.presentPasswordCheckMismatchAlert()
         if(tryAgain) {
           return await this.presentPasswordCheckAlert()
