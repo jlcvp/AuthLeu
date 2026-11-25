@@ -27,9 +27,11 @@
     "ERROR": {
       "CORRUPT_BACKUP_FILE": "Arquivo de backup corrompido",
       "EMPTY_FILE": "O arquivo está vazio",
+      "GENERIC_EXPORT_ERROR": "Erro desconhecido ao exportar contas",
       "GENERIC_IMPORT_ERROR": "Erro desconhecido ao importar contas do backup",
       "IMPORT_ERROR_TITLE": "Erro ao importar contas",
       "INVALID_PASSWORD": "Não foi possível decodificar as contas com a senha informada. A importação de contas foi abortada.",
+      "INVALID_SECRET": "O backup tem uma conta com uma chave secreta inválida.",
       "NO_ACCOUNTS_SELECTED_TO_EXPORT": "Você deve selecionar pelo menos uma conta para exportar",
       "NO_ACCOUNTS_SELECTED_TO_IMPORT": "Nenhuma conta selecionada para importar",
       "NO_PASSWORD_PROVIDED": "É necessário informar uma senha para desencriptar as contas"
@@ -45,6 +47,7 @@
   },
   "ADD_ACCOUNT_MODAL": {
     "ADDING_ACCOUNT": "Adicionando conta...",
+    "ALGORITHM": "Algoritmo",
     "ERROR_MSGS": {
       "ERROR_ADDING_ACCOUNT": "Erro ao adicionar conta",
       "ERROR_CAMERA_HEADER": "Câmera não disponível",
@@ -68,6 +71,11 @@
   },
   "CONFIG_MENU": {
     "ADD_ACCOUNT": "Adicionar Conta",
+    "ASK_PASSWORD_ON_OPEN": "Pedir Senha ao Abrir",
+    "AUTO_LOCK": "Bloqueio Automático",
+    "AUTO_LOCK_MINUTES": "{{minutes}} min",
+    "AUTO_LOCK_NEVER": "Nunca",
+    "CHANGE_PASSWORD": "Alterar Senha",
     "COLOR_MODE": "Modo de Cor",
     "COLOR_MODE_DARK": "Escuro",
     "COLOR_MODE_LIGHT": "Claro",
@@ -78,6 +86,7 @@
     "ENCRYPT_ACCOUNTS": "Criptografar Contas",
     "EXPORT_ACCOUNTS": "Exportar Backup",
     "IMPORT_ACCOUNTS": "Importar Backup",
+    "LOCK_NOW": "Bloquear Agora",
     "LOGOUT": "Sair",
     "PERIODIC_CHECK": "Re-checagem periódica",
     "UNLOCK_ACCOUNTS": "Decriptar contas",
@@ -97,14 +106,24 @@
       "KEEP_LOCKED": "Não descriptografar"
     },
     "CANCEL": "Cancelar",
+    "CHANGE_PASSWORD": {
+      "CURRENT": "Digite sua senha atual.",
+      "DONE": "Senha alterada",
+      "FAILED": "Não foi possível alterar a senha. A senha atual continua valendo.",
+      "NEW": "Digite a nova senha. Seus outros dispositivos vão pedi-la na próxima vez que precisarem da senha."
+    },
     "CONFIRM_LOGOUT_MESSAGE": "<p>Todas as contas locais e não sincronizadas serão excluídas!</p><p><strong>Esta ação não pode ser desfeita.</strong></p>",
     "CONFIRM_LOGOUT_TITLE": "Tem certeza de que deseja sair?",
     "CONFIRM_LOGOUT_YES": "LIMPAR DADOS LOCAIS E SAIR",
     "ERRORS": {
       "ACCOUNTS_LOCKED": "Suas contas estão criptografadas. Não será possível gerar os códigos de acesso até que eles sejam descriptografados usando a senha de criptografia.",
       "ACCOUNTS_LOCKED_TITLE": "Contas criptografadas",
+      "DECRYPTION_FAILED": "Não foi possível descriptografar suas contas. A criptografia continua ativada.",
+      "ENCRYPTION_FAILED": "Não foi possível criptografar suas contas. A criptografia continua desativada.",
+      "ENCRYPTION_SET_UP_ELSEWHERE": "A criptografia já foi configurada em outro dispositivo com uma senha diferente. Use essa senha para desbloquear suas contas.",
       "PASSWORD_NOT_SET": "A senha não foi definida.<p>A funcionalidade de criptografia não foi ativada.</p>",
       "PASSWORD_NOT_SET_TITLE": "Atenção",
+      "SYNC_FAILED": "Não foi possível sincronizar com a nuvem, então suas contas podem estar desatualizadas. Tentando novamente…",
       "INVALID_PASSWORD": "Senha inválida"
     },
     "LOADING_ACCOUNTS": "Carregando contas...",
@@ -132,6 +151,12 @@
       "TITLE": "Confirmação de Senha"
     },
     "UNLOCK_ACCOUNTS": "Inserir Senha"
+  },
+  "LOCK_SCREEN": {
+    "MESSAGE": "Digite sua senha para ver seus códigos.",
+    "PASSWORD": "Senha",
+    "TITLE": "O AuthLeu está bloqueado",
+    "UNLOCK": "Desbloquear"
   },
   "LOGIN": {
     "AUTHENTICATING": "Autenticando...",

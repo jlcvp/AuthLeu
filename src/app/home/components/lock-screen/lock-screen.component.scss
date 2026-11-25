@@ -1,0 +1,26 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1000; // above the page and its header, below Ionic's overlays (alerts, toasts)
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ion-background-color, #fff);
+}
+
+.lock-screen {
+  width: 100%;
+  max-width: 360px;
+  padding: 24px;
+  text-align: center;
+}
+
+.lock-logo {
+  width: 96px;
+  height: 96px;
+}
+
+form {
+  margin: 16px 0 8px;
+  text-align: start;
+}

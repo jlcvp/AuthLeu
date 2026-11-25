@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { AlertController } from '@ionic/angular';
 import { PASSWORD_CHECK_PERIOD } from '../models/encryption-options.model';
+import { Account2faService } from '../services/accounts/account2fa.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,17 +17,22 @@ export class PasswordService {
   constructor(
     private alertController: AlertController,
     private configService: AppConfigService,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private accountsService: Account2faService
   ) { }
 
-  public async setupNewPassword(): Promise<boolean> {
-    const passwordData = await this.promptNewPassword()
+  /**
+   * Asks for a new password, twice. The password isn't stored.
+   * @param messageKey - Translation key of the message shown in the prompt.
+   * @returns The password, or undefined if the prompt was cancelled or the passwords don't match.
+   */
+  public async setupNewPassword(messageKey = 'HOME.PASSWORD_PROMPT_MESSAGE'): Promise<string | undefined> {
+    const passwordData = await this.promptNewPassword(messageKey)
     if(passwordData && passwordData.password && passwordData.password === passwordData.passwordConfirmation) {
-      await this.configService.setEncryptionKey(passwordData.password)
       await this.configService.setLastPasswordCheck()
-      return true 
+      return passwordData.password
     }
-    return false
+    return undefined
   }
 
   public async periodicPasswordCheck() {
@@ -43,12 +49,6 @@ export class PasswordService {
         await this.alertUserAboutInabilityToRecoverPassword()
       }
     }
-  }
-  
-  public async showFailedPasswordSetupAlert() {
-    const title = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET_TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.PASSWORD_NOT_SET'))
-    this.showAlert(message, title)
   }
   
   private async presentPasswordCheckAlert(): Promise<boolean> {
@@ -86,9 +86,8 @@ export class PasswordService {
 
     const { data, role } = await alert.onDidDismiss()
     if (role === 'confirm') {
-      console.log('password check', { data })
       const password = data.values.password
-      if(password !== await this.configService.getEncryptionKey()) {
+      if(!(await this.accountsService.verifyPassword(password))) {
         const tryAgain = await this.presentPasswordCheckMismatchAlert()
         if(tryAgain) {
           return await this.presentPasswordCheckAlert()
@@ -100,9 +99,9 @@ export class PasswordService {
     return false
   }
 
-  private async promptNewPassword(): Promise<{password: string, passwordConfirmation: string}> {
+  private async promptNewPassword(messageKey: string): Promise<{password: string, passwordConfirmation: string}> {
     const title = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_TITLE'))
-    const message = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_MESSAGE'))
+    const message = await firstValueFrom(this.translateService.get(messageKey))
     const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_PLACEHOLDER'))
     const passwordConfirmationPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
     const cancelText = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CANCEL'))
@@ -130,6 +129,7 @@ export class PasswordService {
           role: 'cancel'
         }, {
           text: okText,
+          role: 'confirm',
           handler: (data) => {
             return { password: data.password, passwordConfirmation: data.passwordConfirmation }
           }
@@ -138,15 +138,21 @@ export class PasswordService {
     })
     await alert.present()
 
-    const { data } = await alert.onDidDismiss()
-    if(!data) {
+    // Ionic passes the typed values even when the alert is cancelled
+    const { data, role } = await alert.onDidDismiss()
+    if(role !== 'confirm' || !data) {
       return { password: '', passwordConfirmation: '' }
     }
     return data.values
   }
 
-  public async promptUnlockPassword(): Promise<string> {
-    const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.MESSAGE'))
+  /**
+   * Asks for the password.
+   * @param messageKey - Translation key of the message shown in the prompt.
+   * @returns The password, or an empty string if the prompt was cancelled.
+   */
+  public async promptUnlockPassword(messageKey = 'HOME.ASK_PASSWORD.MESSAGE'): Promise<string> {
+    const message = await firstValueFrom(this.translateService.get(messageKey))
     const confirm = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.CONFIRM'))
     const cancelLabel = await firstValueFrom(this.translateService.get('HOME.CANCEL'))
     const passwordPlaceholder = await firstValueFrom(this.translateService.get('HOME.PASSWORD_PROMPT_CONFIRMATION_PLACEHOLDER'))
@@ -175,8 +181,9 @@ export class PasswordService {
       ]
     })
     await alert.present()
-    const { data } = await alert.onDidDismiss()
-    if(data && data.values) {
+    // Ionic passes the typed values even when the alert is cancelled
+    const { data, role } = await alert.onDidDismiss()
+    if(role === 'confirm' && data && data.values) {
       return data.values.password
     }
     return ''

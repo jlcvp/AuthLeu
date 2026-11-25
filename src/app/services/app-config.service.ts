@@ -3,6 +3,7 @@ import { LocalStorageService } from './local-storage.service';
 import { environment } from 'src/environments/environment';
 import { ENCRYPTION_OPTIONS_DEFAULT, ENCRYPTION_OPTIONS_KEY, ENCRYPTION_OPTIONS_PASSWORD_KEY, EncryptionOptions, LAST_PASSWORD_CHECK_KEY } from '../models/encryption-options.model';
 import { AppVersionInfo } from '../models/app-version.enum';
+import { VAULT_OPTIONS_DEFAULT, VAULT_OPTIONS_KEY, VaultOptions } from '../models/vault.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,10 +17,8 @@ export class AppConfigService {
   }
 
   async isOfflineMode() {
-    const isOfflinePref = await this.localStorage.get<boolean>('isOfflineMode') ?? false;
-    // if isOfflinePref is not set, use the environment variable
-    return isOfflinePref ?? environment.isOfflineEnv;
-    
+    // until the user chooses, use the build's default (the GitHub Pages build is offline-only)
+    return (await this.localStorage.get<boolean>('isOfflineMode')) ?? environment.isOfflineEnv;
   }
 
   async setOfflineMode(isOffline: boolean) {
@@ -31,22 +30,27 @@ export class AppConfigService {
   }
 
   async getEncryptionOptions(): Promise<EncryptionOptions> {
-    return (await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY)) || ENCRYPTION_OPTIONS_DEFAULT;
+    return (await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY)) || { ...ENCRYPTION_OPTIONS_DEFAULT };
   }
   
   async setEncryptionOptions(options: EncryptionOptions) {
     await this.localStorage.set(ENCRYPTION_OPTIONS_KEY, options);
   }
 
-  async getEncryptionKey() {
+  async getVaultOptions(): Promise<VaultOptions> {
+    return { ...VAULT_OPTIONS_DEFAULT, ...(await this.localStorage.get<Partial<VaultOptions>>(VAULT_OPTIONS_KEY)) };
+  }
+
+  async setVaultOptions(options: Partial<VaultOptions>) {
+    await this.localStorage.set(VAULT_OPTIONS_KEY, { ...(await this.getVaultOptions()), ...options });
+  }
+
+  /** The encryption password stored by 2.x. 3.0 stores no password; the 3.0.0 migration deletes it */
+  async getLegacyEncryptionPassword() {
     return await this.localStorage.get<string>(ENCRYPTION_OPTIONS_PASSWORD_KEY);
   }
 
-  async setEncryptionKey(key: string) {
-    await this.localStorage.set(ENCRYPTION_OPTIONS_PASSWORD_KEY, key);
-  }
-
-  async clearEncryptionKey() {
+  async clearLegacyEncryptionPassword() {
     await this.localStorage.remove(ENCRYPTION_OPTIONS_PASSWORD_KEY);
   }
 

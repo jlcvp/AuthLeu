@@ -2,25 +2,18 @@ import { AppVersion } from "../models/app-version.enum"
 
 export class VersionUtils {
     /**
-     * Converts a version string to the corresponding AppVersion enum value.
-     * 
-     * @param {string} version - The version string to convert.
-     * @returns {AppVersion} The corresponding AppVersion enum value.
+     * Lists the AppVersion migrations that must run to bring data from `dataVersion` up to `appVersion`.
+     *
+     * @param {string} dataVersion - The version of the stored data, in semver format.
+     * @param {string} appVersion - The version of the running app, in semver format.
+     * @returns {AppVersion[]} The versions in (dataVersion, appVersion], sorted in ascending order.
+     * @throws {Error} If either version is not in semver format.
      */
-    static appVersionFromVersionString(version: string): AppVersion {
-        const appVersion = Object.values(AppVersion).find((appVersion) => appVersion === version)
-        return appVersion as AppVersion ?? AppVersion.UNKNOWN
-    }
-
-    /**
-     * Compares two AppVersion enum values.
-     * 
-     * @param {AppVersion} a - The first AppVersion to compare.
-     * @param {AppVersion} b - The second AppVersion to compare.
-     * @returns {number} A negative number if a < b, zero if a === b, and a positive number if a > b.
-     */
-    static appVersionCompare(a: AppVersion, b: AppVersion): number {
-        return Object.values(AppVersion).indexOf(a) - Object.values(AppVersion).indexOf(b)
+    static pendingMigrations(dataVersion: string, appVersion: string): AppVersion[] {
+        return Object.values(AppVersion)
+            .filter((version) => version !== AppVersion.UNKNOWN)
+            .filter((version) => VersionUtils.semverCompare(version, dataVersion) > 0 && VersionUtils.semverCompare(version, appVersion) <= 0)
+            .sort(VersionUtils.semverCompare)
     }
 
     /**
@@ -34,12 +27,12 @@ export class VersionUtils {
         const aParts = a.split('.').map((part) => parseInt(part))
         const bParts = b.split('.').map((part) => parseInt(part))
         for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-            if(isNaN(aParts[i]) || isNaN(bParts[i])) {
-                throw new Error('UTILS.ERROR_INVALID_SEMVER_FORMAT')
-            }
-
             const aPart = aParts[i] ?? 0
             const bPart = bParts[i] ?? 0
+
+            if(isNaN(aPart) || isNaN(bPart)) {
+                throw new Error('UTILS.ERROR_INVALID_SEMVER_FORMAT')
+            }
 
             if (aPart < bPart) {
                 return -1

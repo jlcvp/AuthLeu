@@ -4,7 +4,7 @@ import { LocalStorageService } from './local-storage.service';
 import { AppVersion } from '../models/app-version.enum';
 import { VersionUtils } from '../utils/version-utils';
 import { AppConfigService } from './app-config.service';
-import { EncryptionOptions } from '../models/encryption-options.model';
+import { ENCRYPTION_OPTIONS_KEY, EncryptionOptions } from '../models/encryption-options.model';
 import { Account2faService } from './accounts/account2fa.service';
 import { firstValueFrom } from 'rxjs';
 import { LogoService } from './logo.service';
@@ -28,17 +28,14 @@ export class MigrationService {
     
     const appVersion = environment.versionConfig.versionNumber
     console.log('App version:', appVersion )
-    const migrationsToRun = Object.values(AppVersion)
-      .filter(version => { 
-        console.log('Checking version:', {version, dataVersion, appVersion})
-        return version > dataVersion && version <= appVersion && version != AppVersion.UNKNOWN
-      })
-      .map(versionString => { 
-        const versionMapped = VersionUtils.appVersionFromVersionString(versionString) 
-        console.log('Mapped version:', versionMapped)
-        return versionMapped
-      })
-      .sort(VersionUtils.appVersionCompare)
+    let migrationsToRun: AppVersion[]
+    try {
+      migrationsToRun = VersionUtils.pendingMigrations(dataVersion, appVersion)
+    } catch (error) {
+      // e.g. dev builds, where versionNumber is still the '%VERSION%' placeholder
+      console.warn('Skipping migrations, invalid version:', {dataVersion, appVersion, error})
+      return
+    }
 
     if (migrationsToRun.length === 0) {
       console.log('No migrations to run.')
@@ -49,7 +46,13 @@ export class MigrationService {
     const message = await firstValueFrom(this.translate.get('MIGRATION.RUNNING_UPDATE'))
     GlobalUtils.updateSplashScreenMessage(message)
     for(const version of migrationsToRun) {
-      await this.runMigration(version)
+      try {
+        await this.runMigration(version)
+      } catch (error) {
+        // data_version stays at the last successful migration, so the remaining ones run again on the next launch
+        console.error('Migration failed:', {version, error})
+        break
+      }
     }
   }
 
@@ -71,6 +74,10 @@ export class MigrationService {
         await this.migrateToV2_2_0()
         await this.localStorage.set('data_version', AppVersion.V2_2_0)
         break
+      case AppVersion.V3_0_0:
+        await this.migrateToV3_0_0()
+        await this.localStorage.set('data_version', AppVersion.V3_0_0)
+        break
       default:
         console.warn('Migration not implemented for version:', version)
     }
@@ -83,13 +90,16 @@ export class MigrationService {
   private async migrateToV2_0_0() {
     console.log('Migrating to v2.0.0')
 
-    // Initial encryption options
-    const encryptionOptions: EncryptionOptions = {
-      encryptionActive: false,
-      shouldPerformPeriodicCheck: false
+    // Initial encryption options. Installs without a recorded data version (GitHub Pages builds
+    // before 3.0.0) run every migration, so keep the options of users who already have some
+    if (!(await this.localStorage.get<EncryptionOptions>(ENCRYPTION_OPTIONS_KEY))) {
+      const encryptionOptions: EncryptionOptions = {
+        encryptionActive: false,
+        shouldPerformPeriodicCheck: false
+      }
+      await this.appConfigService.setEncryptionOptions(encryptionOptions)
+      await this.appConfigService.setLastPasswordCheck(0)
     }
-    await this.appConfigService.setEncryptionOptions(encryptionOptions)
-    await this.appConfigService.setLastPasswordCheck(0)
 
     await this.appConfigService.setFirstRun() // reset first run
   }
@@ -135,5 +145,34 @@ export class MigrationService {
       await Promise.all(promises)
       await this.accounts2FAService.updateAccountsBatch(accounts)
     }
+  }
+
+  private async migrateToV3_0_0() {
+    console.log('Migrating to v3.0.0')
+
+    // 2.x stored the encryption password. Use it to set up the data key that replaces it (or to unlock
+    // the one another device set up), encrypt every secret with that key, then delete the password.
+    // This also encrypts the secrets older versions saved in plaintext while encryption was active
+    const password = await this.appConfigService.getLegacyEncryptionPassword()
+    const { encryptionActive } = await this.appConfigService.getEncryptionOptions()
+    if (encryptionActive && password) {
+      // start loading the accounts and let them settle for 1000ms
+      await this.accounts2FAService.getAccounts()
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      try {
+        await this.accounts2FAService.enableEncryption(password)
+      } catch (error) {
+        if (!(error instanceof Error && error.message === 'VAULT.INVALID_PASSWORD')) {
+          throw error
+        }
+        // another device set up encryption with another password: keep the stored password, so the
+        // secrets it encrypts can be upgraded once the user unlocks with the new password
+        console.warn('Encryption was set up with another password on another device')
+        return
+      }
+      await this.accounts2FAService.upgradeLegacyAccounts(password)
+    }
+    await this.appConfigService.clearLegacyEncryptionPassword()
   }
 }

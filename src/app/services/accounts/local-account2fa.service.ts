@@ -3,6 +3,9 @@ import { Account2FA, IAccount2FA, IAccount2FAProvider } from '../../models/accou
 import { BehaviorSubject, Observable } from 'rxjs';
 import { LocalStorageService } from '../local-storage.service';
 import { CryptoUtils } from 'src/app/utils/crypto-utils';
+import { VaultRecord } from 'src/app/models/vault.model';
+
+const VAULT_RECORD_KEY = 'vaultRecord'
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +59,7 @@ export class LocalAccount2faService implements IAccount2FAProvider {
         this.updateAccountData(account)
       }
     }
-    this.persistAccounts()
+    await this.persistAccounts()
     this.accountsSubject.next(this.accounts)
   }
 
@@ -74,6 +77,27 @@ export class LocalAccount2faService implements IAccount2FAProvider {
   private async persistAccounts() {
     this.sortAccounts()
     await this.localStorage.set('local_accounts', this.accounts)
+  }
+
+  async getVaultRecord(): Promise<VaultRecord | undefined> {
+    return this.localStorage.get<VaultRecord>(VAULT_RECORD_KEY)
+  }
+
+  async createVaultRecord(record: VaultRecord): Promise<VaultRecord> {
+    const existing = await this.getVaultRecord()
+    if (existing) {
+      return existing
+    }
+    await this.updateVaultRecord(record)
+    return record
+  }
+
+  async updateVaultRecord(record: VaultRecord): Promise<void> {
+    await this.localStorage.set(VAULT_RECORD_KEY, record)
+  }
+
+  async deleteVaultRecord(): Promise<void> {
+    await this.localStorage.remove(VAULT_RECORD_KEY)
   }
 
   private async loadAccountsFromStorage() {

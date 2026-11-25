@@ -1,34 +1,35 @@
-import { Component, HostListener, Input, ViewChild } from '@angular/core';
+import { Component, HostListener, Input } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Account2FA } from 'src/app/models/account2FA.model';
 import { OtpService } from 'src/app/services/otp.service';
-import { CountdownTimerComponent } from '../countdown-timer/countdown-timer.component';
 import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-account-detail',
-  templateUrl: './account-detail.component.html',
-  styleUrls: ['./account-detail.component.scss'],
+    selector: 'app-account-detail',
+    templateUrl: './account-detail.component.html',
+    styleUrls: ['./account-detail.component.scss'],
+    standalone: false
 })
 export class AccountDetailComponent {
-  @ViewChild(CountdownTimerComponent) countdownTimer!: CountdownTimerComponent;
+  /** When the current code changes, in milliseconds since the epoch */
+  codeEndTime = 0
 
   private _account?: Account2FA
   private _token = '000 000'
-  private _tokenCountdown = 0
+  private hasCode = false
   @Input() set account(value: Account2FA | undefined) {
     this._account = value
-    this.updateTokenCountdown()
+    this.updateCodeEndTime()
     this.updateCode()
   }
 
-  @HostListener('window:focus', ['$event'])
-  onFocus(event: FocusEvent): void {
-    // resume timer
-    console.log('focus event', event)
+  // timers are throttled while the app is in the background, so resync when it's back
+  @HostListener('window:focus')
+  @HostListener('document:visibilitychange')
+  onResume(): void {
     this.updateCode()
-    this.updateTokenCountdown()
+    this.updateCodeEndTime()
   }
 
   @HostListener('copy', ['$event'])
@@ -72,19 +73,8 @@ export class AccountDetailComponent {
     return this._token
   }
 
-  private set tokenCountdown(value: number) {
-    this._tokenCountdown = value
-    setTimeout(() => {
-      this.countdownTimer?.startTimer()
-    }, 50);
-  }
-
-  get tokenCountdown(): number {
-    return this._tokenCountdown
-  }
-
   async copyCode(evt: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-    if(!this.account) {
+    if(!this.account || !this.hasCode) {
       return
     }
     console.log("copying code", {evt})
@@ -105,21 +95,41 @@ export class AccountDetailComponent {
 
   timerEnd() {
     console.log("timer end")
-    setTimeout(() => {
-      this.updateTokenCountdown()
-      this.updateCode()
-    }, 150); // using 150ms to debounce the timer end event
+    this.updateCodeEndTime()
+    this.updateCode()
   }
 
   updateCode() {
     if(this.account) {
       console.log("generating new code")
-      this.token = this.otpService.generateTOTP(this.account.secret, this.account.interval)
+      const code = this.generateCode(this.account)
+      this.hasCode = !!code
+      // never show a code that may be wrong
+      this.token = code || '-'.repeat(this.account.tokenLength)
     }
   }
 
-  private updateTokenCountdown() {
-    const countdown = this.account?.getNextRollingTimeLeft() || this.account?.interval || 30   
-    this.tokenCountdown = countdown > 0 ? countdown : 0
+  /**
+   * Generates the current code of an account.
+   * @returns The code, or undefined if a correct code can't be generated.
+   */
+  private generateCode(account: Account2FA): string | undefined {
+    if(account.isLocked) {
+      return undefined // the secret is still encrypted
+    }
+    try {
+      return this.otpService.generateTOTP(account)
+    } catch (error) {
+      // e.g. an imported account with an unsupported algorithm
+      console.error("Error generating code", error)
+      return undefined
+    }
+  }
+
+  private updateCodeEndTime() {
+    // the code changes when the time step (Unix time divided by the period) changes
+    const period = (this.account?.interval || 30) * 1000
+    const now = Date.now()
+    this.codeEndTime = now - (now % period) + period
   }
 }

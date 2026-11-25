@@ -2,8 +2,12 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-button (click)="dismissModal()">
-        <ion-icon *ngIf="isMD" slot="icon-only" name="close-outline"></ion-icon>
-        <ion-label *ngIf="!isMD">{{ "ABOUT_MODAL.CLOSE" | translate }}</ion-label>
+        @if (isMD) {
+          <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+        }
+        @if (!isMD) {
+          <ion-label>{{ "ABOUT_MODAL.CLOSE" | translate }}</ion-label>
+        }
       </ion-button>
     </ion-buttons>
     <ion-title>{{ "ABOUT_MODAL.TITLE" | translate }}</ion-title>
@@ -20,24 +24,26 @@
       <p>{{ "ABOUT_MODAL.VERSION_INFO.GIT_HASH" | translate }}:&emsp;{{ versionInfo.commitHash }}</p>
     </ion-card-content>
   </ion-card>
-  
-  <ng-container *ngIf="licenses.length > 0">
+
+  @if (licenses.length > 0) {
     <ion-card>
       <ion-card-header>
         <ion-card-title>{{ "ABOUT_MODAL.LICENSES_HEADER" | translate }}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <ion-accordion-group>
-          <ion-accordion *ngFor="let license of licenses">
-            <ion-item slot="header" color="light">
-              <ion-label> {{ license.title }}</ion-label>
-            </ion-item>
-            <div class="ion-padding" slot="content">
-              <p class="line-break">{{ license.body }}</p>
-            </div>
-          </ion-accordion>
+          @for (license of licenses; track license) {
+            <ion-accordion>
+              <ion-item slot="header" color="light">
+                <ion-label> {{ license.title }}</ion-label>
+              </ion-item>
+              <div class="ion-padding" slot="content">
+                <p class="line-break">{{ license.body }}</p>
+              </div>
+            </ion-accordion>
+          }
         </ion-accordion-group>
       </ion-card-content>
     </ion-card>
-</ng-container>
+  }
 </ion-content>
