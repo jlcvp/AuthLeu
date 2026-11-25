@@ -53,13 +53,15 @@ The provider is chosen by `AppConfigService.isOfflineMode()`, which reads the `i
 
 ### Secret encryption
 
-- `Account2FA` holds either a plaintext `secret` or the `encryptedSecret` + `iv` + `salt` triple. Encryption is AES-GCM with a PBKDF2-derived key (`utils/crypto-utils.ts`).
-- `isLocked` means there's no valid base32 secret in memory. `lock()` and `unlock()` change the instance in place. `unlock()` deletes the encrypted fields, so a decrypted account looks the same as one that was never encrypted.
-- `Account2faService.getAccounts()` decrypts accounts in memory using the stored password (storage key `_eok`).
-- **Saving goes through `Account2faService.toStoredAccount()`.** `addAccount`, `importAccounts`, `updateAccount` and `updateAccountsBatch` save a copy, never the caller's object. While encryption is active (`encryptionActive` plus a stored key), that copy is always encrypted. A plaintext secret is never saved next to its ciphertext.
-- Don't save through the providers directly. The one exception is `decryptAccounts()`, which saves plaintext on purpose while turning encryption off. It runs while encryption is still flagged active, so going through the facade would re-encrypt the secrets.
-- Use `account.copy()` before changing accounts that came from the observable.
-- `home/password.service.ts` handles password setup, the unlock prompt, and the weekly password check.
+- **A random data key encrypts the secrets** (AES-GCM; `encryptedSecret` + `iv` + `keyId` on `Account2FA`). The password only wraps that key: the wrapped key and its PBKDF2 parameters (600k iterations) are stored as a `VaultRecord` (`models/vault.model.ts`, `utils/crypto-utils.ts`). **The password is never stored.**
+- **Encryption is set up when a vault record exists.** Providers store it (`getVaultRecord`/`createVaultRecord`/...): locally in Ionic Storage, or in Firestore at `accounts2fa/{uid}/vault/current` (plus a local copy), so other devices unlock with the same password. `createVaultRecord` returns an existing record instead of overwriting it.
+- **`VaultService` holds the unlocked data key** (`dataKey$`). By default it remembers the key on the device as a CryptoKey that can't be exported (`vaultOptions.rememberUnlock`); otherwise the key lives in memory only and the password is asked on launch.
+- **While the data key is locked, `LockScreenComponent` covers `HomePage`** (`isLocked`), e.g. on a new device or when the user turned on "Ask for Password on Open". In that mode, `AutoLockService` locks after `vaultOptions.autoLockMinutes` without interaction.
+- **`Account2faService` is the only way to read and save accounts.** `getAccounts()` decrypts copies with the data key and emits again when it's locked or unlocked, so the providers always hold encrypted secrets. Saving (`addAccount`, `importAccounts`, `updateAccount`, `updateAccountsBatch`) goes through `toStoredAccount()`, which saves a copy that is always encrypted while a vault record exists, and throws `VAULT.LOCKED` rather than save a plaintext secret while locked.
+- Encryption flows live in the same service: `enableEncryption`, `disableEncryption` (needs the password, saves plaintext through the provider directly), `changePassword` (rewraps the data key only), `unlock`, `restoreUnlock`, `lock`, `verifyPassword`.
+- **2.x format:** 2.x encrypted each secret with a key derived from the password and a per-account `salt` (`isLegacyEncrypted`, `lock()`/`unlock()`), and stored the password under `_eok`. The 3.0.0 migration uses that password to set up the data key, re-encrypts the accounts (`upgradeLegacyAccounts`) and deletes it. Encrypted backups still use the 2.x format, so older versions can import them.
+- `isLocked` means there's no valid base32 secret in memory. Unlocking deletes the encrypted fields, so use `account.copy()` before changing accounts that came from the observable.
+- `home/password.service.ts` handles the password prompts and the weekly password check.
 
 ### Data migrations
 

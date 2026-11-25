@@ -1,0 +1,18 @@
+<div class="lock-screen">
+  <img class="lock-logo" src="assets/icon/256.png" alt="">
+  <h2>{{ "LOCK_SCREEN.TITLE" | translate }}</h2>
+  <p>{{ "LOCK_SCREEN.MESSAGE" | translate }}</p>
+  <form (ngSubmit)="unlock()">
+    <ion-item>
+      <ion-input type="password" name="password" autocomplete="current-password" [(ngModel)]="password"
+        label="{{ 'LOCK_SCREEN.PASSWORD' | translate }}" labelPlacement="stacked" [disabled]="unlocking"></ion-input>
+    </ion-item>
+    @if (invalidPassword) {
+      <ion-text color="danger">
+        <p>{{ "HOME.ERRORS.INVALID_PASSWORD" | translate }}</p>
+      </ion-text>
+    }
+    <ion-button expand="block" type="submit" [disabled]="!password || unlocking">{{ "LOCK_SCREEN.UNLOCK" | translate }}</ion-button>
+  </form>
+  <ion-button fill="clear" color="medium" (click)="signOut.emit()">{{ "CONFIG_MENU.LOGOUT" | translate }}</ion-button>
+</div>

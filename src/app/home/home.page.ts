@@ -10,13 +10,14 @@ import { GlobalUtils } from '../utils/global-utils';
 import { AccountSelectModalComponent } from './components/account-select-modal/account-select-modal.component';
 import { AppConfigService } from '../services/app-config.service';
 import { ENCRYPTION_OPTIONS_DEFAULT, EncryptionOptions } from '../models/encryption-options.model';
+import { VAULT_OPTIONS_DEFAULT } from '../models/vault.model';
 import { MigrationService } from '../services/migration.service';
 import { LoggingService } from '../services/logging.service';
 import { AppVersionInfo } from '../models/app-version.enum';
 import { PasswordService } from './password.service';
 import { AccountModalComponent } from './components/account-modal/account-modal.component';
 import { AboutModalComponent } from './components/about-modal/about-modal.component';
-import { AccountDetailComponent } from './components/account-detail/account-detail.component';
+import { AutoLockService } from '../services/auto-lock.service';
 
 @Component({
     selector: 'app-home',
@@ -26,7 +27,6 @@ import { AccountDetailComponent } from './components/account-detail/account-deta
 })
 export class HomePage implements OnInit {
   @ViewChild('popover') popover!: IonPopover;
-  @ViewChild(AccountDetailComponent) accountDetail?: AccountDetailComponent;
 
   @HostListener('window:resize')
   onWindowResize() {
@@ -41,7 +41,7 @@ export class HomePage implements OnInit {
   hasLockedAccounts: boolean = true
   versionInfo: AppVersionInfo
 
-  private encryptionOptions: EncryptionOptions = ENCRYPTION_OPTIONS_DEFAULT
+  private encryptionOptions: EncryptionOptions = { ...ENCRYPTION_OPTIONS_DEFAULT }
   private systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
   private isLandscape: boolean = false
   private currentDarkModePref: string = '';
@@ -62,6 +62,7 @@ export class HomePage implements OnInit {
     private loggingService: LoggingService,
     private passwordService: PasswordService,
     private navCtrl: NavController,
+    private autoLock: AutoLockService,
   ) {
     this.versionInfo = this.configService.versionInfo
   }
@@ -97,6 +98,17 @@ export class HomePage implements OnInit {
     return this.encryptionOptions.shouldPerformPeriodicCheck
   }
 
+  /** Whether encryption is set up but the data key is locked, so the lock screen covers the app */
+  get isLocked(): boolean {
+    return this.hasVaultRecord && !this.accountsService.isUnlocked
+  }
+
+  // Unlock settings, when encryption is set up
+  hasVaultRecord = false
+  askPasswordOnOpen = false
+  autoLockMinutes = VAULT_OPTIONS_DEFAULT.autoLockMinutes
+  readonly autoLockChoices = [1, 5, 15, 0] // 0 = never
+
   async ngOnInit() {
     await this.migrationService.migrate()
     this.onWindowResize()
@@ -105,6 +117,7 @@ export class HomePage implements OnInit {
     await this.setupEncryption()
     await this.loadAccounts()
     this.watchSyncErrors()
+    this.autoLock.start()
     await this.configService.setFirstRun(false)
   }
 
@@ -214,10 +227,23 @@ export class HomePage implements OnInit {
     const selectedAccounts = data ? data as Account2FA[] : undefined
     if (selectedAccounts && selectedAccounts.length > 0) {
       console.log("Selected accounts to export", { selectedAccounts })
+      // encrypted backups are encrypted with the password, which isn't stored
+      let password: string | undefined
+      if (exportWithEncryption) {
+        password = await this.passwordService.promptUnlockPassword()
+        if (!password) {
+          return
+        }
+        if (!(await this.accountsService.verifyPassword(password))) {
+          const invalidPasswordMessage = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
+          await this.showAlert(invalidPasswordMessage)
+          return
+        }
+      }
       const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.EXPORTING_ACCOUNTS'))
       await this.presentLoading(message)
       try {
-        await this.accountsService.exportAccounts(selectedAccounts, exportWithEncryption)
+        await this.accountsService.exportAccounts(selectedAccounts, password)
         await this.dismissLoading()
       } catch (error) {
         console.error("Error exporting accounts", error)
@@ -263,51 +289,14 @@ export class HomePage implements OnInit {
           }
           const selectedAccounts = data ? data as Account2FA[] : undefined
           if (selectedAccounts && selectedAccounts.length > 0) {
-            // check if imported accounts are encrypted
-            const lockedAccounts = selectedAccounts.filter(account => account.isEncrypted)
+            // backups are encrypted with a password, in the format 2.x uses
+            const lockedAccounts = selectedAccounts.filter(account => account.isLegacyEncrypted)
             if (lockedAccounts.length > 0) {
-              const password = await this.configService.getEncryptionKey()
-              let currentPasswordWorks = false;
-              if (password) {
-                // try to decrypt using current password (if available)
-                try {
-                  console.log("Trying to decrypt accounts with saved password")
-                  for (const account of selectedAccounts) {
-                    if (account.isEncrypted) {
-                      await account.unlock(password)
-                    }
-                  }
-                  currentPasswordWorks = true
-                } catch (error) {
-                  console.warn("Unable to decrypt accounts with saved password", {error})
-                }
-              }
-
-              if (!currentPasswordWorks) {
-                try {
-                  // ask for password
-                  const password = await this.promptUnlockPassword(lockedAccounts)
-                  if (!password) {
-                    const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_PASSWORD_PROVIDED'))
-                    throw new Error(message)
-                  }
-
-                  try {
-                    for (const account of selectedAccounts) {
-                      if (account.isEncrypted) {
-                        await account.unlock(password)
-                      }
-                    }
-                  } catch {
-                    const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.INVALID_PASSWORD'))
-                    throw new Error(message)
-                  }
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } catch (error: any) {
-                  const message = error && error.message || await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.GENERIC_IMPORT_ERROR'))
-                  await this.showAlert(message)
-                  return
-                }
+              const password = await this.promptUnlockPassword(lockedAccounts)
+              if (!password) {
+                const message = await firstValueFrom(this.translateService.get('ACCOUNT_SYNC.ERROR.NO_PASSWORD_PROVIDED'))
+                await this.showAlert(message)
+                return
               }
             }
 
@@ -458,7 +447,8 @@ export class HomePage implements OnInit {
     const loadingMsg = await firstValueFrom(this.translateService.get('HOME.LOADING_ACCOUNTS'))
     await this.presentLoading(loadingMsg)
     const accounts$ = (await this.accountsService.getAccounts()).pipe(tap(accounts => {
-      const lockedAccounts = accounts.filter(account => account.isLocked)
+      // the lock screen unlocks the data key; a password can still decrypt the accounts 2.x encrypted
+      const lockedAccounts = this.isLocked ? [] : accounts.filter(account => account.isLegacyEncrypted && account.isLocked)
       this.hasLockedAccounts = lockedAccounts.length > 0
       if(this.shouldAlertAboutLockedAccounts && this.hasLockedAccounts) {
         this.shouldAlertAboutLockedAccounts = false
@@ -493,82 +483,125 @@ export class HomePage implements OnInit {
   }
 
   private async setupEncryption(): Promise<void> {
-    /**
-     * While setting up the encryption, app will follow the flow below:
-     * 0. Load encryption options
-     * 1. If encryption is active, check saved password
-     *  1.1 If password is not set, show password setup prompt
-     *    1.1.1 If password setup is cancelled or failed, show error message, deactivate encryption and exit setup flow
-     *    1.1.2 If password setup is successful, update last password check timestamp and proceed to 1.2
-     *  1.2 If password is set:
-     *    1.2.1 If periodic password check is enabled, and it is time to perform a check:
-     *      1.2.1.1 If the check succeeds, update the last password check timestamp
-     *      1.2.1.2 If the check fails, alert user about the inability of decrypt accounts on other devices if password is lost
-     * 2. If encryption is not active, check if alert to activate encryption is enabled
-     *  2.1 If alert is enabled, show alert to activate encryption
-     *    2.1.1 If user chooses to enable encryption, go to 1.1
-     *    2.1.2 If user chooses to enable encryption later, check if it selected to not show the alert again and save the preference
-     */
-
-    this.encryptionOptions = await this.configService.getEncryptionOptions() // step 0
-    // set page properties
+    this.encryptionOptions = await this.configService.getEncryptionOptions()
     console.log("Encryption Options:",{ encryptionOptions: this.encryptionOptions })
-    if(this.isEncryptionActive) { // step 1
-      const password = await this.configService.getEncryptionKey()
-      if(!password) { // 1.1
-        const success = await this.passwordService.setupNewPassword() // 1.1
-        if(!success) { // 1.1.1
-          // Deactivate encryption
-          await this.deactivateEncryption()
-          // Show failed password setup message
-          await this.passwordService.showFailedPasswordSetupAlert()
-          return // exit encryption setup flow
-        }
-      }
 
-      // 1.2
-      if (this.shouldPeriodicCheckPassword) { // 1.2.1
+    // encryption is set up when there's a data key record, which other devices may create or delete.
+    // While a password 2.x stored remains, the 3.0.0 migration hasn't set up the data key yet
+    const record = await this.accountsService.getVaultRecord()
+    const migrationPending = !record && !!(await this.configService.getLegacyEncryptionPassword())
+    if (!migrationPending && this.isEncryptionActive !== !!record) {
+      await this.setEncryptionActive(!!record)
+    }
+    this.hasVaultRecord = !!record
+    if (!record) {
+      return
+    }
+    await this.loadUnlockSettings()
+
+    // without a data key remembered on this device, the lock screen asks for the password
+    if (await this.accountsService.restoreUnlock()) {
+      await this.upgradeLegacyAccountsWithStoredPassword()
+      if (this.shouldPeriodicCheckPassword) {
         console.log("Starting periodic password check")
         await this.passwordService.periodicPasswordCheck()
-      } 
-    } 
+      }
+    }
   }
 
-  private async activateEncryption(): Promise<void> {
-    const success = await this.passwordService.setupNewPassword()
-    if(!success) {
-      await this.setEncryptionActive(false)
+  /** Called when the lock screen unlocks the data key */
+  async onUnlocked() {
+    await this.configService.setLastPasswordCheck() // the user just entered the password
+    await this.upgradeLegacyAccountsWithStoredPassword()
+  }
+
+  private async loadUnlockSettings() {
+    const { rememberUnlock, autoLockMinutes } = await this.configService.getVaultOptions()
+    this.askPasswordOnOpen = !rememberUnlock
+    this.autoLockMinutes = autoLockMinutes
+  }
+
+  async askPasswordOnOpenToggle() {
+    this.askPasswordOnOpen = !this.askPasswordOnOpen
+    await this.accountsService.setUnlockRemembered(!this.askPasswordOnOpen)
+  }
+
+  async autoLockChange(minutes: number) {
+    this.autoLockMinutes = minutes
+    await this.configService.setVaultOptions({ autoLockMinutes: minutes })
+  }
+
+  lockAction() {
+    this.popover?.dismiss()
+    this.accountsService.lock()
+  }
+
+  async changePasswordAction() {
+    this.popover?.dismiss()
+    const currentPassword = await this.passwordService.promptUnlockPassword('HOME.CHANGE_PASSWORD.CURRENT')
+    if (!currentPassword) {
+      return
+    }
+    if (!(await this.accountsService.verifyPassword(currentPassword))) {
+      const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.INVALID_PASSWORD'))
+      await this.showAlert(message)
+      return
+    }
+    const newPassword = await this.passwordService.setupNewPassword('HOME.CHANGE_PASSWORD.NEW')
+    if (!newPassword) {
       return
     }
     try {
-      await this.accountsService.encryptAccounts()
+      await this.accountsService.changePassword(currentPassword, newPassword)
+    } catch (error) {
+      console.error("Error changing the password", error)
+      const message = await firstValueFrom(this.translateService.get('HOME.CHANGE_PASSWORD.FAILED'))
+      await this.showAlert(message)
+      return
+    }
+    const message = await firstValueFrom(this.translateService.get('HOME.CHANGE_PASSWORD.DONE'))
+    const toast = await this.toastController.create({ message, duration: 2000 })
+    await toast.present()
+  }
+
+  private async activateEncryption(): Promise<void> {
+    const password = await this.passwordService.setupNewPassword()
+    if(!password) {
+      return
+    }
+    try {
+      await this.accountsService.enableEncryption(password)
     } catch (error) {
       console.error("Error encrypting accounts", error)
-      // the accounts are saved in a single write, so none were encrypted: forget the new password
-      await this.configService.clearEncryptionKey()
-      const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ENCRYPTION_FAILED'))
+      const messageKey = error instanceof Error && error.message === 'VAULT.INVALID_PASSWORD'
+        ? 'HOME.ERRORS.ENCRYPTION_SET_UP_ELSEWHERE'
+        : 'HOME.ERRORS.ENCRYPTION_FAILED'
+      const message = await firstValueFrom(this.translateService.get(messageKey))
       await this.showAlert(message)
       return
     }
     console.log("accounts encrypted")
+    this.hasVaultRecord = true
+    await this.loadUnlockSettings()
     await this.setEncryptionActive(true)
   }
 
   private async deactivateEncryption() {
-    const password = await this.configService.getEncryptionKey()
-    if(password) {
-      try {
-        await this.accountsService.decryptAccounts()
-      } catch (error) {
-        console.error("Error decrypting accounts", error)
-        // the accounts are saved in a single write, so none were decrypted: keep encryption on
-        const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.DECRYPTION_FAILED'))
-        await this.showAlert(message)
-        return
-      }
-      console.log("accounts decrypted")
+    const password = await this.passwordService.promptUnlockPassword()
+    if(!password) {
+      return
     }
-    await this.configService.clearEncryptionKey()
+    try {
+      await this.accountsService.disableEncryption(password)
+    } catch (error) {
+      console.error("Error decrypting accounts", error)
+      const invalidPassword = error instanceof Error && ['VAULT.INVALID_PASSWORD', 'CRYPTO.INVALID_DECRYPTION_KEY'].includes(error.message)
+      const message = await firstValueFrom(this.translateService.get(invalidPassword ? 'HOME.ERRORS.INVALID_PASSWORD' : 'HOME.ERRORS.DECRYPTION_FAILED'))
+      await this.showAlert(message)
+      return
+    }
+    console.log("accounts decrypted")
+    this.hasVaultRecord = false
     await this.setEncryptionActive(false)
   }
 
@@ -578,6 +611,7 @@ export class HomePage implements OnInit {
     await this.saveEncryptionOptions()
   }
 
+  /** Asks for a password until it decrypts the given accounts, encrypted by 2.x or in a backup, or the user cancels */
   private async promptUnlockPassword(lockedAccounts: Account2FA[]): Promise<string> { // TODO: refactor this, and move to password service
     if(!lockedAccounts.some(account => account.isLocked)) {
       const message = await firstValueFrom(this.translateService.get('HOME.ASK_PASSWORD.ERROR_NOT_LOCKED'))
@@ -608,17 +642,41 @@ export class HomePage implements OnInit {
   }
 
   private async handleAccountsLocked(lockedAccounts: Account2FA[]): Promise<void> {
-    if(await this.alertAccountsLocked()) { // user wants to informPassword
-      const password = await this.promptUnlockPassword(lockedAccounts)
-      if(password) { // user provided the correct password
-        // save password and enable encryption
-        await this.configService.setEncryptionKey(password)
-        await this.configService.setLastPasswordCheck()
+    if(!(await this.alertAccountsLocked())) { // user wants to keep them locked
+      return
+    }
+
+    // the accounts were encrypted by 2.x (e.g. on a device that hasn't updated yet): re-encrypt them with the data key
+    const password = await this.promptUnlockPassword(lockedAccounts)
+    if (!password) {
+      return
+    }
+    try {
+      if (!(await this.accountsService.getVaultRecord())) {
+        await this.accountsService.enableEncryption(password)
+        this.hasVaultRecord = true
+        await this.loadUnlockSettings()
         await this.setEncryptionActive(true)
-        this.hasLockedAccounts = false
-        // the accounts were unlocked in place, so the selected account's code must be refreshed
-        this.accountDetail?.updateCode()
       }
+      await this.accountsService.upgradeLegacyAccounts(password)
+    } catch (error) {
+      console.error("Error upgrading the accounts encrypted by 2.x", error)
+      const message = await firstValueFrom(this.translateService.get('HOME.ERRORS.ENCRYPTION_FAILED'))
+      await this.showAlert(message)
+    }
+  }
+
+  /** Re-encrypts the remaining accounts encrypted by 2.x with the password it stored, kept when it didn't unlock the data key */
+  private async upgradeLegacyAccountsWithStoredPassword(): Promise<void> {
+    const password = await this.configService.getLegacyEncryptionPassword()
+    if (!password) {
+      return
+    }
+    try {
+      await this.accountsService.upgradeLegacyAccounts(password)
+      await this.configService.clearLegacyEncryptionPassword()
+    } catch (error) {
+      console.warn("The password 2.x stored doesn't decrypt the remaining accounts", { error })
     }
   }
 

@@ -150,17 +150,29 @@ export class MigrationService {
   private async migrateToV3_0_0() {
     console.log('Migrating to v3.0.0')
 
-    // Older versions could persist plaintext secrets while encryption was active
-    // (accounts added after enabling encryption, and the v2.2.0 migration), so encrypt them now
+    // 2.x stored the encryption password. Use it to set up the data key that replaces it (or to unlock
+    // the one another device set up), encrypt every secret with that key, then delete the password.
+    // This also encrypts the secrets older versions saved in plaintext while encryption was active
+    const password = await this.appConfigService.getLegacyEncryptionPassword()
     const { encryptionActive } = await this.appConfigService.getEncryptionOptions()
-    if (!encryptionActive || !(await this.appConfigService.getEncryptionKey())) {
-      return
+    if (encryptionActive && password) {
+      // start loading the accounts and let them settle for 1000ms
+      await this.accounts2FAService.getAccounts()
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      try {
+        await this.accounts2FAService.enableEncryption(password)
+      } catch (error) {
+        if (!(error instanceof Error && error.message === 'VAULT.INVALID_PASSWORD')) {
+          throw error
+        }
+        // another device set up encryption with another password: keep the stored password, so the
+        // secrets it encrypts can be upgraded once the user unlocks with the new password
+        console.warn('Encryption was set up with another password on another device')
+        return
+      }
+      await this.accounts2FAService.upgradeLegacyAccounts(password)
     }
-
-    // start loading the accounts and let them settle for 1000ms
-    await this.accounts2FAService.getAccounts()
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    await this.accounts2FAService.encryptAccounts()
+    await this.appConfigService.clearLegacyEncryptionPassword()
   }
 }

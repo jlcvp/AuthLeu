@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Account2FA, IAccount2FAProvider } from '../../models/account2FA.model';
-import { firstValueFrom, Observable, of, switchMap } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, of, switchMap } from 'rxjs';
 import { RemoteAccount2faService } from './remote-account2fa.service';
 import { LocalAccount2faService } from './local-account2fa.service';
 import { AppConfigService } from '../app-config.service';
-import { TranslateService } from '@ngx-translate/core';
 import { LogoService } from '../logo.service';
+import { VaultService } from '../vault.service';
+import { DataKey, VaultRecord } from '../../models/vault.model';
+
+/** How saved secrets must be encrypted when encryption is set up: with the data key, undefined while locked */
+interface SaveEncryption {
+  dataKey?: DataKey
+}
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +30,7 @@ export class Account2faService {
     private logoService: LogoService,
     private remoteService: RemoteAccount2faService,
     private localService: LocalAccount2faService,
-    private translateService: TranslateService) {
+    private vault: VaultService) {
 
     this.setupService()
   }
@@ -38,76 +44,56 @@ export class Account2faService {
   }
 
   /**
-   * Adds a new account, encrypting its secret if encryption is active.
+   * Adds a new account, encrypting its secret if encryption is set up.
    * The given account keeps its plaintext secret and receives the new id.
    *
    * @param account - The account to add.
    * @returns A promise that resolves with the id of the new account.
+   * @throws {Error} 'VAULT.LOCKED' if encryption is set up but locked.
    */
   public async addAccount(account: Account2FA): Promise<string> {
-    const encryptionKey = await this.getActiveEncryptionKey()
-    const id = await this.service.addAccount(await this.toStoredAccount(account, encryptionKey))
+    const encryption = await this.getSaveEncryption()
+    const id = await this.service.addAccount(await this.toStoredAccount(account, encryption))
     account.id = id
     return id
   }
 
   /**
-   * Retrieves accounts, automatically decrypting them if necessary.
-   * @returns An observable of the list of accounts.
+   * Retrieves the accounts, decrypting the secrets encrypted with the unlocked data key.
+   * @returns An observable of the list of accounts, emitting again when the data key is locked or unlocked.
    */
   public async getAccounts(): Promise<Observable<Account2FA[]>> {
-    // Get the observable of accounts from the service
     const accounts$ = await this.service.getAccounts();
 
-    // If a decryption key is provided, decrypt the accounts. Decryptions can finish out of order,
-    // so a newer list of accounts discards the decryption of an older one
-    return accounts$.pipe(
-      switchMap(async (accounts) => {
-        const key = await this.appConfig.getEncryptionKey() // always get updated key
-        if (key) {
-          const decryptions: Promise<void>[] = [];
-          // Iterate over each account and decrypt if necessary
-          for (const account of accounts) {
-            if (account.isLocked) {
-              decryptions.push(account.unlock(key));
-            }
-          }
-
-          // Wait for all decryption promises to resolve
-          const results = await Promise.allSettled(decryptions);
-          for (const result of results) {
-            if (result.status === 'rejected') {
-              console.error('Failed to unlock account', { reason: result.reason })
-            }
-          }
-        }
-
-        // Return the decrypted accounts
-        return accounts;
-      })
+    // Decrypt copies, so the provider keeps the encrypted secrets and locking discards the decrypted
+    // ones. Decryptions can finish out of order, so a newer list of accounts discards an older one
+    return combineLatest([accounts$, this.vault.dataKey$]).pipe(
+      switchMap(([accounts, dataKey]) => this.decryptAccounts(accounts, dataKey))
     );
   }
 
   /**
-   * Updates an existing account with new information, encrypting its secret if encryption is active.
+   * Updates an existing account with new information, encrypting its secret if encryption is set up.
    *
    * @param account - The account object containing updated information.
    * @returns A promise that resolves when the account has been updated.
+   * @throws {Error} 'VAULT.LOCKED' if encryption is set up but locked.
    */
   public async updateAccount(account: Account2FA) {
-    const encryptionKey = await this.getActiveEncryptionKey()
-    return this.service.updateAccount(await this.toStoredAccount(account, encryptionKey))
+    const encryption = await this.getSaveEncryption()
+    return this.service.updateAccount(await this.toStoredAccount(account, encryption))
   }
 
   /**
-   * Updates multiple accounts with new information, encrypting their secrets if encryption is active.
+   * Updates multiple accounts with new information, encrypting their secrets if encryption is set up.
    *
    * @param accounts - The array of account objects containing updated information.
    * @returns A promise that resolves when the accounts have been updated.
+   * @throws {Error} 'VAULT.LOCKED' if encryption is set up but locked.
    */
   public async updateAccountsBatch(accounts: Account2FA[]) {
-    const encryptionKey = await this.getActiveEncryptionKey()
-    const storedAccounts = await Promise.all(accounts.map(account => this.toStoredAccount(account, encryptionKey)))
+    const encryption = await this.getSaveEncryption()
+    const storedAccounts = await Promise.all(accounts.map(account => this.toStoredAccount(account, encryption)))
     return this.service.updateAccountsBatch(storedAccounts)
   }
 
@@ -125,21 +111,158 @@ export class Account2faService {
     return this.service.syncError$ ?? of(undefined)
   }
 
+  /** The record of the data key that encrypts the secrets, if encryption is set up */
+  public async getVaultRecord(): Promise<VaultRecord | undefined> {
+    return this.service.getVaultRecord()
+  }
+
+  /** Whether the data key is unlocked */
+  get isUnlocked(): boolean {
+    return !!this.vault.dataKey
+  }
+
+  /**
+   * Unlocks the data key with the password.
+   * @throws {Error} 'VAULT.INVALID_PASSWORD' if the password is wrong.
+   */
+  public async unlock(password: string): Promise<void> {
+    await this.vault.unlock(await this.requireVaultRecord(), password)
+  }
+
+  /**
+   * Unlocks the data key remembered on this device, if there is one.
+   * @returns Whether the data key was unlocked.
+   */
+  public async restoreUnlock(): Promise<boolean> {
+    const record = await this.service.getVaultRecord()
+    return record ? this.vault.restore(record) : false
+  }
+
+  /** Removes the data key, and so the decrypted secrets, from memory */
+  public lock(): void {
+    this.vault.lock()
+  }
+
+  /** Whether the unlocked data key is kept on this device, instead of asking for the password on every launch */
+  public async isUnlockRemembered(): Promise<boolean> {
+    return this.vault.isRemembered()
+  }
+
+  public async setUnlockRemembered(remembered: boolean): Promise<void> {
+    await this.vault.setRemembered(remembered)
+  }
+
+  /** Checks a password against the data key, without unlocking it */
+  public async verifyPassword(password: string): Promise<boolean> {
+    return this.vault.verifyPassword(await this.requireVaultRecord(), password)
+  }
+
+  /**
+   * Changes the password that protects the data key. The secrets don't need to be encrypted again.
+   * @throws {Error} 'VAULT.INVALID_PASSWORD' if the old password is wrong.
+   */
+  public async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+    const record = await this.vault.changePassword(await this.requireVaultRecord(), oldPassword, newPassword)
+    await this.service.updateVaultRecord(record)
+  }
+
+  /**
+   * Sets up encryption with a password: creates a data key, or unlocks the one another device set up
+   * in the meantime, and encrypts the secrets saved in plaintext. If that fails, encryption stays off.
+   * @throws {Error} 'VAULT.INVALID_PASSWORD' if another device set up encryption with another password.
+   */
+  public async enableEncryption(password: string): Promise<void> {
+    const record = await this.vault.create(password)
+    let createdRecord = false
+    try {
+      const savedRecord = await this.service.createVaultRecord(record)
+      createdRecord = savedRecord.keyId === record.keyId
+      if (!createdRecord) {
+        await this.vault.unlock(savedRecord, password) // set up by another device first
+      }
+      await this.encryptPlaintextAccounts()
+    } catch (error) {
+      // the plaintext secrets are saved in a single write, so none were encrypted with the new data key
+      if (createdRecord) {
+        await this.service.deleteVaultRecord()
+      }
+      await this.vault.forget()
+      throw error
+    }
+  }
+
+  /**
+   * Turns encryption off: saves every secret in plaintext, then deletes the data key.
+   * @throws {Error} 'VAULT.INVALID_PASSWORD' or 'CRYPTO.INVALID_DECRYPTION_KEY' if the password is wrong.
+   * Nothing changes then.
+   */
+  public async disableEncryption(password: string): Promise<void> {
+    const record = await this.service.getVaultRecord()
+    if (record) {
+      await this.vault.unlock(record, password)
+    }
+
+    // decrypt everything before saving anything
+    const accounts = await this.getStoredAccounts()
+    for (const account of accounts) {
+      if (account.isLegacyEncrypted) {
+        await account.unlock(password)
+      } else if (account.isEncrypted && this.vault.dataKey) {
+        await account.unlockWithDataKey(this.vault.dataKey)
+      }
+    }
+
+    // write through the provider directly: updateAccountsBatch would encrypt the secrets again
+    await this.service.updateAccountsBatch(accounts)
+    if (record) {
+      await this.service.deleteVaultRecord()
+    }
+    await this.vault.forget()
+  }
+
+  /** Encrypts with the data key the secrets saved in plaintext, e.g. before encryption was set up or by an older version */
+  public async encryptPlaintextAccounts(): Promise<void> {
+    const dataKey = this.requireDataKey()
+    const plaintextAccounts = (await this.getStoredAccounts()).filter(account => !account.isLocked)
+    if (plaintextAccounts.length === 0) {
+      return
+    }
+    for (const account of plaintextAccounts) {
+      await account.lockWithDataKey(dataKey)
+    }
+    await this.service.updateAccountsBatch(plaintextAccounts)
+  }
+
+  /**
+   * Re-encrypts with the data key the secrets that 2.x encrypted with a key derived from the password.
+   * @throws {Error} 'CRYPTO.INVALID_DECRYPTION_KEY' if the password doesn't decrypt them. Nothing is saved then.
+   */
+  public async upgradeLegacyAccounts(password: string): Promise<void> {
+    const dataKey = this.requireDataKey()
+    const legacyAccounts = (await this.getStoredAccounts()).filter(account => account.isLegacyEncrypted)
+    if (legacyAccounts.length === 0) {
+      return
+    }
+    for (const account of legacyAccounts) {
+      await account.unlock(password)
+      await account.lockWithDataKey(dataKey)
+    }
+    await this.service.updateAccountsBatch(legacyAccounts)
+  }
+
   /**
    * Exports the given accounts to a JSON file and triggers a download.
    * @param accountsArray - The array of accounts to export.
+   * @param password - When given, the secrets are encrypted with it, in the format 2.x uses, so the file
+   * can also be imported by older versions.
    */
-  public async exportAccounts(accountsArray: Account2FA[], encrypted: boolean = false) {
+  public async exportAccounts(accountsArray: Account2FA[], password?: string) {
     // copy accounts to avoid modifying the original array
     accountsArray = accountsArray.map(account => account.copy())
-    // encrypt accounts if needed
-    if (encrypted) {
-      const password = await this.appConfig.getEncryptionKey()
-      if(password) {
-        for (const account of accountsArray) {
-          if (account.secret) {
-            await account.lock(password)
-          }
+    if (password) {
+      for (const account of accountsArray) {
+        if (!account.isLocked) {
+          await account.lock(password)
         }
       }
     }
@@ -162,7 +285,7 @@ export class Account2faService {
   }
 
   /**
-   * Adds the given accounts to the account provider, encrypting their secrets if encryption is active.
+   * Adds the given accounts to the account provider, encrypting their secrets if encryption is set up.
    * @param accounts - The array of accounts to import.
    */
   public async importAccounts(accounts: Account2FA[]) {
@@ -232,74 +355,77 @@ export class Account2faService {
     })
   }
 
-  public async encryptAccounts() {
-    const accounts = (await firstValueFrom(await this.service.getAccounts())).map(account => account.copy())
-    const encryptionKey = await this.appConfig.getEncryptionKey()
-    if (!encryptionKey) {
-      const errorText = await firstValueFrom(this.translateService.get('ACCOUNT_SERVICE.ERROR.NO_ENCRYPTION_KEY'))
-      throw new Error(errorText)
-    }
-
-    const encryptions: Promise<void>[] = []
-    for (const account of accounts) {
-      if (!account.isLocked) {
-        encryptions.push(account.lock(encryptionKey))
-      }
-    }
-
-    if (encryptions.length === 0) {
-      return // nothing to encrypt
-    }
-
-    await Promise.all(encryptions)
-    await this.updateAccountsBatch(accounts)
+  /** Copies of the accounts as stored, with their secrets encrypted */
+  private async getStoredAccounts(): Promise<Account2FA[]> {
+    return (await firstValueFrom(await this.service.getAccounts())).map(account => account.copy())
   }
 
-  public async decryptAccounts() {
-    const accounts = (await firstValueFrom(await this.service.getAccounts())).map(account => account.copy())
-    
-    console.log("decrypting accounts", accounts)
-    const encryptionKey = await this.appConfig.getEncryptionKey()
-    if (!encryptionKey) {
-      const errorText = await firstValueFrom(this.translateService.get('ACCOUNT_SERVICE.ERROR.NO_ENCRYPTION_KEY'))
-      throw new Error(errorText)
-    }
+  /** Decrypts copies of the accounts whose secrets were encrypted with the data key */
+  private async decryptAccounts(accounts: Account2FA[], dataKey?: DataKey): Promise<Account2FA[]> {
+    // until the 3.0.0 migration replaces it with the data key (e.g. while it can't reach the server),
+    // the password 2.x stored still decrypts the accounts 2.x encrypted
+    const legacyPassword = accounts.some(account => account.isLegacyEncrypted)
+      ? await this.appConfig.getLegacyEncryptionPassword()
+      : undefined
 
-    const decryptions: Promise<void>[] = []
-    for (const account of accounts) {
-      if (account.encryptedSecret && account.iv && account.salt) {
-        decryptions.push(account.unlock(encryptionKey))
+    return Promise.all(accounts.map(async account => {
+      const copy = account.copy()
+      try {
+        if (dataKey && copy.keyId === dataKey.keyId && copy.isLocked) {
+          await copy.unlockWithDataKey(dataKey)
+        } else if (legacyPassword && copy.isLegacyEncrypted && copy.isLocked) {
+          await copy.unlock(legacyPassword)
+        }
+      } catch (error) {
+        console.error('Failed to unlock account', { error })
       }
-    }
-
-    await Promise.all(decryptions)
-    // Write through the provider directly: encryption is still active at this point,
-    // and updateAccountsBatch would encrypt the secrets again
-    await this.service.updateAccountsBatch(accounts)
+      return copy
+    }))
   }
 
-  /**
-   * Gets the encryption key, if encryption is active.
-   * @returns The encryption key, or undefined if encryption is inactive or no key is set.
-   */
-  private async getActiveEncryptionKey(): Promise<string | undefined> {
-    const { encryptionActive } = await this.appConfig.getEncryptionOptions()
-    return encryptionActive ? await this.appConfig.getEncryptionKey() : undefined
+  /** How saved secrets must be encrypted, or undefined when encryption isn't set up */
+  private async getSaveEncryption(): Promise<SaveEncryption | undefined> {
+    const record = await this.service.getVaultRecord()
+    if (!record) {
+      return undefined
+    }
+    const dataKey = this.vault.dataKey
+    return { dataKey: dataKey?.keyId === record.keyId ? dataKey : undefined }
+  }
+
+  private async requireVaultRecord(): Promise<VaultRecord> {
+    const record = await this.service.getVaultRecord()
+    if (!record) {
+      throw new Error('VAULT.NOT_SET_UP')
+    }
+    return record
+  }
+
+  private requireDataKey(): DataKey {
+    const dataKey = this.vault.dataKey
+    if (!dataKey) {
+      throw new Error('VAULT.LOCKED')
+    }
+    return dataKey
   }
 
   /**
    * Creates the copy of an account that gets persisted, so the given account is never modified.
-   * With an encryption key, the copy's secret is always encrypted. A plaintext secret is never
+   * When encryption is set up, the copy's secret is always encrypted. A plaintext secret is never
    * persisted alongside its encrypted form.
    *
    * @param account - The account to persist.
-   * @param encryptionKey - The key to encrypt the secret with, if encryption is active.
+   * @param encryption - How the secret must be encrypted, when encryption is set up.
    * @returns The account copy to persist.
+   * @throws {Error} 'VAULT.LOCKED' if the secret must be encrypted but the data key is locked.
    */
-  private async toStoredAccount(account: Account2FA, encryptionKey?: string): Promise<Account2FA> {
+  private async toStoredAccount(account: Account2FA, encryption?: SaveEncryption): Promise<Account2FA> {
     const storedAccount = account.copy()
-    if (encryptionKey && !storedAccount.isLocked) {
-      await storedAccount.lock(encryptionKey)
+    if (encryption && !storedAccount.isLocked) {
+      if (!encryption.dataKey) {
+        throw new Error('VAULT.LOCKED')
+      }
+      await storedAccount.lockWithDataKey(encryption.dataKey)
     } else if (storedAccount.isEncrypted) {
       storedAccount.secret = ''
     }
